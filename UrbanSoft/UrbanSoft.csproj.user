@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="AgregarMaquinariasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AgregarMaterialesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AgregarServiciosAdicionalesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ConsultarBitacoraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="DetalleCotizacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarCotizaciones.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarFamiliasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarItemPersonalizadoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarMaquinariasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarMaquinariaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarMonedaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarPatentesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarPerfilProfesionalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarServicioAdicionalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarTipoEdificacion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GestionarUsuariosForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="NuevaContrasenaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="NuevaCotizacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
+
 namespace UrbanSoft
 {
     public partial class GestionarUsuariosForm : Form
@@ -13,9 +15,9 @@ namespace UrbanSoft
 
         private void CargarDatosMockeados()
         {
-            dgvUsuarios.Rows.Clear();
-            dgvUsuarios.Rows.Add("1", "Ana", "Pérez", "ana@email.com", "1512345678", "Calle sarasa y saranga", "12345678");
-            dgvUsuarios.Rows.Add("2", "Carlos", "Ramírez", "carlos@email.com", "1198765432", "Av. Sarlingui 1500", "87654321");
+            dgvUsuarios.DataSource = null;
+
+            dgvUsuarios.DataSource = UsuarioBLL.GetInstance().GetAll();
         }
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)

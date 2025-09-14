@@ -1,18 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Linq;
 using System.Text;
+using Microsoft.Data.SqlClient;
 using Utilities;
+
+using UserDaoInterface = DAL.Seguridad.DV.IDVDAOInterface<BE.Usuario>;
+using DVService = DAL.Seguridad.DV.DVService;
 
 namespace DAL.Seguridad
 {
-    public class Usuario : BE.ICrud<BE.Usuario>
+    public class UsuarioDAL : UserDaoInterface
     {
-        private static Usuario instance;
-        private Usuario() { }
-        public static Usuario GetInstance() => instance ??= new Usuario();
+
+        private static UsuarioDAL instance;
+        private UsuarioDAL() { }
+        public static UsuarioDAL GetInstance() => instance ??= new UsuarioDAL();
+        private const string USER_TABLE = "dbo.Usuario";
+
+        private const string DVV_LEGACY_TABLE = "[UrbanSoft].[dbo].[dvv]";
+        private const string DVV_LEGACY_COL_DVV = "dvv";
+        private const string DVV_LEGACY_COL_TABLENAME = "tablename";
+        private const string DVV_LEGACY_TABLENAME_VALUE = "Usuario";
 
         private static BE.Usuario Map(IDataRecord r)
         {
@@ -41,10 +50,9 @@ namespace DAL.Seguridad
             return false;
         }
 
-        private static void BindParams(SqlCommand cmd, BE.Usuario u, bool includeId = true)
+        private static void BindParams(SqlCommand cmd, BE.Usuario u, bool includeId)
         {
             if (includeId) cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = u.IdUsuario;
-
             cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object?)u.NombreUsuario ?? DBNull.Value;
             cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object?)u.ApellidoUsuario ?? DBNull.Value;
             cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object?)u.CorreoElectronico ?? DBNull.Value;
@@ -58,38 +66,15 @@ namespace DAL.Seguridad
             cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = u.Bloqueado;
         }
 
-        public bool Create(BE.Usuario objAdd)
-        {
-            const string sql = @"
-INSERT INTO dbo.Usuario
-( idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-  numeroDocumento, contrasenaHash, tokenRecuperoSesionHash, tiempoExpiracionToken,
-  contadorIntentosFallidos, Bloqueado )
-VALUES
-( @idUsuario, @nombreUsuario, @apellidoUsuario, @correoElectronico, @telefonoContacto, @direccionUsuario,
-  @numeroDocumento, @contrasenaHash, @tokenRecuperoSesionHash, @tiempoExpiracionToken,
-  @contadorIntentosFallidos, @Bloqueado );";
-
-            using var con = ConnectionSingleton.getConnection();
-            using var cmd = new SqlCommand(sql, con);
-            BindParams(cmd, objAdd, includeId: true);
-
-            if (con.State != ConnectionState.Open) con.Open();
-            var rows = cmd.ExecuteNonQuery();
-            con.Close();
-            return rows == 1;
-        }
-
         public List<BE.Usuario> GetAll()
         {
-            const string sql = @"
+            var list = new List<BE.Usuario>();
+            var sql = $@"
 SELECT idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
        numeroDocumento, contrasenaHash, tokenRecuperoSesionHash, tiempoExpiracionToken,
-       contadorIntentosFallidos,
-       /* si existe la columna: */ Bloqueado
-FROM dbo.Usuario;";
+       contadorIntentosFallidos, Bloqueado
+FROM {USER_TABLE};";
 
-            var list = new List<BE.Usuario>();
             using var con = ConnectionSingleton.getConnection();
             using var cmd = new SqlCommand(sql, con);
             if (con.State != ConnectionState.Open) con.Open();
@@ -99,10 +84,72 @@ FROM dbo.Usuario;";
             return list;
         }
 
-        public bool Update(BE.Usuario objUpd)
+        public string CalculateHorizontal(BE.Usuario u)
         {
-            const string sql = @"
-UPDATE dbo.Usuario SET
+            var sb = new StringBuilder();
+            sb.Append(u.NombreUsuario ?? string.Empty)
+              .Append(u.ApellidoUsuario ?? string.Empty)
+              .Append(u.CorreoElectronico ?? string.Empty)
+              .Append(u.TelefonoContacto ?? string.Empty)
+              .Append(u.DireccionUsuario ?? string.Empty)
+              .Append(u.NumeroDocumento ?? string.Empty)
+              .Append(u.ContrasenaHash ?? string.Empty)
+              .Append(u.TokenRecuperoSesionHash ?? string.Empty)
+              .Append(u.TiempoExpiracionToken?.ToString("o") ?? string.Empty)
+              .Append(u.ContadorIntentosFallidos.ToString())
+              .Append(u.Bloqueado.ToString());
+            return DVService.getDV(sb.ToString());
+        }
+
+        public string CalculateVertical(List<BE.Usuario> list)
+        {
+            string acc = string.Empty;
+            if (list != null)
+            {
+                foreach (var u in list)
+                {
+                    var dvh = CalculateHorizontal(u);
+                    acc = DVService.getDV(acc + dvh);
+                }
+            }
+            return acc;
+        }
+
+        public void Save(BE.Usuario obj)
+        {
+            string dvh = CalculateHorizontal(obj);
+            var sql = $@"
+INSERT INTO {USER_TABLE}
+( nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
+  numeroDocumento, contrasenaHash, tokenRecuperoSesionHash, tiempoExpiracionToken,
+  contadorIntentosFallidos, Bloqueado, DVH )
+VALUES
+( @nombreUsuario, @apellidoUsuario, @correoElectronico, @telefonoContacto, @direccionUsuario,
+  @numeroDocumento, @contrasenaHash, @tokenRecuperoSesionHash, @tiempoExpiracionToken,
+  @contadorIntentosFallidos, @Bloqueado, @DVH );
+SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+            using var con = ConnectionSingleton.getConnection();
+            using var cmd = new SqlCommand(sql, con);
+            BindParams(cmd, obj, includeId: false);
+            cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 100).Value = dvh;
+
+            if (con.State != ConnectionState.Open) con.Open();
+            var newIdObj = cmd.ExecuteScalar();
+            con.Close();
+
+            if (newIdObj != null && newIdObj != DBNull.Value)
+                obj.IdUsuario = Convert.ToInt32(newIdObj);
+
+            UpdateVertical();
+        }
+
+        public void Update(BE.Usuario obj)
+        {
+            string dvh = CalculateHorizontal(obj);
+
+            var sql = $@"
+UPDATE {USER_TABLE} SET
     nombreUsuario = @nombreUsuario,
     apellidoUsuario = @apellidoUsuario,
     correoElectronico = @correoElectronico,
@@ -113,87 +160,122 @@ UPDATE dbo.Usuario SET
     tokenRecuperoSesionHash = @tokenRecuperoSesionHash,
     tiempoExpiracionToken = @tiempoExpiracionToken,
     contadorIntentosFallidos = @contadorIntentosFallidos,
-    Bloqueado = @Bloqueado
+    Bloqueado = @Bloqueado,
+    DVH = @DVH
 WHERE idUsuario = @idUsuario;";
 
             using var con = ConnectionSingleton.getConnection();
             using var cmd = new SqlCommand(sql, con);
-            BindParams(cmd, objUpd, includeId: true);
-
-            if (con.State != ConnectionState.Open) con.Open();
-            var rows = cmd.ExecuteNonQuery();
-            con.Close();
-            return rows == 1;
-        }
-
-        public bool Delete(BE.Usuario objUdp)
-        {
-            const string sql = @"DELETE FROM dbo.Usuario WHERE idUsuario = @idUsuario;";
-            using var con = ConnectionSingleton.getConnection();
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = objUdp.IdUsuario;
-
-            if (con.State != ConnectionState.Open) con.Open();
-            var rows = cmd.ExecuteNonQuery();
-            con.Close();
-            return rows == 1;
-        }
-
-        public BE.Usuario GetByUsername(string username)
-        {
-            const string sql = @"
-SELECT TOP 1 idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-             numeroDocumento, contrasenaHash, tokenRecuperoSesionHash, tiempoExpiracionToken,
-             contadorIntentosFallidos,
-             /* si existe la columna: */ Bloqueado
-FROM dbo.Usuario
-WHERE correoElectronico = @u OR nombreUsuario = @u;";
-
-            using var con = ConnectionSingleton.getConnection();
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.Add("@u", SqlDbType.VarChar, 150).Value = username;
-
-            if (con.State != ConnectionState.Open) con.Open();
-            using var rdr = cmd.ExecuteReader();
-            BE.Usuario u = null;
-            if (rdr.Read()) u = Map(rdr);
-            con.Close();
-            return u;
-        }
-
-        public BE.Usuario GetById(int idUsuario)
-        {
-            const string sql = @"
-SELECT TOP 1 idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-             numeroDocumento, contrasenaHash, tokenRecuperoSesionHash, tiempoExpiracionToken,
-             contadorIntentosFallidos,
-             /* si existe la columna: */ Bloqueado
-FROM dbo.Usuario
-WHERE idUsuario = @id;";
-
-            using var con = ConnectionSingleton.getConnection();
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
-
-            if (con.State != ConnectionState.Open) con.Open();
-            using var rdr = cmd.ExecuteReader();
-            BE.Usuario u = null;
-            if (rdr.Read()) u = Map(rdr);
-            con.Close();
-            return u;
-        }
-
-        public void UpdatePassword(int idUsuario, string newHash)
-        {
-            const string sql = @"UPDATE dbo.Usuario SET contrasenaHash = @pwd WHERE idUsuario = @id;";
-            using var con = ConnectionSingleton.getConnection();
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
-            cmd.Parameters.Add("@pwd", SqlDbType.Char, 32).Value = newHash ?? (object)DBNull.Value;
+            BindParams(cmd, obj, includeId: true);
+            cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 100).Value = dvh;
 
             if (con.State != ConnectionState.Open) con.Open();
             cmd.ExecuteNonQuery();
             con.Close();
+
+            UpdateVertical();
+        }
+
+        public void UpdateVertical()
+        {
+            var dvvString = CalculateVertical(GetAll());
+
+            using var connection = ConnectionSingleton.getConnection();
+            if (connection.State != ConnectionState.Open) connection.Open();
+            using (IDbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = $@"
+UPDATE {DVV_LEGACY_TABLE}
+   SET [{DVV_LEGACY_COL_DVV}] = @dvv
+ WHERE [{DVV_LEGACY_COL_TABLENAME}] = @tablename;";
+
+                var dvv = command.CreateParameter();
+                dvv.ParameterName = "@dvv";
+                dvv.Value = dvvString;
+                command.Parameters.Add(dvv);
+
+                var tablename = command.CreateParameter();
+                tablename.ParameterName = "@tablename";
+                tablename.Value = DVV_LEGACY_TABLENAME_VALUE;
+                command.Parameters.Add(tablename);
+
+                command.ExecuteNonQuery();
+            }
+            connection.Close();
+        }
+
+        public void UpdateAllDV()
+        {
+            var users = GetAll();
+            using var con = ConnectionSingleton.getConnection();
+            if (con.State != ConnectionState.Open) con.Open();
+            using var tx = con.BeginTransaction();
+
+            try
+            {
+                foreach (var u in users)
+                {
+                    var dvh = CalculateHorizontal(u);
+                    var sqlUpd = $"UPDATE {USER_TABLE} SET DVH = @DVH WHERE idUsuario = @id;";
+                    using var cmd = new SqlCommand(sqlUpd, con, tx);
+                    cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 100).Value = dvh;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = u.IdUsuario;
+                    cmd.ExecuteNonQuery();
+                }
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+            finally
+            {
+                con.Close();
+            }
+
+            UpdateVertical();
+        }
+
+        public string GetVertical()
+        {
+            var sql = $@"SELECT {DVV_LEGACY_COL_DVV} FROM {DVV_LEGACY_TABLE} WHERE {DVV_LEGACY_COL_TABLENAME} = @tablename;";
+            using var con = ConnectionSingleton.getConnection();
+            using var cmd = new SqlCommand(sql, con);
+            cmd.Parameters.Add("@tablename", SqlDbType.VarChar, 128).Value = DVV_LEGACY_TABLENAME_VALUE;
+
+            if (con.State != ConnectionState.Open) con.Open();
+            var obj = cmd.ExecuteScalar();
+            con.Close();
+
+            return obj?.ToString() ?? string.Empty;
+        }
+
+
+        public BE.Usuario GetByCorreoElectronico(string correoElectronico)
+        {
+            const string sql = @"
+SELECT TOP 1
+    idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto,
+    direccionUsuario, numeroDocumento, contrasenaHash, tokenRecuperoSesionHash,
+    tiempoExpiracionToken, contadorIntentosFallidos, Bloqueado
+FROM dbo.Usuario
+WHERE correoElectronico = @mail;";
+
+            using var con = ConnectionSingleton.getConnection();
+            using var cmd = new SqlCommand(sql, con);
+            cmd.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value =
+                (correoElectronico ?? string.Empty).Trim();
+
+            if (con.State != ConnectionState.Open) con.Open();
+            using var rdr = cmd.ExecuteReader();
+
+            BE.Usuario u = null;
+            if (rdr.Read())
+                u = Map(rdr); 
+
+            con.Close();
+            return u; 
         }
     }
 }

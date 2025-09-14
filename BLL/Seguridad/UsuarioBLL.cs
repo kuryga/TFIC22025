@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using UsuarioDAL = DAL.Seguridad.Usuario;
+using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 
 namespace BLL.Seguridad
 {
@@ -21,8 +21,10 @@ namespace BLL.Seguridad
 
         public bool Create(BE.Usuario objAdd)
         {
-          try { return UsuarioDAL.GetInstance().Create(objAdd); }
-          catch (Exception) { throw; }
+            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
+            //catch (Exception) { throw; }
+
+            return false;
         }
 
 
@@ -33,24 +35,28 @@ namespace BLL.Seguridad
         }
 
 
-        public BE.Usuario GetByUsername(string username)
+        public BE.Usuario GetByCorreoElectronico(string username)
         {
-             try { return UsuarioDAL.GetInstance().GetByUsername(username); }
+             try { return UsuarioDAL.GetInstance().GetByCorreoElectronico(username); }
              catch (Exception) { throw; }
         }
 
 
         public bool Update(BE.Usuario objUpd)
         {
-            try { return UsuarioDAL.GetInstance().Update(objUpd); }
+            try { UsuarioDAL.GetInstance().Update(objUpd);
+                return true;
+                }
             catch (Exception) { throw; }
         }
 
 
         public bool Delete(BE.Usuario objUdp)
         {
-            try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            catch (Exception) { throw; }
+            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
+            //catch (Exception) { throw; }
+
+            return false;
         }
     }
 }

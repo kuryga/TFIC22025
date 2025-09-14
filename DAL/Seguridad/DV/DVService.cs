@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DigitosVerificadoresLib.services
+namespace DAL.Seguridad.DV
 {
     public class DVService
     {

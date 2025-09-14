@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="GestionarFamiliasForm - Copy.Designer.cs">
-      <DependentUpon>GestionarFamiliasForm.Designer.cs</DependentUpon>
-    </Compile>
-    <Compile Update="RecuperarContraForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <ProjectReference Include="..\BLL\BLL.csproj" />
   </ItemGroup>
-
-
-
 </Project>

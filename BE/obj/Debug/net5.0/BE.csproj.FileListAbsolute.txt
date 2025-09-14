@@ -1,0 +1,12 @@
+C:\Users\andre\source\repos\UrbanSoftProject\BE\bin\Debug\net5.0\BE.deps.json
+C:\Users\andre\source\repos\UrbanSoftProject\BE\bin\Debug\net5.0\BE.dll
+C:\Users\andre\source\repos\UrbanSoftProject\BE\bin\Debug\net5.0\ref\BE.dll
+C:\Users\andre\source\repos\UrbanSoftProject\BE\bin\Debug\net5.0\BE.pdb
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.csproj.AssemblyReference.cache
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.AssemblyInfoInputs.cache
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.AssemblyInfo.cs
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.csproj.CoreCompileInputs.cache
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.dll
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\ref\BE.dll
+C:\Users\andre\source\repos\UrbanSoftProject\BE\obj\Debug\net5.0\BE.pdb

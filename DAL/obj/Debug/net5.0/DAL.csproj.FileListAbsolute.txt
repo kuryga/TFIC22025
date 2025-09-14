@@ -1,0 +1,17 @@
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.csproj.AssemblyReference.cache
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.AssemblyInfoInputs.cache
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.AssemblyInfo.cs
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.csproj.CoreCompileInputs.cache
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\DAL.deps.json
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\DAL.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\ref\DAL.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\DAL.pdb
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\BE.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\Utilities.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\BE.pdb
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\bin\Debug\net5.0\Utilities.pdb
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.csproj.CopyComplete
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\ref\DAL.dll
+C:\Users\andre\source\repos\UrbanSoftProject\DAL\obj\Debug\net5.0\DAL.pdb

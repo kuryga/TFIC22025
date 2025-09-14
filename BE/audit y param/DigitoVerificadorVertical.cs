@@ -10,6 +10,5 @@ namespace BE
     {
         public string Tabla { get; set; } = string.Empty; // PK
         public string ValorDVV { get; set; } = string.Empty;
-        public string? DVH { get; set; }
     }
 }

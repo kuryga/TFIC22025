@@ -1,0 +1,9 @@
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\obj\Debug\Utilities.csproj.AssemblyReference.cache
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\obj\Debug\Utilities.csproj.CoreCompileInputs.cache
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\bin\Debug\DAL.dll
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\bin\Debug\DAL.pdb
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\bin\Debug\BE.dll
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\bin\Debug\BE.pdb
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\obj\Debug\Utilities.csproj.CopyComplete
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\obj\Debug\DAL.dll
+C:\Users\andre\OneDrive\Desktop\sarasa\UrbanSoft_TFIC22025\Utilities\obj\Debug\DAL.pdb

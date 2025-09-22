@@ -27,8 +27,6 @@ namespace UI
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
             this.btnBorrar = new System.Windows.Forms.Button();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTipos)).BeginInit();
             this.SuspendLayout();
             // 
@@ -36,9 +34,6 @@ namespace UI
             // 
             this.dgvTipos.AllowUserToAddRows = false;
             this.dgvTipos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvTipos.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2});
             this.dgvTipos.Location = new System.Drawing.Point(20, 20);
             this.dgvTipos.MultiSelect = false;
             this.dgvTipos.Name = "dgvTipos";
@@ -53,14 +48,14 @@ namespace UI
             this.txtId.Location = new System.Drawing.Point(130, 180);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 23);
+            this.txtId.Size = new System.Drawing.Size(150, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtDescripcion
             // 
             this.txtDescripcion.Location = new System.Drawing.Point(130, 210);
             this.txtDescripcion.Name = "txtDescripcion";
-            this.txtDescripcion.Size = new System.Drawing.Size(300, 23);
+            this.txtDescripcion.Size = new System.Drawing.Size(300, 20);
             this.txtDescripcion.TabIndex = 4;
             // 
             // lblId
@@ -105,18 +100,6 @@ namespace UI
             this.btnBorrar.TabIndex = 7;
             this.btnBorrar.Text = "Borrar tipo";
             this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "idTipoEdificacion";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Descripción";
-            this.dataGridViewTextBoxColumn2.Name = "descripcion";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
             // 
             // GestionarTipoEdificacionForm
             // 

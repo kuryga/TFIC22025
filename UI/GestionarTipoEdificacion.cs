@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using TipoEdificacionBLL = BLL.Genericos.TipoEdificacionBLL;
+
 namespace UI
 {
     public partial class GestionarTipoEdificacionForm : Form
@@ -8,15 +10,14 @@ namespace UI
         public GestionarTipoEdificacionForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
-            dgvTipos.Rows.Clear();
-            dgvTipos.Rows.Add("1", "Vivienda unifamiliar");
-            dgvTipos.Rows.Add("2", "Edificio comercial");
-            dgvTipos.Rows.Add("3", "Edificio Residencial");
+            dgvTipos.DataSource = null;
+
+            dgvTipos.DataSource = TipoEdificacionBLL.GetInstance().GetAll();
         }
 
         private void dgvTipos_SelectionChanged(object sender, EventArgs e)

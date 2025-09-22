@@ -16,7 +16,6 @@ namespace UI
         private void CargarDatos()
         {
             dgvTipos.DataSource = null;
-
             dgvTipos.DataSource = TipoEdificacionBLL.GetInstance().GetAll();
         }
 

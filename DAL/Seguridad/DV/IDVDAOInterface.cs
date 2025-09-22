@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Seguridad.DV
 {
-    public interface IDVDAOInterface<T>
+    public interface IDAOInterface<T>
     {
         List<T> GetAll();
 

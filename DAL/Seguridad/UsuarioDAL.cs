@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System;
+using System.Data.SqlClient; // solo para tipos de parámetro en binds
 
-using UserDaoInterface = DAL.Seguridad.DV.IDVDAOInterface<BE.Usuario>;
+using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 
 namespace DAL.Seguridad
 {
@@ -18,12 +18,14 @@ namespace DAL.Seguridad
         }
 
         private static readonly DalToolkit db = new DalToolkit();
+
         private const string userTable = "dbo.Usuario";
         private const string userIdCol = "idUsuario";
         private const string userPublicCols =
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
             "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado";
 
+        // -------- CRUD --------
 
         public List<BE.Usuario> GetAll()
         {
@@ -31,10 +33,9 @@ namespace DAL.Seguridad
 
             return db.QueryListAndUpdateDv<BE.Usuario>(
                 sql,
-                null,                         
+                null,
                 userTable,
-                userIdCol,
-                u => u.IdUsuario
+                userIdCol
             );
         }
 
@@ -49,26 +50,24 @@ VALUES
   @numeroDocumento, @Bloqueado );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            // Ejecuta y obtiene nuevo ID con el toolkit
-            object newId = db.ExecuteScalar(
+            object newId = db.ExecuteScalarAndRefresh(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? DBNull.Value;
-                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? DBNull.Value;
-                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? DBNull.Value;
+                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
-                }
+                },
+                userTable,
+                userIdCol
             );
 
-            if (newId != null && newId != DBNull.Value)
+            if (newId != null && newId != System.DBNull.Value)
                 obj.IdUsuario = System.Convert.ToInt32(newId);
-
-            // Recalcular DVH/DVV de la tabla
-            RefreshUserDvs();
         }
 
         public void Update(BE.Usuario obj)
@@ -84,25 +83,25 @@ UPDATE " + userTable + @" SET
     Bloqueado         = @Bloqueado
 WHERE " + userIdCol + @" = @idUsuario;";
 
-            db.ExecuteNonQuery(
+            db.ExecuteNonQueryAndRefresh(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = obj.IdUsuario;
-                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? DBNull.Value;
-                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? DBNull.Value;
-                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? DBNull.Value;
+                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
-                }
+                },
+                userTable,
+                userIdCol
             );
-
-            // Recalcular DVH/DVV de la tabla
-            RefreshUserDvs();
         }
 
+        // (Opcional, fuera de la interfaz)
         public BE.Usuario GetByCorreoElectronico(string correoElectronico)
         {
             var sql = @"
@@ -115,22 +114,7 @@ WHERE correoElectronico = @mail;";
                 c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value =
                         (correoElectronico ?? string.Empty).Trim(),
                 userTable,
-                userIdCol,
-                u => u.IdUsuario
-            );
-        }
-
-        private void RefreshUserDvs()
-        {
-            var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
-
-            // No uso el resultado; el toolkit actualiza DVH por fila y DVV (con su DVH) de la tabla
-            db.QueryListAndUpdateDv<BE.Usuario>(
-                sql,
-                null,
-                userTable,
-                userIdCol,
-                u => u.IdUsuario
+                userIdCol
             );
         }
     }

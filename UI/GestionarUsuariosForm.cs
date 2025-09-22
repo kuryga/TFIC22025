@@ -10,10 +10,10 @@ namespace UI
         public GestionarUsuariosForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
             dgvUsuarios.DataSource = null;
 

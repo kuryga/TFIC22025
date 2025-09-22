@@ -43,16 +43,15 @@
   <ItemGroup>
     <Compile Include="audit y param\Bitacora.cs" />
     <Compile Include="audit y param\Criticidad.cs" />
-    <Compile Include="audit y param\DigitoVerificadorVertical.cs" />
     <Compile Include="audit y param\Parametrizacion.cs" />
     <Compile Include="Genericos\Cotizacion.cs" />
-    <Compile Include="Genericos\ICrud.cs" />
     <Compile Include="Genericos\Idioma.cs" />
     <Compile Include="Genericos\Maquinaria.cs" />
     <Compile Include="Genericos\Material.cs" />
     <Compile Include="Genericos\Moneda.cs" />
     <Compile Include="Genericos\ServicioAdicional.cs" />
     <Compile Include="Genericos\TipoEdificacion.cs" />
+    <Compile Include="Genericos\ICrud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Seguridad\Familia.cs" />
     <Compile Include="Seguridad\Patente.cs" />

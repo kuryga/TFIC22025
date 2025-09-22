@@ -25,10 +25,6 @@ namespace UI
         private void InitializeComponent()
         {
             this.dgvMoneda = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtId = new System.Windows.Forms.TextBox();
             this.txtNombre = new System.Windows.Forms.TextBox();
             this.txtValor = new System.Windows.Forms.TextBox();
@@ -47,11 +43,6 @@ namespace UI
             // 
             this.dgvMoneda.AllowUserToAddRows = false;
             this.dgvMoneda.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMoneda.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn4});
             this.dgvMoneda.Location = new System.Drawing.Point(20, 20);
             this.dgvMoneda.MultiSelect = false;
             this.dgvMoneda.Name = "dgvMoneda";
@@ -61,50 +52,26 @@ namespace UI
             this.dgvMoneda.TabIndex = 0;
             this.dgvMoneda.SelectionChanged += new System.EventHandler(this.dgvMoneda_SelectionChanged);
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "idMoneda";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Nombre";
-            this.dataGridViewTextBoxColumn2.Name = "nombreMoneda";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "valorCambio";
-            this.dataGridViewTextBoxColumn3.Name = "valorCambio";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Simbolo";
-            this.dataGridViewTextBoxColumn4.Name = "simbolo";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
             // txtId
             // 
             this.txtId.Location = new System.Drawing.Point(130, 180);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 23);
+            this.txtId.Size = new System.Drawing.Size(150, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtNombre
             // 
             this.txtNombre.Location = new System.Drawing.Point(130, 210);
             this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(150, 23);
+            this.txtNombre.Size = new System.Drawing.Size(150, 20);
             this.txtNombre.TabIndex = 4;
             // 
             // txtValor
             // 
             this.txtValor.Location = new System.Drawing.Point(130, 240);
             this.txtValor.Name = "txtValor";
-            this.txtValor.Size = new System.Drawing.Size(150, 23);
+            this.txtValor.Size = new System.Drawing.Size(150, 20);
             this.txtValor.TabIndex = 6;
             // 
             // lblId
@@ -166,11 +133,11 @@ namespace UI
             this.lblSimbolo.TabIndex = 10;
             this.lblSimbolo.Text = "Simbolo:";
             // 
-            // textBox1
+            // txtSimbolo
             // 
             this.txtSimbolo.Location = new System.Drawing.Point(130, 269);
-            this.txtSimbolo.Name = "textBox1";
-            this.txtSimbolo.Size = new System.Drawing.Size(150, 23);
+            this.txtSimbolo.Name = "txtSimbolo";
+            this.txtSimbolo.Size = new System.Drawing.Size(150, 20);
             this.txtSimbolo.TabIndex = 11;
             // 
             // GestionarMonedaForm

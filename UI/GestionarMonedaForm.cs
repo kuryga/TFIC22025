@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 
+
+using MonedaBLL = BLL.Genericos.MonedaBLL;
+
 namespace UI
 {
     public partial class GestionarMonedaForm : Form
@@ -8,14 +11,14 @@ namespace UI
         public GestionarMonedaForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
-            dgvMoneda.Rows.Clear();
-            dgvMoneda.Rows.Add("1", "Dólar", "1.00", "$");
-            dgvMoneda.Rows.Add("2", "Euro", "1.08", "€");
+            dgvMoneda.DataSource = null;
+
+            dgvMoneda.DataSource = MonedaBLL.GetInstance().GetAll();
         }
 
         private void dgvMoneda_SelectionChanged(object sender, EventArgs e)

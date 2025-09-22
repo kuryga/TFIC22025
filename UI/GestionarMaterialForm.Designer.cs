@@ -20,11 +20,6 @@ namespace UI
         private void InitializeComponent()
         {
             this.dgvMaterial = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtId = new System.Windows.Forms.TextBox();
             this.txtNombre = new System.Windows.Forms.TextBox();
             this.txtUnidad = new System.Windows.Forms.TextBox();
@@ -45,12 +40,6 @@ namespace UI
             // 
             this.dgvMaterial.AllowUserToAddRows = false;
             this.dgvMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMaterial.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn4,
-            this.dataGridViewTextBoxColumn5});
             this.dgvMaterial.Location = new System.Drawing.Point(20, 20);
             this.dgvMaterial.MultiSelect = false;
             this.dgvMaterial.Name = "dgvMaterial";
@@ -60,49 +49,19 @@ namespace UI
             this.dgvMaterial.TabIndex = 0;
             this.dgvMaterial.SelectionChanged += new System.EventHandler(this.dgvMaterial_SelectionChanged);
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "idMaterial";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Nombre";
-            this.dataGridViewTextBoxColumn2.Name = "nombre";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Unidad";
-            this.dataGridViewTextBoxColumn3.Name = "unidadMedida";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Precio";
-            this.dataGridViewTextBoxColumn4.Name = "precioUnidad";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.HeaderText = "Uso/m²";
-            this.dataGridViewTextBoxColumn5.Name = "usoPorM2";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            // 
             // txtId
             // 
             this.txtId.Location = new System.Drawing.Point(126, 185);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 23);
+            this.txtId.Size = new System.Drawing.Size(150, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtNombre
             // 
             this.txtNombre.Location = new System.Drawing.Point(126, 212);
             this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(150, 23);
+            this.txtNombre.Size = new System.Drawing.Size(150, 20);
             this.txtNombre.TabIndex = 4;
             // 
             // txtUnidad
@@ -110,21 +69,21 @@ namespace UI
             this.txtUnidad.Location = new System.Drawing.Point(126, 241);
             this.txtUnidad.Name = "txtUnidad";
             this.txtUnidad.ReadOnly = true;
-            this.txtUnidad.Size = new System.Drawing.Size(150, 23);
+            this.txtUnidad.Size = new System.Drawing.Size(150, 20);
             this.txtUnidad.TabIndex = 6;
             // 
             // txtPrecio
             // 
             this.txtPrecio.Location = new System.Drawing.Point(430, 182);
             this.txtPrecio.Name = "txtPrecio";
-            this.txtPrecio.Size = new System.Drawing.Size(150, 23);
+            this.txtPrecio.Size = new System.Drawing.Size(150, 20);
             this.txtPrecio.TabIndex = 8;
             // 
             // txtUso
             // 
             this.txtUso.Location = new System.Drawing.Point(430, 212);
             this.txtUso.Name = "txtUso";
-            this.txtUso.Size = new System.Drawing.Size(150, 23);
+            this.txtUso.Size = new System.Drawing.Size(150, 20);
             this.txtUso.TabIndex = 10;
             // 
             // lblId

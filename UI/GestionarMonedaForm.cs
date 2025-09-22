@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 
-
 using MonedaBLL = BLL.Genericos.MonedaBLL;
 
 namespace UI

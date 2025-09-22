@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using MaterialBLL = BLL.Genericos.MaterialBLL;
+
 namespace UI
 {
     public partial class GestionarMaterialForm : Form
@@ -8,15 +10,14 @@ namespace UI
         public GestionarMaterialForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
-            dgvMaterial.Rows.Clear();
+            dgvMaterial.DataSource = null;
 
-            dgvMaterial.Rows.Add("1", "Cemento", "kg", "5.00", "3.5");
-            dgvMaterial.Rows.Add("2", "Arena", "m³", "20.00", "0.6");
+            dgvMaterial.DataSource = MaterialBLL.GetInstance().GetAll();
         }
 
         private void dgvMaterial_SelectionChanged(object sender, EventArgs e)

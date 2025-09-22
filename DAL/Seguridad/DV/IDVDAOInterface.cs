@@ -11,17 +11,8 @@ namespace DAL.Seguridad.DV
     {
         List<T> GetAll();
 
-        String CalculateHorizontal(T obj);
-
-        String CalculateVertical(List<T> list);
-
-        void Save(T obj);
+        void Create(T obj);
 
         void Update(T obj);
-        void UpdateVertical();
-
-        void UpdateAllDV();
-
-        string GetVertical();
     }
 }

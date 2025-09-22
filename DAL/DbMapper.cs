@@ -30,15 +30,19 @@ public static class DbMapper
         return list;
     }
 
-    public static async Task<List<T>> MapToListAsync<T>(
-        System.Data.Common.DbDataReader reader,
-        CancellationToken ct = default(CancellationToken)) where T : new()
+    public static T MapSingleOrDefault<T>(IDataReader reader) where T : new()
     {
-        var list = new List<T>();
         var map = GetRowMapper<T>(reader);
-        while (await reader.ReadAsync(ct).ConfigureAwait(false))
-            list.Add(map(reader));
-        return list;
+
+        if (!reader.Read())
+            return default(T); // para clases = null
+
+        var item = map(reader);
+
+        if (reader.Read())
+            throw new InvalidOperationException("Se esperaba 0 o 1 fila, pero se obtuvo más de una.");
+
+        return item;
     }
 
     public static Func<IDataRecord, T> GetRowMapper<T>(IDataReader reader) where T : new()

@@ -25,8 +25,6 @@ namespace DAL.Seguridad
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
             "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado";
 
-        // -------- CRUD --------
-
         public List<BE.Usuario> GetAll()
         {
             var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
@@ -101,7 +99,6 @@ WHERE " + userIdCol + @" = @idUsuario;";
             );
         }
 
-        // (Opcional, fuera de la interfaz)
         public BE.Usuario GetByCorreoElectronico(string correoElectronico)
         {
             var sql = @"

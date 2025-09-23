@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using ServicioAdicionalBLL = BLL.Genericos.ServicioAdicionalBLL;
+
 namespace UI
 {
     public partial class GestionarServicioAdicionalForm : Form
@@ -8,14 +10,14 @@ namespace UI
         public GestionarServicioAdicionalForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
-            dgvServicios.Rows.Clear();
-            dgvServicios.Rows.Add("1", "Instalación de vallado regulatorio", "30000.00");
-            dgvServicios.Rows.Add("2", "Transporte de materiales", "15000.00");
+            dgvServicios.DataSource = null;
+
+            dgvServicios.DataSource = ServicioAdicionalBLL.GetInstance().GetAll();
         }
 
         private void dgvServicios_SelectionChanged(object sender, EventArgs e)

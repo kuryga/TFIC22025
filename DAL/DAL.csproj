@@ -52,6 +52,7 @@
     <Compile Include="IDAOInterface.cs" />
     <Compile Include="Seguridad\UsuarioDAL.cs" />
     <Compile Include="Genericos\TipoEdificacionDAL.cs" />
+    <Compile Include="ServicioAdicionalDAL.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BE\BE.csproj">

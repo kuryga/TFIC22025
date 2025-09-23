@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using MaquinariaBLL = BLL.Genericos.MaquinariaBLL;
+
 namespace UI
 {
     public partial class GestionarMaquinariaForm : Form
@@ -8,15 +10,14 @@ namespace UI
         public GestionarMaquinariaForm()
         {
             InitializeComponent();
-            CargarDatosMockeados();
+            CargarDatos();
         }
 
-        private void CargarDatosMockeados()
+        private void CargarDatos()
         {
-            dgvMaquinaria.Rows.Clear();
+            dgvMaquinaria.DataSource = null;
 
-            dgvMaquinaria.Rows.Add("1", "Excavadora", "120");
-            dgvMaquinaria.Rows.Add("2", "Camión Volcador", "95");
+            dgvMaquinaria.DataSource = MaquinariaBLL.GetInstance().GetAll();
         }
 
         private void dgvMaquinaria_SelectionChanged(object sender, EventArgs e)

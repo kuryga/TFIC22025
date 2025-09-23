@@ -26,9 +26,6 @@ namespace UI
         private void InitializeComponent()
         {
             this.dgvMaquinaria = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtId = new System.Windows.Forms.TextBox();
             this.txtNombre = new System.Windows.Forms.TextBox();
             this.txtCosto = new System.Windows.Forms.TextBox();
@@ -46,10 +43,6 @@ namespace UI
             this.dgvMaquinaria.AllowUserToAddRows = false;
             this.dgvMaquinaria.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgvMaquinaria.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3});
             this.dgvMaquinaria.Location = new System.Drawing.Point(20, 20);
             this.dgvMaquinaria.MultiSelect = false;
             this.dgvMaquinaria.Name = "dgvMaquinaria";
@@ -59,44 +52,26 @@ namespace UI
             this.dgvMaquinaria.TabIndex = 0;
             this.dgvMaquinaria.SelectionChanged += new System.EventHandler(this.dgvMaquinaria_SelectionChanged);
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "idMaquinaria";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Nombre";
-            this.dataGridViewTextBoxColumn2.Name = "nombre";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Costo por Hora";
-            this.dataGridViewTextBoxColumn3.Name = "costoPorHora";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
             // txtId
             // 
             this.txtId.Location = new System.Drawing.Point(126, 182);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 23);
+            this.txtId.Size = new System.Drawing.Size(150, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtNombre
             // 
             this.txtNombre.Location = new System.Drawing.Point(126, 212);
             this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(150, 23);
+            this.txtNombre.Size = new System.Drawing.Size(150, 20);
             this.txtNombre.TabIndex = 4;
             // 
             // txtCosto
             // 
             this.txtCosto.Location = new System.Drawing.Point(126, 239);
             this.txtCosto.Name = "txtCosto";
-            this.txtCosto.Size = new System.Drawing.Size(150, 23);
+            this.txtCosto.Size = new System.Drawing.Size(150, 20);
             this.txtCosto.TabIndex = 6;
             // 
             // lblId

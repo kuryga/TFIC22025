@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-
+using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Idioma>;
 
@@ -21,23 +21,35 @@ namespace DAL.Genericos
         public List<BE.Idioma> GetAll()
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
-            return db.QueryListAndUpdateDv<BE.Idioma>(sql, null, table, idCol);
+            return db.QueryListAndLog<BE.Idioma>(
+                sql,
+                null,
+                table, idCol,
+                BE.Audit.AuditEvents.ConsultaIdiomas,
+                "Listado de idiomas"
+            );
         }
 
         public void Create(BE.Idioma obj)
         {
-            var sql = @"INSERT INTO " + table + @"( nombre, codigoISO )
-                        VALUES ( @nombre, @codigoISO );
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
+            var sql = @"
+INSERT INTO " + table + @" (nombre, codigoISO)
+VALUES (@nombre, @codigoISO);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value = (object)obj.CodigoISO ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value =
+                        (object)obj.CodigoISO ?? System.DBNull.Value;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.CreacionIdioma,
+                "Alta de idioma: " + (obj.Nombre ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -46,21 +58,27 @@ namespace DAL.Genericos
 
         public void Update(BE.Idioma obj)
         {
-            var sql = @"UPDATE " + table + 
-                      @" SET
-                            nombre    = @nombre,
-                            codigoISO = @codigoISO
-                      WHERE " + idCol + @" = @id;";
+            var sql = @"
+UPDATE " + table + @"
+   SET nombre    = @nombre,
+       codigoISO = @codigoISO
+ WHERE " + idCol + @" = @id;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdIdioma;
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value = (object)obj.CodigoISO ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value =
+                        (object)obj.CodigoISO ?? System.DBNull.Value;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.ModificacionIdioma,
+                "Modificación de idioma Id=" + obj.IdIdioma
             );
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Moneda>;
 
@@ -20,24 +21,39 @@ namespace DAL.Genericos
         public List<BE.Moneda> GetAll()
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
-            return db.QueryListAndUpdateDv<BE.Moneda>(sql, null, table, idCol);
+            return db.QueryListAndLog<BE.Moneda>(
+                sql,
+                null,
+                table, idCol,
+                BE.Audit.AuditEvents.ConsultaMonedas,
+                "Listado de monedas"
+            );
         }
 
         public void Create(BE.Moneda obj)
         {
-            var sql = @"INSERT INTO " + table + @"( NombreMoneda, Simbolo, ValorCambio )
-                        VALUES ( @NombreMoneda, @Simbolo, @ValorCambio );
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
+            var sql = @"
+INSERT INTO " + table + @" (NombreMoneda, Simbolo, ValorCambio)
+VALUES (@NombreMoneda, @Simbolo, @ValorCambio);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value = (object)obj.NombreMoneda ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value = (object)obj.Simbolo ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal, 10).Value = (object)obj.ValorCambio ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
+                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
+                        (object)obj.Simbolo ?? System.DBNull.Value;
+
+                    var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
+                    pCambio.Precision = 18; pCambio.Scale = 4;   // más precisión para tipo de cambio
+                    pCambio.Value = obj.ValorCambio;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.AltaMoneda,
+                "Alta de moneda: " + (obj.NombreMoneda ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -46,23 +62,32 @@ namespace DAL.Genericos
 
         public void Update(BE.Moneda obj)
         {
-            var sql = @"UPDATE " + table +
-                      @" SET
-                            NombreMoneda    = @NombreMoneda,
-                            simbolo   = @Simbolo,
-                            ValorCambio = @ValorCambio,
-                       WHERE " + idCol + @" = @IdMoneda;";
+            var sql = @"
+UPDATE " + table + @"
+   SET NombreMoneda = @NombreMoneda,
+       Simbolo      = @Simbolo,
+       ValorCambio  = @ValorCambio
+ WHERE " + idCol + @" = @IdMoneda;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@IdMoneda", SqlDbType.Int).Value = obj.IdMoneda;
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value = (object)obj.NombreMoneda ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value = (object)obj.Simbolo ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@codigoISO", SqlDbType.Decimal, 10).Value = (object)obj.ValorCambio ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
+                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
+                        (object)obj.Simbolo ?? System.DBNull.Value;
+
+                    var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
+                    pCambio.Precision = 18; pCambio.Scale = 4;
+                    pCambio.Value = obj.ValorCambio;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.ModificacionValorMoneda,
+                "Modificación de moneda Id=" + obj.IdMoneda
             );
         }
     }

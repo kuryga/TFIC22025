@@ -10,6 +10,7 @@ namespace BE.Audit
     {
         public int IdRegistro { get; set; }
         public DateTime Fecha { get; set; }
+        public string Accion { get; set; }
         public Criticidad Criticidad { get; set; } = Criticidad.C5;
         public string Mensaje { get; set; }
     }

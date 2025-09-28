@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient; // solo para tipos de parámetro en binds
+using System.Data.SqlClient; // tipos de parámetro en binds
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 
@@ -29,11 +29,12 @@ namespace DAL.Seguridad
         {
             var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
 
-            return db.QueryListAndUpdateDv<BE.Usuario>(
+            return db.QueryListAndLog<BE.Usuario>(
                 sql,
                 null,
-                userTable,
-                userIdCol
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarios,
+                "Listado de usuarios"
             );
         }
 
@@ -48,7 +49,7 @@ VALUES
   @numeroDocumento, @Bloqueado );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
@@ -58,10 +59,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = false;
+                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
                 },
-                userTable,
-                userIdCol
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.CreacionUsuario,
+                "Alta de usuario: " + (obj.CorreoElectronico ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -81,7 +83,7 @@ UPDATE " + userTable + @" SET
     Bloqueado         = @Bloqueado
 WHERE " + userIdCol + @" = @idUsuario;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
@@ -94,8 +96,9 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
                 },
-                userTable,
-                userIdCol
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ModificacionUsuario,
+                "Modificación de usuario Id=" + obj.IdUsuario
             );
         }
 
@@ -106,12 +109,13 @@ SELECT TOP 1 " + userPublicCols + @"
 FROM " + userTable + @"
 WHERE correoElectronico = @mail;";
 
-            return db.QuerySingleOrDefaultAndUpdateDv<BE.Usuario>(
+            return db.QuerySingleOrDefaultAndLog<BE.Usuario>(
                 sql,
                 c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value =
                         (correoElectronico ?? string.Empty).Trim(),
-                userTable,
-                userIdCol
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
+                "Búsqueda por correo: " + (correoElectronico ?? string.Empty)
             );
         }
     }

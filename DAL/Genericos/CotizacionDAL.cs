@@ -32,6 +32,19 @@ namespace DAL.Genericos
 
         public List<BE.Cotizacion> GetAll() { return GetListaCotizaciones(); }
 
+        // DTO plano para mapear el SELECT con DbMapper
+        private class CotizacionListRow
+        {
+            public int idCotizacion { get; set; }
+            public DateTime fechaCreacion { get; set; }
+            public int idTipoEdificacion { get; set; }
+            public int idMoneda { get; set; }
+            public string tipoDescripcion { get; set; }
+            public string nombreMoneda { get; set; }
+            public decimal valorCambio { get; set; }
+            public string Simbolo { get; set; }
+        }
+
         public List<BE.Cotizacion> GetListaCotizaciones()
         {
             var sql = @"
@@ -45,54 +58,40 @@ JOIN dbo.TipoEdificacion te ON te.idTipoEdificacion = c.idTipoEdificacion
 JOIN dbo.Moneda          m  ON m.idMoneda          = c.idMoneda
 ORDER BY c.idCotizacion DESC;";
 
-            var list = new List<BE.Cotizacion>();
+            var rows = db.QueryListAndLog<CotizacionListRow>(
+                sql,
+                null,
+                TblCotizacion, PkCotizacion,
+                BE.Audit.AuditEvents.ConsultaCotizaciones,
+                "Listado de cotizaciones"
+            );
 
-            var conn = new SqlConnection(connectionString);
-            var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text };
-
-            try
+            var list = new List<BE.Cotizacion>(rows.Count);
+            for (int i = 0; i < rows.Count; i++)
             {
-                conn.Open();
-                var rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
+                var r = rows[i];
+                var ctz = new BE.Cotizacion
                 {
-                    var ctz = new BE.Cotizacion();
-                    ctz.IdCotizacion = rdr.GetInt32(rdr.GetOrdinal("idCotizacion"));
-                    ctz.FechaCreacion = rdr.GetDateTime(rdr.GetOrdinal("fechaCreacion"));
-
-                    // TipoEdificacion
-                    var te = new BE.TipoEdificacion();
-                    te.IdTipoEdificacion = rdr.GetInt32(rdr.GetOrdinal("idTipoEdificacion"));
-                    te.Descripcion = rdr["tipoDescripcion"] == DBNull.Value ? null : rdr["tipoDescripcion"].ToString();
-                    ctz.TipoEdificacion = te;
-
-                    // Moneda
-                    var mon = new BE.Moneda();
-                    mon.IdMoneda = rdr.GetInt32(rdr.GetOrdinal("idMoneda"));
-                    mon.NombreMoneda = rdr["nombreMoneda"] == DBNull.Value ? null : rdr["nombreMoneda"].ToString();
-                    mon.ValorCambio = rdr["valorCambio"] == DBNull.Value ? 0m : Convert.ToDecimal(rdr["valorCambio"]);
-                    mon.Simbolo = rdr["Simbolo"] == DBNull.Value ? null : rdr["Simbolo"].ToString();
-                    ctz.Moneda = mon;
-
-                    // Listas en null para “resumen”
-                    ctz.ListaMateriales = null;
-                    ctz.ListaMaquinaria = null;
-                    ctz.ListaServicios = null;
-
-                    list.Add(ctz);
-                }
-                conn.Close();
-
-                // Recalcula DV de la tabla principal
-                db.RecalculateTableDvsFromSelectAll(TblCotizacion, PkCotizacion);
+                    IdCotizacion = r.idCotizacion,
+                    FechaCreacion = r.fechaCreacion,
+                    TipoEdificacion = new BE.TipoEdificacion
+                    {
+                        IdTipoEdificacion = r.idTipoEdificacion,
+                        Descripcion = r.tipoDescripcion
+                    },
+                    Moneda = new BE.Moneda
+                    {
+                        IdMoneda = r.idMoneda,
+                        NombreMoneda = r.nombreMoneda,
+                        ValorCambio = r.valorCambio,
+                        Simbolo = r.Simbolo
+                    },
+                    ListaMateriales = null,
+                    ListaMaquinaria = null,
+                    ListaServicios = null
+                };
+                list.Add(ctz);
             }
-            catch
-            {
-                if (conn.State == ConnectionState.Open) conn.Close();
-                throw;
-            }
-
             return list;
         }
 
@@ -141,7 +140,7 @@ WHERE sc.idCotizacion = @id;
                 conn.Open();
                 var rdr = cmd.ExecuteReader();
 
-                // ------ Header ------
+                // Header
                 if (rdr.Read())
                 {
                     ctz = new BE.Cotizacion();
@@ -164,10 +163,12 @@ WHERE sc.idCotizacion = @id;
                 if (ctz == null)
                 {
                     conn.Close();
+                    db.ExecuteScalarAndLog("SELECT 1", null, TblCotizacion, PkCotizacion,
+                        BE.Audit.AuditEvents.ConsultaCotizacionDetalle, "Detalle inexistente Id=" + idCotizacion);
                     return null;
                 }
 
-                // ------ Materiales ------
+                // Materiales
                 ctz.ListaMateriales = new List<BE.MaterialCotizacion>();
                 rdr.NextResult();
                 while (rdr.Read())
@@ -188,7 +189,7 @@ WHERE sc.idCotizacion = @id;
                     ctz.ListaMateriales.Add(mc);
                 }
 
-                // ------ Maquinaria ------
+                // Maquinaria
                 ctz.ListaMaquinaria = new List<BE.MaquinariaCotizacion>();
                 rdr.NextResult();
                 while (rdr.Read())
@@ -207,7 +208,7 @@ WHERE sc.idCotizacion = @id;
                     ctz.ListaMaquinaria.Add(mq);
                 }
 
-                // ------ Servicios ------
+                // Servicios
                 ctz.ListaServicios = new List<BE.ServicioCotizacion>();
                 rdr.NextResult();
                 while (rdr.Read())
@@ -227,21 +228,25 @@ WHERE sc.idCotizacion = @id;
 
                 conn.Close();
 
-                // Recalcular DV de todas las tablas relacionadas
-                db.RecalculateTableDvsFromSelectAll(TblCotizacion, PkCotizacion);
-                db.RecalculateTableDvsFromSelectAll(TblMaterialCotizacion, PkMaterialCotizacion);
-                db.RecalculateTableDvsFromSelectAll(TblMaquinariaCotizacion, PkMaquinariaCotizacion);
-                db.RecalculateTableDvsFromSelectAll(TblServicioCotizacion, PkServicioCotizacion);
+                // Registrar lectura y refrescar DV de cabecera (liviano)
+                db.ExecuteScalarAndLog("SELECT 1", null, TblCotizacion, PkCotizacion,
+                    BE.Audit.AuditEvents.ConsultaCotizacionDetalle, "Detalle Id=" + idCotizacion);
             }
-            catch
+            catch (Exception ex)
             {
                 if (conn.State == ConnectionState.Open) conn.Close();
+                // Log explícito de la falla usando el toolkit (C1)
+                db.ExecuteScalarAndLog(
+                    "SELECT 1", null,
+                    TblCotizacion, PkCotizacion,
+                    BE.Audit.AuditEvents.FalloConexionBD,
+                    "GetCotizacionCompleta sobre cotizacion: " + ex.Message
+                );
                 throw;
             }
 
             return ctz;
         }
-
 
         public void Create(BE.Cotizacion obj)
         {
@@ -252,15 +257,19 @@ VALUES
 ( @fecha, @idTipoEdificacion, @idMoneda );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = obj.FechaCreacion;
-                    cmd.Parameters.Add("@idTipoEdificacion", SqlDbType.Int).Value = (obj.TipoEdificacion != null) ? obj.TipoEdificacion.IdTipoEdificacion : 0;
-                    cmd.Parameters.Add("@idMoneda", SqlDbType.Int).Value = (obj.Moneda != null) ? obj.Moneda.IdMoneda : 0;
+                    cmd.Parameters.Add("@idTipoEdificacion", SqlDbType.Int).Value =
+                        (obj.TipoEdificacion != null) ? obj.TipoEdificacion.IdTipoEdificacion : 0;
+                    cmd.Parameters.Add("@idMoneda", SqlDbType.Int).Value =
+                        (obj.Moneda != null) ? obj.Moneda.IdMoneda : 0;
                 },
-                TblCotizacion, PkCotizacion
+                TblCotizacion, PkCotizacion,
+                BE.Audit.AuditEvents.CreacionCotizacion,
+                "Alta de cotización"
             );
 
             if (newId != null && newId != DBNull.Value)
@@ -276,16 +285,20 @@ UPDATE " + TblCotizacion + @" SET
     idMoneda          = @idMoneda
 WHERE " + PkCotizacion + @" = @id;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdCotizacion;
                     cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = obj.FechaCreacion;
-                    cmd.Parameters.Add("@idTipoEdificacion", SqlDbType.Int).Value = (obj.TipoEdificacion != null) ? obj.TipoEdificacion.IdTipoEdificacion : 0;
-                    cmd.Parameters.Add("@idMoneda", SqlDbType.Int).Value = (obj.Moneda != null) ? obj.Moneda.IdMoneda : 0;
+                    cmd.Parameters.Add("@idTipoEdificacion", SqlDbType.Int).Value =
+                        (obj.TipoEdificacion != null) ? obj.TipoEdificacion.IdTipoEdificacion : 0;
+                    cmd.Parameters.Add("@idMoneda", SqlDbType.Int).Value =
+                        (obj.Moneda != null) ? obj.Moneda.IdMoneda : 0;
                 },
-                TblCotizacion, PkCotizacion
+                TblCotizacion, PkCotizacion,
+                BE.Audit.AuditEvents.ModificacionCotizacionHeader,
+                "Actualización de cotización Id=" + obj.IdCotizacion
             );
         }
     }

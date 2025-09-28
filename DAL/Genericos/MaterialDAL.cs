@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Material>;
 
@@ -20,25 +21,43 @@ namespace DAL.Genericos
         public List<BE.Material> GetAll()
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
-            return db.QueryListAndUpdateDv<BE.Material>(sql, null, table, idCol);
+            return db.QueryListAndLog<BE.Material>(
+                sql,
+                null,
+                table, idCol,
+                BE.Audit.AuditEvents.ConsultaMateriales,
+                "Listado de materiales"
+            );
         }
 
         public void Create(BE.Material obj)
         {
-            var sql = @"INSERT INTO " + table + @"( nombre, unidadMedida, precioUnidad, usoPorM2 )
-                        VALUES( @nombre, @unidadMedida, @precioUnidad, @usoPorM2 );
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
+            var sql = @"
+INSERT INTO " + table + @" (nombre, unidadMedida, precioUnidad, usoPorM2)
+VALUES (@nombre, @unidadMedida, @precioUnidad, @usoPorM2);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value = (object)obj.UnidadMedida ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal).Value = obj.PrecioUnidad;
-                    cmd.Parameters.Add("@usoPorM2", SqlDbType.Decimal).Value = obj.UsoPorM2;
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
+                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+
+                    var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
+                    pPrecio.Precision = 18; pPrecio.Scale = 2;     // precio con 2 decimales
+                    pPrecio.Value = obj.PrecioUnidad;
+
+                    var pUso = cmd.Parameters.Add("@usoPorM2", SqlDbType.Decimal);
+                    pUso.Precision = 18; pUso.Scale = 4;          // uso por m2 con más precisión
+                    pUso.Value = obj.UsoPorM2;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.CreacionMaterial,
+                "Alta de material: " + (obj.Nombre ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -47,24 +66,37 @@ namespace DAL.Genericos
 
         public void Update(BE.Material obj)
         {
-            var sql = @"UPDATE " + table +
-                @" SET
-                     nombre      = @nombre,
-                     unidadMedida = @unidadMedida,
-                     precioUnidad   = @precioUnidad,
-                     usoPorM2   = @usoPorM2
-                     WHERE " + idCol + @" = @id;";
+            var sql = @"
+UPDATE " + table + @"
+   SET nombre       = @nombre,
+       unidadMedida = @unidadMedida,
+       precioUnidad = @precioUnidad,
+       usoPorM2     = @usoPorM2
+ WHERE " + idCol + @" = @id;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value = (object)obj.UnidadMedida ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal).Value = obj.PrecioUnidad;
-                    cmd.Parameters.Add("@usoPorM2", SqlDbType.Decimal).Value = obj.UsoPorM2;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaterial;
+
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
+                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+
+                    var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
+                    pPrecio.Precision = 18; pPrecio.Scale = 2;
+                    pPrecio.Value = obj.PrecioUnidad;
+
+                    var pUso = cmd.Parameters.Add("@usoPorM2", SqlDbType.Decimal);
+                    pUso.Precision = 18; pUso.Scale = 4;
+                    pUso.Value = obj.UsoPorM2;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.ModificacionMaterial,
+                "Modificación de material Id=" + obj.IdMaterial
             );
         }
     }

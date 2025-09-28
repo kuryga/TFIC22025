@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 
-
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Maquinaria>;
 
 namespace DAL.Genericos
@@ -21,23 +20,38 @@ namespace DAL.Genericos
         public List<BE.Maquinaria> GetAll()
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
-            return db.QueryListAndUpdateDv<BE.Maquinaria>(sql, null, table, idCol);
+
+            // SELECT + DV + LOG (acción de consulta)
+            return db.QueryListAndLog<BE.Maquinaria>(
+                sql,
+                null,
+                table, idCol,
+                BE.Audit.AuditEvents.ConsultaMaquinarias,
+                "Listado de maquinarias"
+            );
         }
 
         public void Create(BE.Maquinaria obj)
         {
-            var sql = @"INSERT INTO " + table + @"( nombre, costoPorHora )
-                        VALUES ( @nombre, @costoPorHora );
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
+            var sql = @"
+INSERT INTO " + table + @" (nombre, costoPorHora)
+VALUES (@nombre, @costoPorHora);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal, 250).Value = (object)obj.CostoPorHora ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
+                    p.Precision = 18; p.Scale = 2;
+                    p.Value = obj.CostoPorHora;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.CreacionMaquinaria,
+                "Alta de maquinaria: " + (obj.Nombre ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -46,21 +60,28 @@ namespace DAL.Genericos
 
         public void Update(BE.Maquinaria obj)
         {
-            var sql = @"UPDATE " + table +
-                @" SET
-                    nombre      = @nombre,
-                    costoPorHora = @costoPorHora
-                WHERE " + idCol + @" = @id;";
+            var sql = @"
+UPDATE " + table + @"
+   SET nombre = @nombre,
+       costoPorHora = @costoPorHora
+ WHERE " + idCol + @" = @id;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaquinaria;
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value = (object)obj.Nombre ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal, 250).Value = (object)obj.CostoPorHora ?? System.DBNull.Value;
+
+                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
+                        (object)obj.Nombre ?? System.DBNull.Value;
+
+                    var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
+                    p.Precision = 18; p.Scale = 2;
+                    p.Value = obj.CostoPorHora;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.ModificacionMaquinaria,
+                "Modificación de maquinaria Id=" + obj.IdMaquinaria
             );
         }
     }

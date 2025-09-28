@@ -21,22 +21,32 @@ namespace DAL.Genericos
         public List<BE.TipoEdificacion> GetAll()
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
-            return db.QueryListAndUpdateDv<BE.TipoEdificacion>(sql, null, table, idCol);
+            return db.QueryListAndLog<BE.TipoEdificacion>(
+                sql,
+                null,
+                table, idCol,
+                BE.Audit.AuditEvents.ConsultaTiposEdificacion,
+                "Listado de tipos de edificación"
+            );
         }
 
         public void Create(BE.TipoEdificacion obj)
         {
-            var sql = @"INSERT INTO " + table + @" ( descripcion )
-                        VALUES ( @descripcion );
-                        SELECT CAST(SCOPE_IDENTITY() AS int);";
+            var sql = @"
+INSERT INTO " + table + @" (descripcion)
+VALUES (@descripcion);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndRefresh(
+            object newId = db.ExecuteScalarAndLog(
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value = (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
+                        (object)obj.Descripcion ?? System.DBNull.Value;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.CreacionTipoEdificacion,
+                "Alta de tipo de edificación: " + (obj.Descripcion ?? string.Empty)
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -45,18 +55,22 @@ namespace DAL.Genericos
 
         public void Update(BE.TipoEdificacion obj)
         {
-            var sql = @"UPDATE " + table + 
-                      @" SET descripcion = @descripcion,
-                      WHERE " + idCol + @" = @id;";
+            var sql = @"
+UPDATE " + table + @"
+   SET descripcion = @descripcion
+ WHERE " + idCol + @" = @id;";
 
-            db.ExecuteNonQueryAndRefresh(
+            db.ExecuteNonQueryAndLog(
                 sql,
                 cmd =>
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdTipoEdificacion;
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value = (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
+                        (object)obj.Descripcion ?? System.DBNull.Value;
                 },
-                table, idCol
+                table, idCol,
+                BE.Audit.AuditEvents.ModificacionTipoEdificacion,
+                "Modificación de tipo de edificación Id=" + obj.IdTipoEdificacion
             );
         }
     }

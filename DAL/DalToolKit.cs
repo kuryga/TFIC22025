@@ -16,132 +16,118 @@ public sealed class DalToolkit
     private const string dvvColValue = "valorDVV";
     private const string dvvColDvh = "DVH";
 
-    public List<T> QueryListAndUpdateDv<T>(
+    // ===== Bitácora =====
+    private const string TblBitacora = "dbo.Bitacora";
+    private const string PkBitacora = "idRegistro";
+
+    // =========================================================
+    // =============  APIs UNIFICADAS (públicas)  ==============
+    // =========================================================
+
+    /// <summary>
+    /// Ejecuta INSERT/UPDATE/DELETE, recalcula DVH/DVV y registra en Bitácora.
+    /// Loguea fallos con acción C1 y detalle (tipo de llamado + tabla + mensaje).
+    /// </summary>
+    public int ExecuteNonQueryAndLog(
         string sql,
         Action<SqlCommand> bindParams,
-        string tableName,
-        string idColumn) where T : new()
+        string tableName, string pkName,
+        string accion, string mensaje)
     {
-        var rows = ExecuteList<T>(sql, bindParams);
-        RecalculateTableDvsFromSelectAll(tableName, idColumn);
-        return rows;
+        try
+        {
+            int rows = ExecuteNonQuery(sql, bindParams);
+            RecalculateTableDvsFromSelectAll(tableName, pkName);
+            LogAuto(accion, mensaje);
+            return rows;
+        }
+        catch (Exception ex)
+        {
+            LogDbFailure("ExecuteNonQuery", tableName, ex);
+            throw;
+        }
     }
 
-    public T QuerySingleOrDefaultAndUpdateDv<T>(
+    /// <summary>
+    /// Ejecuta INSERT que retorna SCOPE_IDENTITY (u otro scalar), recalcula DVH/DVV y registra en Bitácora.
+    /// Loguea fallos con acción C1 y detalle (tipo de llamado + tabla + mensaje).
+    /// </summary>
+    public object ExecuteScalarAndLog(
+        string sql,
+        Action<SqlCommand> bindParams,
+        string tableName, string pkName,
+        string accion, string mensaje)
+    {
+        try
+        {
+            object obj = ExecuteScalar(sql, bindParams);
+            RecalculateTableDvsFromSelectAll(tableName, pkName);
+            LogAuto(accion, mensaje);
+            return obj;
+        }
+        catch (Exception ex)
+        {
+            LogDbFailure("ExecuteScalar", tableName, ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Ejecuta SELECT (lista), recalcula DVH/DVV y registra en Bitácora (lectura).
+    /// Loguea fallos con acción C1 y detalle (tipo de llamado + tabla + mensaje).
+    /// </summary>
+    public List<T> QueryListAndLog<T>(
         string sql,
         Action<SqlCommand> bindParams,
         string tableName,
-        string idColumn) where T : new()
+        string idColumn,
+        string accion, string mensaje) where T : new()
     {
-        var list = QueryListAndUpdateDv<T>(sql, bindParams, tableName, idColumn);
+        try
+        {
+            var rows = ExecuteList<T>(sql, bindParams);
+            RecalculateTableDvsFromSelectAll(tableName, idColumn);
+            LogAuto(accion, mensaje);
+            return rows;
+        }
+        catch (Exception ex)
+        {
+            LogDbFailure("QueryList", tableName, ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Ejecuta SELECT (single or default), recalcula DVH/DVV y registra en Bitácora (lectura).
+    /// </summary>
+    public T QuerySingleOrDefaultAndLog<T>(
+        string sql,
+        Action<SqlCommand> bindParams,
+        string tableName,
+        string idColumn,
+        string accion, string mensaje) where T : new()
+    {
+        var list = QueryListAndLog<T>(sql, bindParams, tableName, idColumn, accion, mensaje);
         return list.Count > 0 ? list[0] : default(T);
     }
 
+    // =========================================================
+    // ===============  Internals (privados)  ==================
+    // =========================================================
 
-    public int ExecuteNonQueryAndRefresh(
-        string sql,
-        Action<SqlCommand> bindParams,
-        string tableName,
-        string idColumn)
+    private int LogAuto(string accion, string mensaje)
     {
-        int rows = ExecuteNonQuery(sql, bindParams);
-        RecalculateTableDvsFromSelectAll(tableName, idColumn);
-        return rows;
+        var crit = BE.Audit.AuditEvents.GetCriticidad(accion).ToString();
+        return LogBitacora(accion, mensaje ?? string.Empty, crit);
     }
 
-    public object ExecuteScalarAndRefresh(
-        string sql,
-        Action<SqlCommand> bindParams,
-        string tableName,
-        string idColumn)
+    private void LogDbFailure(string callType, string tableName, Exception ex)
     {
-        object obj = ExecuteScalar(sql, bindParams);
-        RecalculateTableDvsFromSelectAll(tableName, idColumn);
-        return obj;
-    }
-
-    public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
-    {
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand("SELECT * FROM " + tableName + ";", conn) { CommandType = CommandType.Text };
-
-        var dvhs = new List<string>();
-
-        try
-        {
-            conn.Open();
-            var rdr = cmd.ExecuteReader();
-
-            if (!rdr.HasRows)
-            {
-                conn.Close();
-                UpsertDvvWithDvh(tableName, string.Empty);
-                return;
-            }
-            var cols = new List<Tuple<string, int>>();
-            int idOrdinal = -1;
-
-            for (int i = 0; i < rdr.FieldCount; i++)
-            {
-                var colName = rdr.GetName(i);
-                if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (string.Equals(colName, idColumn, StringComparison.OrdinalIgnoreCase))
-                    idOrdinal = i;
-
-                cols.Add(Tuple.Create(colName, i));
-            }
-
-            if (idOrdinal < 0)
-                throw new InvalidOperationException("No se encontró la columna Id '" + idColumn + "' en " + tableName + ".");
-
-            // orden determinístico por nombre de columna
-            cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
-
-            // recorrer filas → DVH por fila
-            while (rdr.Read())
-            {
-                var sb = new StringBuilder();
-
-                for (int c = 0; c < cols.Count; c++)
-                {
-                    int ord = cols[c].Item2;
-                    object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
-
-                    if (v == null)
-                    {
-                        // nada
-                    }
-                    else if (v is byte[])
-                    {
-                        var bytes = (byte[])v;
-                        for (int k = 0; k < bytes.Length; k++)
-                            sb.Append(bytes[k].ToString("x2"));
-                    }
-                    else
-                    {
-                        sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
-                    }
-                }
-
-                string dvh = SimpleDv(sb.ToString());
-                dvhs.Add(dvh);
-
-                object idValue = rdr.GetValue(idOrdinal);
-                UpdateRowDvh(tableName, idColumn, idValue, dvh);
-            }
-
-            conn.Close();
-
-            string dvv = ComputeDvv(dvhs);
-            UpsertDvvWithDvh(tableName, dvv);
-        }
-        catch
-        {
-            if (conn.State == ConnectionState.Open) conn.Close();
-            throw;
-        }
+        string accion = BE.Audit.AuditEvents.FalloConexionBD;
+        string tablaKey = DvvKey(tableName); // "usuario" en vez de "dbo.Usuario"
+        string detalle = (ex != null) ? ex.Message : "DB error";
+        string msg = (callType ?? "DBCall") + " sobre " + (tablaKey ?? "?") + ": " + detalle;
+        LogBitacora(accion, msg, BE.Audit.AuditEvents.GetCriticidad(accion).ToString());
     }
 
     private List<T> ExecuteList<T>(string sql, Action<SqlCommand> bind) where T : new()
@@ -155,7 +141,7 @@ public sealed class DalToolkit
         {
             conn.Open();
             var reader = cmd.ExecuteReader();
-            result = DbMapper.MapToList<T>(reader); // tu mapper
+            result = DbMapper.MapToList<T>(reader);
             conn.Close();
         }
         catch
@@ -206,6 +192,90 @@ public sealed class DalToolkit
         }
     }
 
+    public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
+    {
+        var conn = new SqlConnection(connectionString);
+        var cmd = new SqlCommand("SELECT * FROM " + tableName + ";", conn) { CommandType = CommandType.Text };
+
+        var dvhs = new List<string>();
+
+        try
+        {
+            conn.Open();
+            var rdr = cmd.ExecuteReader();
+
+            if (!rdr.HasRows)
+            {
+                conn.Close();
+                UpsertDvvWithDvh(tableName, string.Empty);
+                return;
+            }
+
+            var cols = new List<Tuple<string, int>>();
+            int idOrdinal = -1;
+
+            for (int i = 0; i < rdr.FieldCount; i++)
+            {
+                var colName = rdr.GetName(i);
+                if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (string.Equals(colName, idColumn, StringComparison.OrdinalIgnoreCase))
+                    idOrdinal = i;
+
+                cols.Add(Tuple.Create(colName, i));
+            }
+
+            if (idOrdinal < 0)
+                throw new InvalidOperationException("No se encontró la columna Id '" + idColumn + "' en " + tableName + ".");
+
+            cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
+
+            while (rdr.Read())
+            {
+                var sb = new StringBuilder();
+
+                for (int c = 0; c < cols.Count; c++)
+                {
+                    int ord = cols[c].Item2;
+                    object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+
+                    if (v == null)
+                    {
+                        // nada
+                    }
+                    else if (v is byte[])
+                    {
+                        var bytes = (byte[])v;
+                        for (int k = 0; k < bytes.Length; k++)
+                            sb.Append(bytes[k].ToString("x2"));
+                    }
+                    else
+                    {
+                        sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
+                    }
+                }
+
+                string dvh = SimpleDv(sb.ToString());
+                dvhs.Add(dvh);
+
+                object idValue = rdr.GetValue(idOrdinal);
+                UpdateRowDvh(tableName, idColumn, idValue, dvh);
+            }
+
+            conn.Close();
+
+            string dvv = ComputeDvv(dvhs);
+            UpsertDvvWithDvh(tableName, dvv);
+        }
+        catch (Exception ex)
+        {
+            if (conn.State == ConnectionState.Open) conn.Close();
+            LogDbFailure("RecalculateDV", tableName, ex);
+            throw;
+        }
+    }
+
     private void UpdateRowDvh(string table, string idColumn, object idValue, string dvh)
     {
         var sql = "UPDATE " + table + " SET DVH = @dvh WHERE " + idColumn + " = @id;";
@@ -214,50 +284,67 @@ public sealed class DalToolkit
         cmd.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = (object)dvh ?? string.Empty;
         cmd.Parameters.Add("@id", SqlDbType.Variant).Value = idValue ?? DBNull.Value;
 
-        conn.Open();
-        cmd.ExecuteNonQuery();
-        conn.Close();
+        try
+        {
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
+        catch (Exception ex)
+        {
+            if (conn.State == ConnectionState.Open) conn.Close();
+            LogDbFailure("UpdateRowDvh", table, ex);
+            throw;
+        }
     }
 
     private void UpsertDvvWithDvh(string tableName, string dvv)
     {
-        var key = DvvKey(tableName); // "usuario"
-
+        var key = DvvKey(tableName); // e.g. "usuario"
         var conn = new SqlConnection(connectionString);
-        conn.Open();
 
-        // upsert valorDVV
-        var upd = new SqlCommand(@"
+        try
+        {
+            conn.Open();
+
+            var upd = new SqlCommand(@"
 UPDATE " + dvvTable + @"
    SET " + dvvColValue + @" = @dvv
  WHERE " + dvvColTableName + @" = @tabla;", conn);
 
-        upd.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-        upd.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
+            upd.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+            upd.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
 
-        int rows = upd.ExecuteNonQuery();
-        if (rows == 0)
-        {
-            var ins = new SqlCommand(@"
+            int rows = upd.ExecuteNonQuery();
+            if (rows == 0)
+            {
+                var ins = new SqlCommand(@"
 INSERT INTO " + dvvTable + @" (" + dvvColTableName + "," + dvvColValue + @")
 VALUES (@tabla, @dvv);", conn);
-            ins.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-            ins.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
-            ins.ExecuteNonQuery();
-        }
+                ins.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+                ins.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
+                ins.ExecuteNonQuery();
+            }
 
-        // actualizar DVH de la fila DVV
-        var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
-        var updDvh = new SqlCommand(@"
+            var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
+            var updDvh = new SqlCommand(@"
 UPDATE " + dvvTable + @"
    SET " + dvvColDvh + @" = @dvh
  WHERE " + dvvColTableName + @" = @tabla;", conn);
 
-        updDvh.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-        updDvh.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = dvh ?? string.Empty;
-        updDvh.ExecuteNonQuery();
-
-        conn.Close();
+            updDvh.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+            updDvh.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = dvh ?? string.Empty;
+            updDvh.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            LogDbFailure("UpsertDVV", dvvTable, ex);
+            throw;
+        }
+        finally
+        {
+            if (conn.State == ConnectionState.Open) conn.Close();
+        }
     }
 
     private static string DvvKey(string tableName)
@@ -287,5 +374,36 @@ UPDATE " + dvvTable + @"
                 sb.Append(hash[i].ToString("x2"));
             return sb.ToString();
         }
+    }
+
+    private int LogBitacora(string accion, string mensaje, string criticidad)
+    {
+        if (accion == null) accion = string.Empty;
+        if (mensaje == null) mensaje = string.Empty;
+        if (criticidad == null) criticidad = string.Empty;
+
+        // TODO: Usuario real cuando halla xd
+        string usuario = "mockuser";
+        string finalMsg = "[" + usuario + "] " + mensaje;
+
+        string sql = @"
+INSERT INTO " + TblBitacora + @"
+( fecha, criticidad, accion, mensaje, DVH )
+VALUES ( @fecha, @criticidad, @accion, @mensaje, @DVH );
+SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+        object newId = ExecuteScalar(sql,
+            cmd =>
+            {
+                cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.UtcNow;
+                cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
+                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = finalMsg;
+                cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
+            });
+
+        RecalculateTableDvsFromSelectAll(TblBitacora, PkBitacora);
+
+        return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
     }
 }

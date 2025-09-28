@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.Text;
 
+using SessionContext = DAL.Seguridad.SessionContext;
 public sealed class DalToolkit
 {
     // Connection string global
@@ -20,9 +21,6 @@ public sealed class DalToolkit
     private const string TblBitacora = "dbo.Bitacora";
     private const string PkBitacora = "idRegistro";
 
-    // =========================================================
-    // =============  APIs UNIFICADAS (públicas)  ==============
-    // =========================================================
 
     /// <summary>
     /// Ejecuta INSERT/UPDATE/DELETE, recalcula DVH/DVV y registra en Bitácora.
@@ -110,10 +108,6 @@ public sealed class DalToolkit
         var list = QueryListAndLog<T>(sql, bindParams, tableName, idColumn, accion, mensaje);
         return list.Count > 0 ? list[0] : default(T);
     }
-
-    // =========================================================
-    // ===============  Internals (privados)  ==================
-    // =========================================================
 
     private int LogAuto(string accion, string mensaje)
     {
@@ -300,7 +294,7 @@ public sealed class DalToolkit
 
     private void UpsertDvvWithDvh(string tableName, string dvv)
     {
-        var key = DvvKey(tableName); // e.g. "usuario"
+        var key = DvvKey(tableName); // por ejemplo "usuario"
         var conn = new SqlConnection(connectionString);
 
         try
@@ -382,14 +376,16 @@ UPDATE " + dvvTable + @"
         if (mensaje == null) mensaje = string.Empty;
         if (criticidad == null) criticidad = string.Empty;
 
-        // TODO: Usuario real cuando halla xd
-        string usuario = "mockuser";
-        string finalMsg = "[" + usuario + "] " + mensaje;
+        var ctx = SessionContext.Current;
+        int? uid = (ctx != null) ? ctx.UsuarioId : (int?)null;
+        string uname = (ctx != null && !string.IsNullOrEmpty(ctx.UsuarioEmail))
+                        ? ctx.UsuarioEmail
+                        : "Usuario deslogeado";
 
         string sql = @"
-INSERT INTO " + TblBitacora + @"
-( fecha, criticidad, accion, mensaje, DVH )
-VALUES ( @fecha, @criticidad, @accion, @mensaje, @DVH );
+INSERT INTO dbo.Bitacora
+( fecha, criticidad, accion, mensaje, idEjecutor, usuarioEjecutor, DVH )
+VALUES ( @fecha, @criticidad, @accion, @mensaje, @idEjecutor, @usuarioEjecutor, @DVH );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
         object newId = ExecuteScalar(sql,
@@ -398,7 +394,16 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.UtcNow;
                 cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
                 cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
-                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = finalMsg;
+                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
+
+                if (uid.HasValue)
+                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = uid.Value;
+                else
+                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = DBNull.Value;
+
+                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
+                    (object)uname ?? DBNull.Value;
+
                 cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
             });
 
@@ -406,4 +411,5 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
 
         return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
     }
+
 }

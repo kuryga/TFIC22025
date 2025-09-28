@@ -41,9 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="audit y param\Bitacora.cs" />
-    <Compile Include="audit y param\Criticidad.cs" />
-    <Compile Include="audit y param\Parametrizacion.cs" />
+    <Compile Include="Audit y param\Bitacora.cs" />
+    <Compile Include="Audit y param\Criticidad.cs" />
+    <Compile Include="Audit y param\Parametrizacion.cs" />
     <Compile Include="Genericos\Cotizacion.cs" />
     <Compile Include="Genericos\Idioma.cs" />
     <Compile Include="Genericos\Maquinaria.cs" />

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+using CotizacionBLL = BLL.Genericos.CotizacionBLL;
+
 namespace UI
 {
     public partial class ConsultarCotizacionesForm : Form
@@ -8,15 +10,47 @@ namespace UI
         public ConsultarCotizacionesForm()
         {
             InitializeComponent();
-            CargarMock();
+            CargarDatos();
         }
 
-        private void CargarMock()
+        private void CargarDatos()
         {
-            dgvCotizaciones.Rows.Clear();
-            dgvCotizaciones.Rows.Add("10101001", "2024-05-01");
-            dgvCotizaciones.Rows.Add("20202002", "2024-06-03");
+            var datos = CotizacionBLL.GetInstance().GetListaCotizaciones();
+
+            dgvCotizaciones.AutoGenerateColumns = false;
+            dgvCotizaciones.Columns.Clear();
+
+            dgvCotizaciones.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "IdCotizacion",
+                DataPropertyName = "IdCotizacion",
+                Name = "colId"
+            });
+
+            dgvCotizaciones.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "FechaCreacion",
+                DataPropertyName = "FechaCreacion",
+                Name = "colFecha",
+                DefaultCellStyle = { Format = "dd/MM/yyyy HH:mm" }
+            });
+            dgvCotizaciones.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "TipoEdificacion",
+                DataPropertyName = "TipoDescripcion",
+                Name = "colTipo"
+            });
+            dgvCotizaciones.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                HeaderText = "Moneda",
+                DataPropertyName = "MonedaNombre",
+                Name = "colMoneda"
+            });
+
+            dgvCotizaciones.DataSource = datos;
         }
+
+
 
         private void btnVerDetalles_Click(object sender, EventArgs e)
         {

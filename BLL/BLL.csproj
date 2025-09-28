@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audit y params\BitacoraBLL.cs" />
+    <Compile Include="Genericos\CotizacionBLL.cs" />
     <Compile Include="Genericos\MaterialBLL.cs" />
     <Compile Include="Genericos\MonedaBLL.cs" />
     <Compile Include="Genericos\MaquinariaBLL.cs" />

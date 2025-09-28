@@ -8,18 +8,14 @@ using System.Text;
 public sealed class DalToolkit
 {
     // Connection string global
-    private const string connectionString =
+    public const string connectionString =
         @"Server=.;Database=UrbanSoft;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True;";
 
-    // Tabla DVV (según tu esquema)
     private const string dvvTable = "[dbo].[DigitoVerificadorVertical]";
     private const string dvvColTableName = "tabla";
     private const string dvvColValue = "valorDVV";
     private const string dvvColDvh = "DVH";
 
-    // ---------------- API pública ----------------
-
-    // Devuelve lista (según tu SQL) y luego recalcula DV con SELECT * (todas las columnas)
     public List<T> QueryListAndUpdateDv<T>(
         string sql,
         Action<SqlCommand> bindParams,
@@ -31,7 +27,6 @@ public sealed class DalToolkit
         return rows;
     }
 
-    // Devuelve 1 (o null) y luego recalcula DV con SELECT *
     public T QuerySingleOrDefaultAndUpdateDv<T>(
         string sql,
         Action<SqlCommand> bindParams,
@@ -42,7 +37,7 @@ public sealed class DalToolkit
         return list.Count > 0 ? list[0] : default(T);
     }
 
-    // Ejecuta escritura y refresca DV con SELECT *
+
     public int ExecuteNonQueryAndRefresh(
         string sql,
         Action<SqlCommand> bindParams,
@@ -54,7 +49,6 @@ public sealed class DalToolkit
         return rows;
     }
 
-    // Ejecuta escalar (INSERT SCOPE_IDENTITY, etc.) y refresca DV con SELECT *
     public object ExecuteScalarAndRefresh(
         string sql,
         Action<SqlCommand> bindParams,
@@ -66,7 +60,6 @@ public sealed class DalToolkit
         return obj;
     }
 
-    // Recalcula DVH por fila (UPDATE ... SET DVH=...) y DVV (upsert en DVV + su DVH) leyendo SELECT *
     public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
     {
         var conn = new SqlConnection(connectionString);
@@ -85,8 +78,6 @@ public sealed class DalToolkit
                 UpsertDvvWithDvh(tableName, string.Empty);
                 return;
             }
-
-            // columnas (excluye DVH), identificar idColumn
             var cols = new List<Tuple<string, int>>();
             int idOrdinal = -1;
 
@@ -143,7 +134,6 @@ public sealed class DalToolkit
 
             conn.Close();
 
-            // DVV de la tabla (y su DVH en la tabla DVV)
             string dvv = ComputeDvv(dvhs);
             UpsertDvvWithDvh(tableName, dvv);
         }
@@ -153,8 +143,6 @@ public sealed class DalToolkit
             throw;
         }
     }
-
-    // ---------------- internas ----------------
 
     private List<T> ExecuteList<T>(string sql, Action<SqlCommand> bind) where T : new()
     {
@@ -258,7 +246,7 @@ VALUES (@tabla, @dvv);", conn);
             ins.ExecuteNonQuery();
         }
 
-        // actualizar DVH de la fila DVV (tabla-normalizada + valorDVV)
+        // actualizar DVH de la fila DVV
         var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
         var updDvh = new SqlCommand(@"
 UPDATE " + dvvTable + @"

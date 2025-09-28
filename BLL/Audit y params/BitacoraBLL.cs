@@ -4,14 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BE.Audit
+namespace BLL.Audit
 {
-    public enum Criticidad
+    class BitacoraBLL
     {
-      C1,
-      C2,
-      C3,
-      C4,
-      C5
     }
 }

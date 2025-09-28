@@ -14,23 +14,18 @@ namespace UI
             this.btnVerDetalles = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
             this.btnBorrar = new System.Windows.Forms.Button();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCotizaciones)).BeginInit();
             this.SuspendLayout();
             // 
             // dgvCotizaciones
             // 
             this.dgvCotizaciones.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvCotizaciones.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2});
             this.dgvCotizaciones.Location = new System.Drawing.Point(20, 20);
             this.dgvCotizaciones.MultiSelect = false;
             this.dgvCotizaciones.Name = "dgvCotizaciones";
             this.dgvCotizaciones.ReadOnly = true;
             this.dgvCotizaciones.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvCotizaciones.Size = new System.Drawing.Size(324, 200);
+            this.dgvCotizaciones.Size = new System.Drawing.Size(544, 200);
             this.dgvCotizaciones.TabIndex = 0;
             // 
             // btnExportar
@@ -53,7 +48,7 @@ namespace UI
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(269, 240);
+            this.btnModificar.Location = new System.Drawing.Point(489, 240);
             this.btnModificar.Name = "btnModificar";
             this.btnModificar.Size = new System.Drawing.Size(75, 23);
             this.btnModificar.TabIndex = 3;
@@ -62,28 +57,16 @@ namespace UI
             // 
             // btnBorrar
             // 
-            this.btnBorrar.Location = new System.Drawing.Point(269, 287);
+            this.btnBorrar.Location = new System.Drawing.Point(489, 287);
             this.btnBorrar.Name = "btnBorrar";
             this.btnBorrar.Size = new System.Drawing.Size(75, 23);
             this.btnBorrar.TabIndex = 4;
             this.btnBorrar.Text = "Borrar";
             this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Fecha de creación";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
             // ConsultarCotizacionesForm
             // 
-            this.ClientSize = new System.Drawing.Size(364, 351);
+            this.ClientSize = new System.Drawing.Size(592, 351);
             this.Controls.Add(this.dgvCotizaciones);
             this.Controls.Add(this.btnExportar);
             this.Controls.Add(this.btnVerDetalles);
@@ -96,8 +79,5 @@ namespace UI
             this.ResumeLayout(false);
 
         }
-
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
     }
 }

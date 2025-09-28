@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="DalToolKit.cs" />
     <Compile Include="DbMapper.cs" />
+    <Compile Include="Genericos\CotizacionDAL.cs" />
     <Compile Include="Genericos\IdiomaDAL.cs" />
     <Compile Include="Genericos\MaterialDAL.cs" />
     <Compile Include="Genericos\MonedaDAL.cs" />

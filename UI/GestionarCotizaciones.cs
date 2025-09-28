@@ -56,10 +56,13 @@ namespace UI
         {
             if (dgvCotizaciones.CurrentRow != null)
             {
-                string id = dgvCotizaciones.CurrentRow.Cells[0].Value.ToString();
+                var ctz = dgvCotizaciones.CurrentRow.DataBoundItem as BE.Cotizacion;
+                if (ctz == null) return;
+
+                int id = ctz.IdCotizacion;
                 using (var form = new DetalleCotizacionForm(id))
                 {
-                    form.ShowDialog();
+                    form.ShowDialog(this);
                 }
             }
         }

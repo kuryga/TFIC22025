@@ -20,14 +20,9 @@ namespace UI
             this.dgvMateriales = new System.Windows.Forms.DataGridView();
             this.dgvMaquinaria = new System.Windows.Forms.DataGridView();
             this.dgvServicios = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMateriales)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMaquinaria)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvServicios)).BeginInit();
@@ -46,12 +41,12 @@ namespace UI
             this.txtId.Location = new System.Drawing.Point(73, 12);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(100, 23);
+            this.txtId.Size = new System.Drawing.Size(100, 20);
             this.txtId.TabIndex = 1;
             // 
             // lblTipo
             // 
-            this.lblTipo.Location = new System.Drawing.Point(209, 12);
+            this.lblTipo.Location = new System.Drawing.Point(311, 12);
             this.lblTipo.Name = "lblTipo";
             this.lblTipo.Size = new System.Drawing.Size(54, 23);
             this.lblTipo.TabIndex = 2;
@@ -64,16 +59,16 @@ namespace UI
             "Vivienda",
             "Comercial",
             "Oficina"});
-            this.cmbTipo.Location = new System.Drawing.Point(269, 12);
+            this.cmbTipo.Location = new System.Drawing.Point(371, 12);
             this.cmbTipo.Name = "cmbTipo";
-            this.cmbTipo.Size = new System.Drawing.Size(150, 23);
+            this.cmbTipo.Size = new System.Drawing.Size(150, 21);
             this.cmbTipo.TabIndex = 3;
             // 
             // lblMoneda
             // 
-            this.lblMoneda.Location = new System.Drawing.Point(425, 12);
+            this.lblMoneda.Location = new System.Drawing.Point(715, 12);
             this.lblMoneda.Name = "lblMoneda";
-            this.lblMoneda.Size = new System.Drawing.Size(69, 23);
+            this.lblMoneda.Size = new System.Drawing.Size(59, 23);
             this.lblMoneda.TabIndex = 4;
             this.lblMoneda.Text = "Moneda:";
             // 
@@ -84,100 +79,71 @@ namespace UI
             "USD",
             "EUR",
             "VES"});
-            this.cmbMoneda.Location = new System.Drawing.Point(500, 12);
+            this.cmbMoneda.Location = new System.Drawing.Point(780, 12);
             this.cmbMoneda.Name = "cmbMoneda";
-            this.cmbMoneda.Size = new System.Drawing.Size(100, 23);
+            this.cmbMoneda.Size = new System.Drawing.Size(128, 21);
             this.cmbMoneda.TabIndex = 5;
             // 
             // dgvMateriales
             // 
             this.dgvMateriales.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMateriales.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn4});
-            this.dgvMateriales.Location = new System.Drawing.Point(20, 50);
+            this.dgvMateriales.Location = new System.Drawing.Point(20, 67);
             this.dgvMateriales.Name = "dgvMateriales";
             this.dgvMateriales.ReadOnly = true;
-            this.dgvMateriales.Size = new System.Drawing.Size(580, 100);
+            this.dgvMateriales.Size = new System.Drawing.Size(888, 100);
             this.dgvMateriales.TabIndex = 6;
             // 
             // dgvMaquinaria
             // 
             this.dgvMaquinaria.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMaquinaria.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn5,
-            this.dataGridViewTextBoxColumn6});
-            this.dgvMaquinaria.Location = new System.Drawing.Point(330, 184);
+            this.dgvMaquinaria.Location = new System.Drawing.Point(495, 221);
             this.dgvMaquinaria.Name = "dgvMaquinaria";
             this.dgvMaquinaria.ReadOnly = true;
-            this.dgvMaquinaria.Size = new System.Drawing.Size(270, 141);
+            this.dgvMaquinaria.Size = new System.Drawing.Size(413, 141);
             this.dgvMaquinaria.TabIndex = 7;
             // 
             // dgvServicios
             // 
             this.dgvServicios.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvServicios.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn7,
-            this.dataGridViewTextBoxColumn8});
-            this.dgvServicios.Location = new System.Drawing.Point(20, 184);
+            this.dgvServicios.Location = new System.Drawing.Point(20, 221);
             this.dgvServicios.Name = "dgvServicios";
             this.dgvServicios.ReadOnly = true;
-            this.dgvServicios.Size = new System.Drawing.Size(288, 141);
+            this.dgvServicios.Size = new System.Drawing.Size(413, 141);
             this.dgvServicios.TabIndex = 8;
             // 
-            // dataGridViewTextBoxColumn1
+            // label1
             // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "Material";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 41);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(96, 23);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Materiales:";
             // 
-            // dataGridViewTextBoxColumn2
+            // label2
             // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Unidad";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(16, 195);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(186, 23);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Servicios adicionales:";
             // 
-            // dataGridViewTextBoxColumn3
+            // label3
             // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Precio";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Uso por m²";
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.HeaderText = "Maquinaria";
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.HeaderText = "Costo por hora";
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.HeaderText = "Servicio";
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn8
-            // 
-            this.dataGridViewTextBoxColumn8.HeaderText = "Precio";
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(491, 195);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(96, 23);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "Maquinaria:";
             // 
             // DetalleCotizacionForm
             // 
-            this.ClientSize = new System.Drawing.Size(619, 345);
+            this.ClientSize = new System.Drawing.Size(938, 400);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);
             this.Controls.Add(this.lblTipo);
@@ -199,13 +165,8 @@ namespace UI
 
         }
 
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
+        private Label label1;
+        private Label label2;
+        private Label label3;
     }
 }

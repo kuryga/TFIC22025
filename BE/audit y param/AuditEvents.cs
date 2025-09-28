@@ -1,85 +1,92 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 namespace BE.Audit
 {
     public static class AuditEvents
     {
-        // ==== C5 (informativas / lecturas) ====
-        public const string IngresoSesion = "Auth.Login";
-        public const string CierreSesion = "Auth.Logout";
-        public const string ConsultaCotizaciones = "Cotizacion.QueryList";
-        public const string ConsultaCotizacionDetalle = "Cotizacion.Get";
-        public const string ConsultaMateriales = "Material.QueryList";
-        public const string ConsultaMaterialPorId = "Material.Get";
-        public const string ConsultaMaquinarias = "Maquinaria.QueryList";
-        public const string ConsultaMaquinariaPorId = "Maquinaria.Get";
-        public const string ConsultaServicios = "Servicio.QueryList";
-        public const string ConsultaServicioPorId = "Servicio.Get";
-        public const string ConsultaMonedas = "Moneda.QueryList";
-        public const string ConsultaMonedaPorId = "Moneda.Get";
-        public const string ConsultaTiposEdificacion = "TipoEdificacion.QueryList";
-        public const string ConsultaTipoEdificacionPorId = "TipoEdificacion.Get";
-        public const string ConsultaUsuarios = "User.QueryList";
-        public const string ConsultaUsuarioPorCorreo = "Usuario.Consulta.Correo";
-        public const string ConsultaBitacora = "Bitacora.Query";
-        public const string ConsultaIdiomas = "Idiomas.Query";
-        public const string ExportacionCotizacion = "Cotizacion.Export";
-        public const string ActivacionUsuarioPorCorreo = "User.ActivationEmail";
+        // ==== C5 informativas ====
+        public const string IngresoSesion = "Autenticacion.IngresoSesion";
+        public const string CierreSesion = "Autenticacion.CierreSesion";
 
-        // ==== C4 ====
-        public const string CambioContrasena = "User.ChangePassword";
+        public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
+        public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
+        public const string ExportacionCotizacion = "Cotizacion.Exportacion";
+
+        public const string ConsultaMateriales = "Material.ConsultaDeListado";
+        public const string ConsultaMaterialPorId = "Material.ConsultaPorId";
+
+        public const string ConsultaMaquinarias = "Maquinaria.ConsultaDeListado";
+        public const string ConsultaMaquinariaPorId = "Maquinaria.ConsultaPorId";
+
+        public const string ConsultaServicios = "ServicioAdicional.ConsultaDeListado";
+        public const string ConsultaServicioPorId = "ServicioAdicional.ConsultaPorId";
+
+        public const string ConsultaMonedas = "Moneda.ConsultaDeListado";
+        public const string ConsultaMonedaPorId = "Moneda.ConsultaPorId";
+
+        public const string ConsultaTiposEdificacion = "TipoEdificacion.ConsultaDeListado";
+        public const string ConsultaTipoEdificacionPorId = "TipoEdificacion.ConsultaPorId";
+
+        public const string ConsultaUsuarios = "Usuario.ConsultaDeListado";
+        public const string ConsultaUsuarioPorCorreo = "Usuario.ConsultaPorCorreo";
+
+        public const string ConsultaBitacora = "Bitacora.Consulta";
+        public const string ConsultaIdiomas = "Idioma.ConsultaDeListado";
+
+        public const string ActivacionUsuarioPorCorreo = "Usuario.ActivacionPorCorreo";
+
+        // ==== C4 (altas / acciones relevantes) ====
+        public const string CambioContrasena = "Usuario.CambioContrasena";
         public const string CreacionUsuario = "Usuario.Creacion";
-        public const string CreacionCotizacion = "Cotizacion.Create";
-        public const string CreacionMaquinaria = "Maquinaria.Create";
-        public const string CreacionMaterial = "Material.Create";
-        public const string CreacionTipoEdificacion = "TipoEdificacion.Create";
-        public const string CreacionServicioAdicional = "ServicioAdicional.Create";
-        public const string AsociacionPatenteUsuario = "User.AttachPatent";
-        public const string AltaMoneda = "Moneda.Create";
-        public const string AgregarServiciosAdicionales = "Cotizacion.AddServicios";
-        public const string ForzarCierreSesion = "Auth.ForceLogout";
 
-        // TODO: revisar si hace falta esto de idiomas, creo que no porque no tengo porque crear idiomas
+        public const string CreacionCotizacion = "Cotizacion.Creacion";
+        public const string AgregarServiciosAdicionales = "Cotizacion.AgregarServiciosAdicionales";
+
+        public const string CreacionMaquinaria = "Maquinaria.Creacion";
+        public const string CreacionMaterial = "Material.Creacion";
+        public const string AltaMoneda = "Moneda.Creacion";
+        public const string CreacionTipoEdificacion = "TipoEdificacion.Creacion";
+        public const string CreacionServicioAdicional = "ServicioAdicional.Creacion";
+
+        public const string AsociacionPatenteUsuario = "Usuario.AsociarPatente";
+        public const string ForzarCierreSesion = "Autenticacion.ForzarCierreSesion";
+
+        // TODO: creo que tengo que eliminar esto, revisar anotaciones
         public const string CreacionIdioma = "Idioma.Creacion";
         public const string ModificacionIdioma = "Idioma.Modificacion";
-        //
 
+        // ==== C3 (modificaciones / cambios de negocio) ====
+        public const string CambioTiempoEstimadoCotizacion = "Cotizacion.CambioTiempoEstimado";
+        public const string ModificacionValorMoneda = "Moneda.ModificacionValor";
+        public const string ModificacionMaterial = "Material.Modificacion";
+        public const string ModificacionMaquinaria = "Maquinaria.Modificacion";
+        public const string ModificacionCantidadMaterialCtz = "Cotizacion.ModificacionCantidadMaterial";
+        public const string ModificacionMaquinariaAsignadaCtz = "Cotizacion.ModificacionMaquinariaAsignada";
+        public const string ModificacionPersonalOTiempo = "Cotizacion.ModificacionPersonalOTiempo";
+        public const string GeneracionInformeCotizacion = "Cotizacion.GeneracionInforme";
+        public const string CreacionOModificacionFamilia = "Familia.CreacionOModificacion";
+        public const string ModificacionUsuario = "Usuario.Modificacion";
+        public const string RecuperacionContrasena = "Autenticacion.RecuperacionContrasena";
+        public const string EliminacionCotizacion = "Cotizacion.Eliminacion";
+        public const string ModificacionTipoEdificacion = "TipoEdificacion.Modificacion";
+        public const string ModificacionCotizacionHeader = "Cotizacion.ModificacionHeader";
+        public const string ModificacionServicioAdicional = "ServicioAdicional.Modificacion";
 
-        // ==== C3 ====
-        public const string CambioTiempoEstimadoCotizacion = "Cotizacion.ChangeTime";
-        public const string ModificacionValorMoneda = "Moneda.UpdateValor";
-        public const string ModificacionMaterial = "Material.Update";
-        public const string ModificacionMaquinaria = "Maquinaria.Update";
-        public const string ModificacionCantidadMaterialCtz = "Cotizacion.UpdateMaterialQty";
-        public const string ModificacionMaquinariaAsignadaCtz = "Cotizacion.UpdateMaquinaria";
-        public const string ModificacionPersonalOTiempo = "Cotizacion.UpdatePersonalTiempo";
-        public const string GeneracionInformeCotizacion = "Cotizacion.Report";
-        public const string CreacionOModificacionFamilia = "Familia.Upsert";
-        public const string ModificacionUsuario = "User.Update";
-        public const string RecuperacionContrasena = "Auth.RecoverPassword";
-        public const string EliminacionCotizacion = "Cotizacion.Delete";
-        public const string ModificacionTipoEdificacion = "TipoEdificacion.Update";
-        public const string ModificacionCotizacionHeader = "Cotizacion.UpdateHeader";
-        public const string ModificacionServicioAdicional = "ServicioAdicional.Update";
-
-        // ==== C2 ====
-        public const string BajaManualUsuario = "User.Disable";
-        public const string BloquearUsuario = "User.Block";
-        public const string DesbloquearUsuario = "User.Unblock";
-        public const string EliminacionPatenteUsuario = "User.RemovePatent";
-        public const string EliminacionMaterial = "Material.Delete";
-        public const string IntentosFallidosAcceso = "Auth.FailedAttempts";
-        public const string RespaldoBase = "DB.Backup";
+        // ==== C2 (acciones sensibles / seguridad operativa) ====
+        public const string BajaManualUsuario = "Usuario.BajaManual";
+        public const string BloquearUsuario = "Usuario.Bloqueo";
+        public const string DesbloquearUsuario = "Usuario.Desbloqueo";
+        public const string EliminacionPatenteUsuario = "Usuario.EliminacionPatente";
+        public const string EliminacionMaterial = "Material.Eliminacion";
+        public const string IntentosFallidosAcceso = "Autenticacion.IntentosFallidos";
+        public const string RespaldoBase = "BaseDatos.Respaldo";
 
         // ==== C1 (muy críticas) ====
-        public const string FalloConexionBD = "DB.ConnectionFailure";
-        public const string FalloVerificacionIntegridad = "DV.VerifyFailure";
-        public const string ReparacionIntegridadDatos = "DV.Repair";
+        public const string FalloConexionBD = "BaseDatos.FalloConexion";
+        public const string FalloVerificacionIntegridad = "DV.FalloVerificacion";
+        public const string ReparacionIntegridadDatos = "DV.ReparacionIntegridad";
 
-        // === Mapeo interno ===
+        // === Mapeo interno a criticidad ===
         public static Criticidad GetCriticidad(string accion)
         {
             if (string.IsNullOrEmpty(accion)) return Criticidad.C5;
@@ -102,7 +109,9 @@ namespace BE.Audit
                 case ConsultaTiposEdificacion:
                 case ConsultaTipoEdificacionPorId:
                 case ConsultaUsuarios:
+                case ConsultaUsuarioPorCorreo:
                 case ConsultaBitacora:
+                case ConsultaIdiomas:
                 case ExportacionCotizacion:
                 case ActivacionUsuarioPorCorreo:
                     return Criticidad.C5;
@@ -111,20 +120,19 @@ namespace BE.Audit
             // C4
             switch (accion)
             {
-                // TODO: revisar si hace falta esto de idiomas, creo que no porque no tengo porque crear idiomas
-                case CreacionIdioma:
-                case ModificacionIdioma:
-                //
                 case CambioContrasena:
+                case CreacionUsuario:
                 case CreacionCotizacion:
-                case AsociacionPatenteUsuario:
-                case AltaMoneda:
                 case AgregarServiciosAdicionales:
-                case ForzarCierreSesion:
                 case CreacionMaquinaria:
                 case CreacionMaterial:
+                case AltaMoneda:
                 case CreacionTipoEdificacion:
                 case CreacionServicioAdicional:
+                case AsociacionPatenteUsuario:
+                case ForzarCierreSesion:
+                case CreacionIdioma:
+                case ModificacionIdioma:
                     return Criticidad.C4;
             }
 
@@ -143,8 +151,8 @@ namespace BE.Audit
                 case ModificacionUsuario:
                 case RecuperacionContrasena:
                 case EliminacionCotizacion:
-                case ModificacionCotizacionHeader:
                 case ModificacionTipoEdificacion:
+                case ModificacionCotizacionHeader:
                 case ModificacionServicioAdicional:
                     return Criticidad.C3;
             }
@@ -171,7 +179,7 @@ namespace BE.Audit
                     return Criticidad.C1;
             }
 
-            // por defecto
+            // Por defecto
             return Criticidad.C5;
         }
     }

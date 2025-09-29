@@ -41,10 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audit y param\AuditEvents.cs" />
-    <Compile Include="Audit y param\Bitacora.cs" />
-    <Compile Include="Audit y param\Criticidad.cs" />
-    <Compile Include="Audit y param\Parametrizacion.cs" />
+    <Compile Include="Audit\AuditEvents.cs" />
+    <Compile Include="Audit\Bitacora.cs" />
+    <Compile Include="Audit\Criticidad.cs" />
+    <Compile Include="Genericos\PagedResult.cs" />
+    <Compile Include="Audit\Parametrizacion.cs" />
     <Compile Include="Genericos\Cotizacion.cs" />
     <Compile Include="Genericos\Idioma.cs" />
     <Compile Include="Genericos\Maquinaria.cs" />

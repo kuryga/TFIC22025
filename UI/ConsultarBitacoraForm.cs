@@ -1,61 +1,102 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
+using BLL.Audit;
+using BitacoraDTO = BE.Audit.Bitacora;
 
 namespace UI
 {
     public partial class ConsultarBitacoraForm : Form
     {
+        // paginado
+        private int _page = 1;
+        private const int PageSize = 30;
+        //
+
         public ConsultarBitacoraForm()
         {
             InitializeComponent();
 
-            // Configurar valores por defecto y restricciones
             dtpHasta.MaxDate = DateTime.Today;
             dtpHasta.Value = DateTime.Today;
 
             dtpDesde.MaxDate = DateTime.Today;
             dtpDesde.Value = DateTime.Today.AddDays(-1);
+
+            btnPrev.Click += btnPrev_Click;
+            btnNext.Click += btnNext_Click;
+
+            btnPrev.Enabled = false;
+            btnNext.Enabled = false;
+
+            lblPageInfo.Text = $"";
         }
 
         private void btnConsultar_Click(object sender, EventArgs e)
         {
-            DateTime desde = dtpDesde.Value.Date;
-            DateTime hasta = dtpHasta.Value.Date;
+            var desde = dtpDesde.Value.Date;
+            var hasta = dtpHasta.Value.Date;
 
             if (desde > hasta)
             {
-                MessageBox.Show("Rango de fechas inválido. La fecha de inicio debe ser anterior a la fecha de fin.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    "Rango de fechas inválido. La fecha de inicio debe ser anterior a la fecha de fin.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
                 return;
             }
 
-            // Simular datos mockeados para la bitácora
-            var datos = new List<BitacoraDTO>
-            {
-                new BitacoraDTO { idRegistro = 1, fecha = DateTime.Now.AddDays(-1), criticidad = "C5", accion = "Login", mensaje = "Ingreso de sesión", idEjecutor = "1", idAfectado = ""},
-                new BitacoraDTO { idRegistro = 2, fecha = DateTime.Now, criticidad = "C5", accion = "Consultar cotizaciones", mensaje = "Consulta de cotizaciones", idEjecutor = "1", idAfectado = ""},
-                new BitacoraDTO { idRegistro = 2, fecha = DateTime.Now, criticidad = "C2", accion = "Baja usuario", mensaje = "Baja manual de usuario", idEjecutor = "2", idAfectado = "1"}
-            };
-            // Filtrar por fecha
-            var filtrado = datos.FindAll(x => x.fecha.Date >= desde && x.fecha.Date <= hasta);
+            _page = 1;
+            LoadPage();
+        }
 
-            dgvBitacora.DataSource = filtrado;
-
-            if (filtrado.Count == 0)
+        private void btnPrev_Click(object sender, EventArgs e)
+        {
+            if (_page > 1)
             {
-                MessageBox.Show("No se encontraron eventos en el período seleccionado.", "Sin resultados", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _page--;
+                LoadPage();
             }
         }
 
-        private class BitacoraDTO
+        private void btnNext_Click(object sender, EventArgs e)
         {
-            public int idRegistro { get; set; }
-            public DateTime fecha { get; set; }
-            public string criticidad { get; set; }
-            public string accion { get; set; }
-            public string mensaje { get; set; }
-            public string idEjecutor { get; set; }
-            public string idAfectado { get; set; }
+            _page++;
+            LoadPage();
+        }
+
+        private void LoadPage()
+        {
+            DateTime? desde = dtpDesde.Value.Date;
+            DateTime? hasta = dtpHasta.Value.Date;
+
+            var result = BitacoraBLL.GetInstance().GetBitacora(desde, hasta, _page, PageSize);
+
+            if (_page > 1 && (result.Items == null || result.Items.Count == 0))
+            {
+                _page--;
+                result = BitacoraBLL.GetInstance().GetBitacora(desde, hasta, _page, PageSize);
+            }
+
+            dgvBitacora.DataSource = null;
+            dgvBitacora.AutoGenerateColumns = true;
+            dgvBitacora.DataSource = result.Items;
+
+            lblPageInfo.Text = $"Página {_page}";
+
+            btnPrev.Enabled = (_page > 1);
+            btnNext.Enabled = (result.Items != null && result.Items.Count == PageSize);
+
+            if (_page == 1 && (result.Items == null || result.Items.Count == 0))
+            {
+                MessageBox.Show(
+                    "No se encontraron eventos en el período seleccionado.",
+                    "Sin resultados",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
         }
     }
 }

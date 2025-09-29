@@ -27,6 +27,9 @@ namespace UI
             this.dtpHasta = new System.Windows.Forms.DateTimePicker();
             this.btnConsultar = new System.Windows.Forms.Button();
             this.dgvBitacora = new System.Windows.Forms.DataGridView();
+            this.btnPrev = new System.Windows.Forms.Button();
+            this.btnNext = new System.Windows.Forms.Button();
+            this.lblPageInfo = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBitacora)).BeginInit();
             this.SuspendLayout();
             // 
@@ -35,7 +38,7 @@ namespace UI
             this.lblDesde.AutoSize = true;
             this.lblDesde.Location = new System.Drawing.Point(20, 20);
             this.lblDesde.Name = "lblDesde";
-            this.lblDesde.Size = new System.Drawing.Size(75, 15);
+            this.lblDesde.Size = new System.Drawing.Size(72, 13);
             this.lblDesde.TabIndex = 0;
             this.lblDesde.Text = "Fecha desde:";
             // 
@@ -44,7 +47,7 @@ namespace UI
             this.lblHasta.AutoSize = true;
             this.lblHasta.Location = new System.Drawing.Point(320, 20);
             this.lblHasta.Name = "lblHasta";
-            this.lblHasta.Size = new System.Drawing.Size(72, 15);
+            this.lblHasta.Size = new System.Drawing.Size(69, 13);
             this.lblHasta.TabIndex = 2;
             this.lblHasta.Text = "Fecha hasta:";
             // 
@@ -53,7 +56,7 @@ namespace UI
             this.dtpDesde.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpDesde.Location = new System.Drawing.Point(110, 18);
             this.dtpDesde.Name = "dtpDesde";
-            this.dtpDesde.Size = new System.Drawing.Size(200, 23);
+            this.dtpDesde.Size = new System.Drawing.Size(200, 20);
             this.dtpDesde.TabIndex = 1;
             // 
             // dtpHasta
@@ -61,12 +64,12 @@ namespace UI
             this.dtpHasta.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpHasta.Location = new System.Drawing.Point(410, 18);
             this.dtpHasta.Name = "dtpHasta";
-            this.dtpHasta.Size = new System.Drawing.Size(200, 23);
+            this.dtpHasta.Size = new System.Drawing.Size(200, 20);
             this.dtpHasta.TabIndex = 3;
             // 
             // btnConsultar
             // 
-            this.btnConsultar.Location = new System.Drawing.Point(685, 18);
+            this.btnConsultar.Location = new System.Drawing.Point(888, 18);
             this.btnConsultar.Name = "btnConsultar";
             this.btnConsultar.Size = new System.Drawing.Size(75, 23);
             this.btnConsultar.TabIndex = 4;
@@ -77,19 +80,50 @@ namespace UI
             // 
             this.dgvBitacora.AllowUserToAddRows = false;
             this.dgvBitacora.AllowUserToDeleteRows = false;
-            this.dgvBitacora.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvBitacora.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvBitacora.Location = new System.Drawing.Point(20, 60);
+            this.dgvBitacora.Location = new System.Drawing.Point(28, 60);
             this.dgvBitacora.Name = "dgvBitacora";
             this.dgvBitacora.ReadOnly = true;
-            this.dgvBitacora.Size = new System.Drawing.Size(740, 380);
+            this.dgvBitacora.Size = new System.Drawing.Size(935, 399);
             this.dgvBitacora.TabIndex = 5;
+            // 
+            // btnPrev
+            // 
+            this.btnPrev.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPrev.Location = new System.Drawing.Point(368, 466);
+            this.btnPrev.Name = "btnPrev";
+            this.btnPrev.Size = new System.Drawing.Size(75, 23);
+            this.btnPrev.TabIndex = 6;
+            this.btnPrev.Text = "<";
+            this.btnPrev.Click += new System.EventHandler(this.btnPrev_Click);
+            // 
+            // btnNext
+            // 
+            this.btnNext.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnNext.Location = new System.Drawing.Point(535, 466);
+            this.btnNext.Name = "btnNext";
+            this.btnNext.Size = new System.Drawing.Size(75, 23);
+            this.btnNext.TabIndex = 7;
+            this.btnNext.Text = ">";
+            this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
+            // 
+            // lblPageInfo
+            // 
+            this.lblPageInfo.AutoSize = true;
+            this.lblPageInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPageInfo.Location = new System.Drawing.Point(451, 467);
+            this.lblPageInfo.Name = "lblPageInfo";
+            this.lblPageInfo.Size = new System.Drawing.Size(75, 20);
+            this.lblPageInfo.TabIndex = 8;
+            this.lblPageInfo.Text = "Pagina: 1";
+            this.lblPageInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ConsultarBitacoraForm
             // 
-            this.ClientSize = new System.Drawing.Size(800, 470);
+            this.ClientSize = new System.Drawing.Size(965, 493);
+            this.Controls.Add(this.lblPageInfo);
+            this.Controls.Add(this.btnNext);
+            this.Controls.Add(this.btnPrev);
             this.Controls.Add(this.lblDesde);
             this.Controls.Add(this.dtpDesde);
             this.Controls.Add(this.lblHasta);
@@ -103,5 +137,9 @@ namespace UI
             this.PerformLayout();
 
         }
+
+        private Button btnPrev;
+        private Button btnNext;
+        private Label lblPageInfo;
     }
 }

@@ -81,12 +81,7 @@ namespace UI
 
             dgvBitacora.DataSource = null;
             dgvBitacora.AutoGenerateColumns = true;
-            dgvBitacora.DataSource = result.Items;
 
-            lblPageInfo.Text = $"Página {_page}";
-
-            btnPrev.Enabled = (_page > 1);
-            btnNext.Enabled = (result.Items != null && result.Items.Count == PageSize);
 
             if (_page == 1 && (result.Items == null || result.Items.Count == 0))
             {
@@ -96,7 +91,17 @@ namespace UI
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
+                return;
             }
+            
+            dgvBitacora.DataSource = result.Items;
+
+            lblPageInfo.Text = $"Página {_page}";
+
+            btnPrev.Enabled = (_page > 1);
+            btnNext.Enabled = (result.Items != null && result.Items.Count == PageSize);
+
+
         }
     }
 }

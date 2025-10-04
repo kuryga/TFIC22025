@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
-
 namespace BLL.Seguridad
 {
     public class UsuarioBLL : BE.ICrud<BE.Usuario>
@@ -30,14 +29,6 @@ namespace BLL.Seguridad
               try { return UsuarioDAL.GetInstance().GetAll(); }
               catch (Exception) { throw; }
         }
-
-
-        public BE.Usuario GetByCorreoElectronico(string username)
-        {
-             try { return UsuarioDAL.GetInstance().GetByCorreoElectronico(username); }
-             catch (Exception) { throw; }
-        }
-
 
         public bool Update(BE.Usuario objUpd)
         {

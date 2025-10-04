@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient; // tipos de parámetro en binds
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 
@@ -102,20 +101,103 @@ WHERE " + userIdCol + @" = @idUsuario;";
             );
         }
 
-        public BE.Usuario GetByCorreoElectronico(string correoElectronico)
+        public class UsuarioLoginRow
         {
-            var sql = @"
-SELECT TOP 1 " + userPublicCols + @"
-FROM " + userTable + @"
+            public int idUsuario { get; set; }
+            public string correoElectronico { get; set; }
+            public string nombreUsuario { get; set; }
+            public string apellidoUsuario { get; set; }
+            public string contrasenaHash { get; set; }
+            public int? contadorIntentosFallidos { get; set; }
+            public bool Bloqueado { get; set; }
+        }
+
+        public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
+        {
+            string sql = @"
+SELECT TOP 1
+    idUsuario,
+    correoElectronico,
+    nombreUsuario,
+    apellidoUsuario,
+    contrasenaHash,
+    contadorIntentosFallidos,
+    Bloqueado
+FROM dbo.Usuario
 WHERE correoElectronico = @mail;";
 
-            return db.QuerySingleOrDefaultAndLog<BE.Usuario>(
+            return db.QuerySingleOrDefaultAndLog<UsuarioLoginRow>(
                 sql,
                 c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value =
                         (correoElectronico ?? string.Empty).Trim(),
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
-                "Búsqueda por correo: " + (correoElectronico ?? string.Empty)
+                "Búsqueda por correo (login): " + (correoElectronico ?? string.Empty)
+            );
+        }
+
+        public void IncrementarIntentosFallidos(int idUsuario, int nuevosIntentos)
+        {
+            string sql = @"
+UPDATE " + userTable + @"
+   SET contadorIntentosFallidos = @intentos
+ WHERE " + userIdCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@intentos", SqlDbType.Int).Value = nuevosIntentos;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
+                },
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.IntentosFallidosAcceso,
+                "Intento fallido. IdUsuario=" + idUsuario + " | Intentos=" + nuevosIntentos
+            );
+        }
+
+        public void BloquearUsuario(int idUsuario, int intentos)
+        {
+            string sql = @"
+UPDATE " + userTable + @"
+   SET Bloqueado = 1,
+       contadorIntentosFallidos = @intentos
+ WHERE " + userIdCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@intentos", SqlDbType.Int).Value = intentos;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
+                },
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.BloquearUsuario,
+                "Usuario bloqueado por superar intentos. IdUsuario=" + idUsuario
+            );
+        }
+
+        public void ResetearIntentosFallidos(int idUsuario)
+        {
+            string sql = @"
+UPDATE " + userTable + @"
+   SET contadorIntentosFallidos = 0
+ WHERE " + userIdCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd => cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.IngresoSesion,
+                "Login OK. Reset de intentos. IdUsuario=" + idUsuario
+            );
+        }
+
+        public bool VerificarHash(string plainPassword, string storedHash)
+        {
+            return Utilities.SecurityUtilities.VerificarIrreversible(
+                plainPassword ?? string.Empty,
+                storedHash ?? string.Empty
             );
         }
     }

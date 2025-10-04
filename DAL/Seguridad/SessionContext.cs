@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL.Seguridad
 {
@@ -13,15 +9,14 @@ namespace DAL.Seguridad
 
         public int? UsuarioId { get; set; }
         public string UsuarioEmail { get; set; }
+        public string NombreCompleto { get; set; }
 
         private SessionContext()
         {
-            // TODO: sacar este Mock cuando haga el login xd 
+            // Mock
             UsuarioId = 1;
             UsuarioEmail = "Usuario deslogeado";
-
-           // SessionContext.Current.UsuarioId = usuario.IdUsuario;
-           // SessionContext.Current.UsuarioEmail = usuario.CorreoElectronico;
+            NombreCompleto = "Usuario deslogeado";
         }
     }
 }

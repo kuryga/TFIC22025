@@ -46,14 +46,9 @@
     <Compile Include="Crypto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegReader.cs" />
+    <Compile Include="SecurityUtilities.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="StringExtension.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BE\BE.csproj">
-      <Project>{ea0a25e5-85ae-4cc0-812b-1ec83d7509ba}</Project>
-      <Name>BE</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

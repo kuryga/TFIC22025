@@ -86,8 +86,8 @@ ORDER BY rn;";
                         if (!rdr.IsDBNull(oCrit))
                         {
                             var s = rdr.GetString(oCrit);
-                            BE.Audit.Criticidad tmp;
-                            if (Enum.TryParse(s, true, out tmp)) crit = tmp;
+                            if (Enum.TryParse(s, true, out BE.Audit.Criticidad tmp))
+                                crit = tmp;
                         }
 
                         items.Add(new BE.Audit.Bitacora
@@ -102,7 +102,6 @@ ORDER BY rn;";
                         });
                     }
                 }
-                conn.Close();
             }
 
             db.RecalculateTableDvsFromSelectAll(TblBitacora, PkBitacora);
@@ -128,29 +127,32 @@ INSERT INTO " + TblBitacora + @"
 VALUES ( @fecha, @criticidad, @accion, @mensaje, @idEjecutor, @usuarioEjecutor, @DVH );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
-            object newId = db.ExecuteScalarAndLog(
-                sql,
-                cmd =>
-                {
-                    cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.Now;
-                    cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
-                    cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
-                    cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
+            object newId;
 
-                    if (uid.HasValue)
-                        cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = uid.Value;
-                    else
-                        cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = DBNull.Value;
+            using (var conn = new SqlConnection(DalToolkit.connectionString))
+            using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+            {
+                cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.Now;
+                cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
+                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
 
-                    cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
-                        (object)uname ?? DBNull.Value;
+                if (uid.HasValue)
+                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = uid.Value;
+                else
+                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = DBNull.Value;
 
-                    // DVH se recalcula luego por Toolkit
-                    cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
-                },
-                TblBitacora, PkBitacora,
-                BE.Audit.AuditEvents.ConsultaBitacora, "Inserción en bitácora"
-            );
+                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
+                    (object)uname ?? DBNull.Value;
+
+                cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
+
+                conn.Open();
+                newId = cmd.ExecuteScalar();
+                conn.Close();
+            }
+
+            db.RecalculateTableDvsFromSelectAll(TblBitacora, PkBitacora);
 
             return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
         }

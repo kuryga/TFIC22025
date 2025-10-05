@@ -43,51 +43,52 @@ namespace UI
             // lblUsuario
             // 
             this.lblUsuario.AutoSize = true;
-            this.lblUsuario.Location = new System.Drawing.Point(103, 40);
+            this.lblUsuario.Location = new System.Drawing.Point(88, 35);
             this.lblUsuario.Name = "lblUsuario";
-            this.lblUsuario.Size = new System.Drawing.Size(50, 15);
+            this.lblUsuario.Size = new System.Drawing.Size(46, 13);
             this.lblUsuario.TabIndex = 0;
             this.lblUsuario.Text = "Usuario:";
             // 
             // lblContrasena
             // 
             this.lblContrasena.AutoSize = true;
-            this.lblContrasena.Location = new System.Drawing.Point(94, 84);
+            this.lblContrasena.Location = new System.Drawing.Point(81, 73);
             this.lblContrasena.Name = "lblContrasena";
-            this.lblContrasena.Size = new System.Drawing.Size(70, 15);
+            this.lblContrasena.Size = new System.Drawing.Size(64, 13);
             this.lblContrasena.TabIndex = 2;
             this.lblContrasena.Text = "Contraseña:";
             // 
             // txtUsuario
             // 
-            this.txtUsuario.Location = new System.Drawing.Point(39, 58);
+            this.txtUsuario.Location = new System.Drawing.Point(33, 50);
             this.txtUsuario.Name = "txtUsuario";
-            this.txtUsuario.Size = new System.Drawing.Size(180, 23);
+            this.txtUsuario.Size = new System.Drawing.Size(155, 20);
             this.txtUsuario.TabIndex = 1;
             // 
             // txtContrasena
             // 
-            this.txtContrasena.Location = new System.Drawing.Point(39, 102);
+            this.txtContrasena.Location = new System.Drawing.Point(33, 88);
             this.txtContrasena.Name = "txtContrasena";
-            this.txtContrasena.Size = new System.Drawing.Size(180, 23);
+            this.txtContrasena.Size = new System.Drawing.Size(155, 20);
             this.txtContrasena.TabIndex = 3;
             this.txtContrasena.UseSystemPasswordChar = true;
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(79, 148);
+            this.btnLogin.Location = new System.Drawing.Point(68, 128);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(100, 30);
+            this.btnLogin.Size = new System.Drawing.Size(86, 26);
             this.btnLogin.TabIndex = 6;
             this.btnLogin.Text = "Iniciar sesión";
             this.btnLogin.UseVisualStyleBackColor = true;
+            this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
             // 
             // lblIdiomaInferior
             // 
             this.lblIdiomaInferior.AutoSize = true;
-            this.lblIdiomaInferior.Location = new System.Drawing.Point(106, 238);
+            this.lblIdiomaInferior.Location = new System.Drawing.Point(91, 206);
             this.lblIdiomaInferior.Name = "lblIdiomaInferior";
-            this.lblIdiomaInferior.Size = new System.Drawing.Size(47, 15);
+            this.lblIdiomaInferior.Size = new System.Drawing.Size(41, 13);
             this.lblIdiomaInferior.TabIndex = 7;
             this.lblIdiomaInferior.Text = "Idioma:";
             // 
@@ -98,17 +99,17 @@ namespace UI
             "Español",
             "Inglés",
             "Portugués"});
-            this.cmbIdiomaInferior.Location = new System.Drawing.Point(79, 256);
+            this.cmbIdiomaInferior.Location = new System.Drawing.Point(68, 222);
             this.cmbIdiomaInferior.Name = "cmbIdiomaInferior";
-            this.cmbIdiomaInferior.Size = new System.Drawing.Size(100, 23);
+            this.cmbIdiomaInferior.Size = new System.Drawing.Size(86, 21);
             this.cmbIdiomaInferior.TabIndex = 8;
             // 
             // btnRecuperarContrasena
             // 
             this.btnRecuperarContrasena.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRecuperarContrasena.Location = new System.Drawing.Point(39, 184);
+            this.btnRecuperarContrasena.Location = new System.Drawing.Point(33, 159);
             this.btnRecuperarContrasena.Name = "btnRecuperarContrasena";
-            this.btnRecuperarContrasena.Size = new System.Drawing.Size(180, 23);
+            this.btnRecuperarContrasena.Size = new System.Drawing.Size(154, 20);
             this.btnRecuperarContrasena.TabIndex = 9;
             this.btnRecuperarContrasena.Text = "¿Olvidaste tu contraseña?";
             this.btnRecuperarContrasena.UseVisualStyleBackColor = true;
@@ -116,17 +117,17 @@ namespace UI
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(25, 10);
+            this.label1.Location = new System.Drawing.Point(21, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(207, 15);
+            this.label1.Size = new System.Drawing.Size(185, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Nombre parametrizacion Empresa S.A";
             // 
             // LoginForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(258, 302);
+            this.ClientSize = new System.Drawing.Size(221, 262);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnRecuperarContrasena);
             this.Controls.Add(this.lblUsuario);

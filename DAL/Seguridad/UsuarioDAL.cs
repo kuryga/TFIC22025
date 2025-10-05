@@ -2,6 +2,7 @@
 using System.Data;
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
+using segUtils = Utilities.SecurityUtilities;
 
 namespace DAL.Seguridad
 {
@@ -195,7 +196,7 @@ UPDATE " + userTable + @"
 
         public bool VerificarHash(string plainPassword, string storedHash)
         {
-            return Utilities.SecurityUtilities.VerificarIrreversible(
+            return segUtils.VerificarIrreversible(
                 plainPassword ?? string.Empty,
                 storedHash ?? string.Empty
             );

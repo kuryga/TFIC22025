@@ -50,7 +50,7 @@ WITH CTE AS (
       AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)
 )
 SELECT
-    " + PkBitacora + @"       AS idRegistro,
+    " + PkBitacora + @" AS idRegistro,
     fecha,
     criticidad,
     accion,
@@ -118,7 +118,7 @@ ORDER BY rn;";
                         $"desde={(desde.HasValue ? desde.Value.ToString("yyyy-MM-dd") : "-")}, " +
                         $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}).";
 
-                    int newId = Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
+                    Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
 
                     db.RecalculateTableDvsFromSelectAllSilent(TblBitacora, PkBitacora);
                 }
@@ -167,13 +167,14 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
                     (object)uname ?? DBNull.Value;
 
-                // DVH se completa con el recalculo silencioso que haga el caller
                 cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
 
                 conn.Open();
                 newId = cmd.ExecuteScalar();
                 conn.Close();
             }
+
+            db.RecalculateTableDvsFromSelectAllSilent(TblBitacora, PkBitacora);
 
             return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
         }

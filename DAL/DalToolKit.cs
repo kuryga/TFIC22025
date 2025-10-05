@@ -4,11 +4,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Text;
-using DAL.Audit;
 
 public sealed class DalToolkit
 {
-    // Connection string global
     public const string connectionString =
         @"Server=.;Database=UrbanSoft;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True;";
 
@@ -25,7 +23,7 @@ public sealed class DalToolkit
     {
         int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
         RecalculateTableDvsFromSelectAll(tableName, pkName);
-        BitacoraDAL.GetInstance().Log(accion, mensaje);
+        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
 
@@ -37,7 +35,7 @@ public sealed class DalToolkit
     {
         object obj = ExecuteScalar(sql, bindParams, "SCALAR", tableName);
         RecalculateTableDvsFromSelectAll(tableName, pkName);
-        BitacoraDAL.GetInstance().Log(accion, mensaje);
+        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
         return obj;
     }
 
@@ -50,7 +48,7 @@ public sealed class DalToolkit
     {
         var rows = ExecuteList<T>(sql, bindParams, "SELECT", tableName);
         RecalculateTableDvsFromSelectAll(tableName, idColumn);
-        BitacoraDAL.GetInstance().Log(accion, mensaje);
+        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
 
@@ -67,22 +65,21 @@ public sealed class DalToolkit
 
     private List<T> ExecuteList<T>(string sql, Action<SqlCommand> bind, string op, string table) where T : new()
     {
-        var result = new List<T>();
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text };
-        if (bind != null) bind(cmd);
-
         try
         {
-            conn.Open();
-            var reader = cmd.ExecuteReader();
-            result = DbMapper.MapToList<T>(reader);
-            conn.Close();
-            return result;
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+            {
+                bind?.Invoke(cmd);
+                conn.Open();
+                using (var reader = cmd.ExecuteReader())
+                {
+                    return DbMapper.MapToList<T>(reader);
+                }
+            }
         }
         catch (Exception ex)
         {
-            if (conn.State == ConnectionState.Open) conn.Close();
             LogFailure(op, table, ex);
             throw;
         }
@@ -90,20 +87,18 @@ public sealed class DalToolkit
 
     private int ExecuteNonQuery(string sql, Action<SqlCommand> bindParams, string op, string table)
     {
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text };
-        if (bindParams != null) bindParams(cmd);
-
         try
         {
-            conn.Open();
-            int rows = cmd.ExecuteNonQuery();
-            conn.Close();
-            return rows;
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+            {
+                bindParams?.Invoke(cmd);
+                conn.Open();
+                return cmd.ExecuteNonQuery();
+            }
         }
         catch (Exception ex)
         {
-            if (conn.State == ConnectionState.Open) conn.Close();
             LogFailure(op, table, ex);
             throw;
         }
@@ -111,20 +106,18 @@ public sealed class DalToolkit
 
     private object ExecuteScalar(string sql, Action<SqlCommand> bindParams, string op, string table)
     {
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text };
-        if (bindParams != null) bindParams(cmd);
-
         try
         {
-            conn.Open();
-            object obj = cmd.ExecuteScalar();
-            conn.Close();
-            return obj;
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+            {
+                bindParams?.Invoke(cmd);
+                conn.Open();
+                return cmd.ExecuteScalar();
+            }
         }
         catch (Exception ex)
         {
-            if (conn.State == ConnectionState.Open) conn.Close();
             LogFailure(op, table, ex);
             throw;
         }
@@ -132,88 +125,143 @@ public sealed class DalToolkit
 
     private void LogFailure(string op, string table, Exception ex)
     {
-        string msg = "[" + op + "] Tabla=" + (table ?? "(desconocida)") + ". Error=" + (ex != null ? ex.Message : "");
-        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloConexionBD, msg);
+        string msg = "[" + op + "] Tabla=" + (table ?? "(desconocida)") + ". Error=" + (ex?.Message ?? "");
+        DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
     }
 
     public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
-    {
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand("SELECT * FROM " + tableName + ";", conn) { CommandType = CommandType.Text };
+        => RecalculateTableDvsFromSelectAllCore(tableName, idColumn, suppressDvErrorLog: false);
 
+    public void RecalculateTableDvsFromSelectAllSilent(string tableName, string idColumn)
+        => RecalculateTableDvsFromSelectAllCore(tableName, idColumn, suppressDvErrorLog: true);
+
+    private void RecalculateTableDvsFromSelectAllCore(string tableName, string idColumn, bool suppressDvErrorLog)
+    {
+        var rowValues = new List<(object IdValue, string DvhCalc)>();
         var dvhs = new List<string>();
 
         try
         {
-            conn.Open();
-            var rdr = cmd.ExecuteReader();
-
-            if (!rdr.HasRows)
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("SELECT * FROM " + tableName + ";", conn) { CommandType = CommandType.Text })
             {
-                conn.Close();
-                UpsertDvvWithDvh(tableName, string.Empty);
-                return;
-            }
-
-            var cols = new List<Tuple<string, int>>();
-            int idOrdinal = -1;
-
-            for (int i = 0; i < rdr.FieldCount; i++)
-            {
-                var colName = rdr.GetName(i);
-                if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                if (string.Equals(colName, idColumn, StringComparison.OrdinalIgnoreCase))
-                    idOrdinal = i;
-
-                cols.Add(Tuple.Create(colName, i));
-            }
-
-            if (idOrdinal < 0)
-                throw new InvalidOperationException("No se encontró la columna Id '" + idColumn + "' en " + tableName + ".");
-
-            cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
-
-            while (rdr.Read())
-            {
-                var sb = new StringBuilder();
-
-                for (int c = 0; c < cols.Count; c++)
+                conn.Open();
+                using (var rdr = cmd.ExecuteReader())
                 {
-                    int ord = cols[c].Item2;
-                    object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+                    if (!rdr.HasRows)
+                    {
+                        conn.Close();
 
-                    if (v == null)
-                    {
+                        string currentDvv = GetCurrentDvv(tableName);
+                        if (!string.Equals(currentDvv ?? string.Empty, string.Empty, StringComparison.Ordinal)
+                            && !suppressDvErrorLog)
+                        {
+                            string msg = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
+                        }
+
+                        UpsertDvvWithDvh(tableName, string.Empty);
+                        return;
                     }
-                    else if (v is byte[])
+
+                    var cols = new List<Tuple<string, int>>();
+                    int idOrdinal = -1;
+                    int dvhOrdinal = -1;
+
+                    for (int i = 0; i < rdr.FieldCount; i++)
                     {
-                        var bytes = (byte[])v;
-                        for (int k = 0; k < bytes.Length; k++)
-                            sb.Append(bytes[k].ToString("x2"));
+                        var colName = rdr.GetName(i);
+
+                        if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
+                        {
+                            dvhOrdinal = i; // no 
+                            continue;
+                        }
+
+                        if (string.Equals(colName, idColumn, StringComparison.OrdinalIgnoreCase))
+                            idOrdinal = i;
+
+                        cols.Add(Tuple.Create(colName, i));
                     }
-                    else
+
+                    if (idOrdinal < 0)
+                        throw new InvalidOperationException("No se encontró la columna Id '" + idColumn + "' en " + tableName + ".");
+
+                    cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
+
+                    int mismatchesDvh = 0;
+
+                    while (rdr.Read())
                     {
-                        sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
+                        var sb = new StringBuilder();
+
+                        for (int c = 0; c < cols.Count; c++)
+                        {
+                            int ord = cols[c].Item2;
+                            object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+
+                            if (v == null)
+                            {
+                            }
+                            else if (v is byte[] bytes)
+                            {
+                                for (int k = 0; k < bytes.Length; k++)
+                                    sb.Append(bytes[k].ToString("x2"));
+                            }
+                            else
+                            {
+                                sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
+                            }
+                        }
+
+                        string dvhCalc = SimpleDv(sb.ToString());
+                        dvhs.Add(dvhCalc);
+
+                        if (dvhOrdinal >= 0)
+                        {
+                            var dvhDb = rdr.IsDBNull(dvhOrdinal) ? string.Empty : Convert.ToString(rdr.GetValue(dvhOrdinal));
+                            if (!string.Equals(dvhDb ?? string.Empty, dvhCalc ?? string.Empty, StringComparison.Ordinal))
+                                mismatchesDvh++;
+                        }
+
+                        object idValue = rdr.GetValue(idOrdinal);
+                        rowValues.Add((idValue, dvhCalc));
+                    }
+
+                    conn.Close();
+
+
+                    string dvvCalc = ComputeDvv(dvhs);
+                    string dvvDb = GetCurrentDvv(tableName);
+                    bool dvvMatch = string.Equals(dvvDb ?? string.Empty, dvvCalc ?? string.Empty, StringComparison.Ordinal);
+
+                    if (!suppressDvErrorLog)
+                    {
+                        if (mismatchesDvh > 0)
+                        {
+                            string msgH = "Error en dígito verificador horizontal en: " + tableName + ". Reparación realizada.";
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
+                        }
+                        if (!dvvMatch)
+                        {
+                            string msgV = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgV);
+                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgV);
+                        }
                     }
                 }
-
-                string dvh = SimpleDv(sb.ToString());
-                dvhs.Add(dvh);
-
-                object idValue = rdr.GetValue(idOrdinal);
-                UpdateRowDvh(tableName, idColumn, idValue, dvh);
             }
 
-            conn.Close();
+            for (int i = 0; i < rowValues.Count; i++)
+                UpdateRowDvh(tableName, idColumn, rowValues[i].IdValue, rowValues[i].DvhCalc);
 
-            string dvv = ComputeDvv(dvhs);
-            UpsertDvvWithDvh(tableName, dvv);
+            string newDvv = ComputeDvv(dvhs);
+            UpsertDvvWithDvh(tableName, newDvv);
         }
         catch (Exception ex)
         {
-            if (conn.State == ConnectionState.Open) conn.Close();
             LogFailure("DV-REFRESH", tableName, ex);
             throw;
         }
@@ -221,53 +269,76 @@ public sealed class DalToolkit
 
     private void UpdateRowDvh(string table, string idColumn, object idValue, string dvh)
     {
-        var sql = "UPDATE " + table + " SET DVH = @dvh WHERE " + idColumn + " = @id;";
-        var conn = new SqlConnection(connectionString);
-        var cmd = new SqlCommand(sql, conn);
-        cmd.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = (object)dvh ?? string.Empty;
-        cmd.Parameters.Add("@id", SqlDbType.Variant).Value = idValue ?? DBNull.Value;
+        const string sqlTpl = "UPDATE {0} SET DVH = @dvh WHERE {1} = @id;";
+        var sql = string.Format(sqlTpl, table, idColumn);
 
-        conn.Open();
-        cmd.ExecuteNonQuery();
-        conn.Close();
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn))
+        {
+            cmd.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = (object)dvh ?? string.Empty;
+            cmd.Parameters.Add("@id", SqlDbType.Variant).Value = idValue ?? DBNull.Value;
+            conn.Open();
+            cmd.ExecuteNonQuery();
+        }
     }
 
     private void UpsertDvvWithDvh(string tableName, string dvv)
     {
         var key = DvvKey(tableName);
-        var conn = new SqlConnection(connectionString);
-        conn.Open();
 
-        var upd = new SqlCommand(@"
+        using (var conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+
+            using (var upd = new SqlCommand(@"
 UPDATE " + dvvTable + @"
    SET " + dvvColValue + @" = @dvv
- WHERE " + dvvColTableName + @" = @tabla;", conn);
+ WHERE " + dvvColTableName + @" = @tabla;", conn))
+            {
+                upd.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+                upd.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
 
-        upd.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-        upd.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
-
-        int rows = upd.ExecuteNonQuery();
-        if (rows == 0)
-        {
-            var ins = new SqlCommand(@"
+                int rows = upd.ExecuteNonQuery();
+                if (rows == 0)
+                {
+                    using (var ins = new SqlCommand(@"
 INSERT INTO " + dvvTable + @" (" + dvvColTableName + "," + dvvColValue + @")
-VALUES (@tabla, @dvv);", conn);
-            ins.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-            ins.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
-            ins.ExecuteNonQuery();
-        }
+VALUES (@tabla, @dvv);", conn))
+                    {
+                        ins.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+                        ins.Parameters.Add("@dvv", SqlDbType.VarChar, 256).Value = dvv ?? string.Empty;
+                        ins.ExecuteNonQuery();
+                    }
+                }
+            }
 
-        var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
-        var updDvh = new SqlCommand(@"
+            // Actualizar DVH de la fila DVV (tabla + valorDVV)
+            var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
+            using (var updDvh = new SqlCommand(@"
 UPDATE " + dvvTable + @"
    SET " + dvvColDvh + @" = @dvh
- WHERE " + dvvColTableName + @" = @tabla;", conn);
+ WHERE " + dvvColTableName + @" = @tabla;", conn))
+            {
+                updDvh.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+                updDvh.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = dvh ?? string.Empty;
+                updDvh.ExecuteNonQuery();
+            }
+        }
+    }
 
-        updDvh.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
-        updDvh.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = dvh ?? string.Empty;
-        updDvh.ExecuteNonQuery();
+    private string GetCurrentDvv(string tableName)
+    {
+        var key = DvvKey(tableName);
+        var sql = "SELECT " + dvvColValue + " FROM " + dvvTable + " WHERE " + dvvColTableName + " = @tabla;";
 
-        conn.Close();
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+        {
+            cmd.Parameters.Add("@tabla", SqlDbType.VarChar, 128).Value = key;
+            conn.Open();
+            object o = cmd.ExecuteScalar();
+            return (o == null || o == DBNull.Value) ? null : Convert.ToString(o);
+        }
     }
 
     private static string DvvKey(string tableName)

@@ -22,6 +22,8 @@ namespace DAL.Audit
         private const string TblBitacora = "dbo.Bitacora";
         private const string PkBitacora = "idRegistro";
 
+        private static bool _isListingBitacora;
+
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize)
         {
             if (page <= 0) page = 1;
@@ -102,9 +104,29 @@ ORDER BY rn;";
                         });
                     }
                 }
+                conn.Close();
             }
 
-            db.RecalculateTableDvsFromSelectAll(TblBitacora, PkBitacora);
+            if (!_isListingBitacora)
+            {
+                try
+                {
+                    _isListingBitacora = true;
+
+                    string msg =
+                        $"Listado de bitácora (página={page}, tamaño={pageSize}, " +
+                        $"desde={(desde.HasValue ? desde.Value.ToString("yyyy-MM-dd") : "-")}, " +
+                        $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}).";
+
+                    int newId = Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
+
+                    db.RecalculateTableDvsFromSelectAllSilent(TblBitacora, PkBitacora);
+                }
+                finally
+                {
+                    _isListingBitacora = false;
+                }
+            }
 
             return items;
         }
@@ -145,14 +167,13 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
                     (object)uname ?? DBNull.Value;
 
+                // DVH se completa con el recalculo silencioso que haga el caller
                 cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
 
                 conn.Open();
                 newId = cmd.ExecuteScalar();
                 conn.Close();
             }
-
-            db.RecalculateTableDvsFromSelectAll(TblBitacora, PkBitacora);
 
             return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
         }

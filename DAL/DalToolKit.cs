@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Text;
+using BitacoraDAL = DAL.Audit.BitacoraDAL;
 
 public sealed class DalToolkit
 {
@@ -23,7 +24,7 @@ public sealed class DalToolkit
     {
         int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
         RecalculateTableDvsFromSelectAll(tableName, pkName);
-        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
+        BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
 
@@ -35,7 +36,7 @@ public sealed class DalToolkit
     {
         object obj = ExecuteScalar(sql, bindParams, "SCALAR", tableName);
         RecalculateTableDvsFromSelectAll(tableName, pkName);
-        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
+        BitacoraDAL.GetInstance().Log(accion, mensaje);
         return obj;
     }
 
@@ -48,7 +49,7 @@ public sealed class DalToolkit
     {
         var rows = ExecuteList<T>(sql, bindParams, "SELECT", tableName);
         RecalculateTableDvsFromSelectAll(tableName, idColumn);
-        DAL.Audit.BitacoraDAL.GetInstance().Log(accion, mensaje);
+        BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
 
@@ -126,7 +127,7 @@ public sealed class DalToolkit
     private void LogFailure(string op, string table, Exception ex)
     {
         string msg = "[" + op + "] Tabla=" + (table ?? "(desconocida)") + ". Error=" + (ex?.Message ?? "");
-        DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
+        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
     }
 
     public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
@@ -157,8 +158,8 @@ public sealed class DalToolkit
                             && !suppressDvErrorLog)
                         {
                             string msg = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
                         }
 
                         UpsertDvvWithDvh(tableName, string.Empty);
@@ -241,14 +242,14 @@ public sealed class DalToolkit
                         if (mismatchesDvh > 0)
                         {
                             string msgH = "Error en dígito verificador horizontal en: " + tableName + ". Reparación realizada.";
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
                         }
                         if (!dvvMatch)
                         {
                             string msgV = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgV);
-                            DAL.Audit.BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgV);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgV);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgV);
                         }
                     }
                 }
@@ -312,7 +313,6 @@ VALUES (@tabla, @dvv);", conn))
                 }
             }
 
-            // Actualizar DVH de la fila DVV (tabla + valorDVV)
             var dvh = SimpleDv((key ?? "") + (dvv ?? ""));
             using (var updDvh = new SqlCommand(@"
 UPDATE " + dvvTable + @"

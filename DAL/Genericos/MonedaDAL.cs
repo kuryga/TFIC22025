@@ -26,7 +26,8 @@ namespace DAL.Genericos
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaMonedas,
-                "Listado de monedas"
+                "Listado de monedas",
+                false
             );
         }
 
@@ -48,16 +49,20 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                         (object)obj.Simbolo ?? System.DBNull.Value;
 
                     var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
-                    pCambio.Precision = 18; pCambio.Scale = 4;   // más precisión para tipo de cambio
+                    pCambio.Precision = 18; pCambio.Scale = 4;
                     pCambio.Value = obj.ValorCambio;
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.AltaMoneda,
-                "Alta de moneda: " + (obj.NombreMoneda ?? string.Empty)
+                "Alta de moneda: " + (obj.NombreMoneda ?? string.Empty),
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdMoneda = System.Convert.ToInt32(newId);
+
+            if (obj.IdMoneda > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdMoneda, false);
         }
 
         public void Update(BE.Moneda obj)
@@ -85,9 +90,10 @@ UPDATE " + table + @"
                     pCambio.Precision = 18; pCambio.Scale = 4;
                     pCambio.Value = obj.ValorCambio;
                 },
-                table, idCol,
+                table, idCol, obj.IdMoneda,
                 BE.Audit.AuditEvents.ModificacionValorMoneda,
-                "Modificación de moneda Id=" + obj.IdMoneda
+                "Modificación de moneda Id=" + obj.IdMoneda,
+                true
             );
         }
     }

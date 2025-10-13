@@ -26,7 +26,8 @@ namespace DAL.Genericos
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaMateriales,
-                "Listado de materiales"
+                "Listado de materiales",
+                false
             );
         }
 
@@ -48,20 +49,24 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                         (object)obj.UnidadMedida ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
-                    pPrecio.Precision = 18; pPrecio.Scale = 2;     // precio con 2 decimales
+                    pPrecio.Precision = 18; pPrecio.Scale = 2;
                     pPrecio.Value = obj.PrecioUnidad;
 
                     var pUso = cmd.Parameters.Add("@usoPorM2", SqlDbType.Decimal);
-                    pUso.Precision = 18; pUso.Scale = 4;          // uso por m2 con más precisión
+                    pUso.Precision = 18; pUso.Scale = 4;
                     pUso.Value = obj.UsoPorM2;
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionMaterial,
-                "Alta de material: " + (obj.Nombre ?? string.Empty)
+                "Alta de material: " + (obj.Nombre ?? string.Empty),
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdMaterial = System.Convert.ToInt32(newId);
+
+            if (obj.IdMaterial > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdMaterial, false);
         }
 
         public void Update(BE.Material obj)
@@ -94,9 +99,10 @@ UPDATE " + table + @"
                     pUso.Precision = 18; pUso.Scale = 4;
                     pUso.Value = obj.UsoPorM2;
                 },
-                table, idCol,
+                table, idCol, obj.IdMaterial,
                 BE.Audit.AuditEvents.ModificacionMaterial,
-                "Modificación de material Id=" + obj.IdMaterial
+                "Modificación de material Id=" + obj.IdMaterial,
+                true
             );
         }
     }

@@ -1,4 +1,7 @@
-﻿using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
+﻿using System;
+using System.Security.Cryptography;
+using System.Threading;
+using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
 using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
@@ -23,10 +26,16 @@ namespace BLL.Seguridad
             var row = dal.GetLoginRowByCorreo(correo);
 
             if (row == null)
+            {
+                SleepRandomMs(3000, 7000);
                 throw new CredencialesException(0);
+            }
 
             if (row.Bloqueado)
+            {
+                SleepRandomMs(3000, 7000);
                 throw new BloqueadoException();
+            }
 
             bool ok = dal.VerificarHash(password, row.contrasenaHash);
             if (!ok)
@@ -53,6 +62,15 @@ namespace BLL.Seguridad
             SessionContext.Current.NombreCompleto =
                 ((row.nombreUsuario ?? string.Empty) + " " + (row.apellidoUsuario ?? string.Empty)).Trim();
 
+            try
+            {
+                dal.VerifyAndRepairAllTablesAuto();
+            }
+            catch
+            {
+                // nada
+            }
+
             return true;
         }
 
@@ -65,6 +83,23 @@ namespace BLL.Seguridad
             ctx.UsuarioId = null;
             ctx.UsuarioEmail = null;
             ctx.NombreCompleto = null;
+        }
+
+        private static void SleepRandomMs(int minInclusive, int maxInclusive)
+        {
+            if (minInclusive < 0 || maxInclusive < minInclusive) return;
+
+            int range = maxInclusive - minInclusive + 1;
+            int delayMs;
+            // Random
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var b = new byte[4];
+                rng.GetBytes(b);
+                uint v = BitConverter.ToUInt32(b, 0);
+                delayMs = minInclusive + (int)(v % (uint)range);
+            }
+            Thread.Sleep(delayMs);
         }
     }
 }

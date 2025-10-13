@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Windows.Forms;
+using LoginBLL = BLL.Seguridad.LoginBLL;
 
 namespace UI
 {
     public partial class MainForm : Form
     {
+        public event Action LogoutRequested;
+
         public MainForm()
         {
             InitializeComponent();
@@ -15,8 +18,6 @@ namespace UI
             menuMoneda.Click += (s, e) => AbrirFormulario(new GestionarMonedaForm());
             menuServicios.Click += (s, e) => AbrirFormulario(new GestionarServicioAdicionalForm());
             menuBitacora.Click += (s, e) => AbrirFormulario(new ConsultarBitacoraForm());
-            //  menuPerfiles.Click += (s, e) => AbrirFormulario(new GestionarPerfilProfesionalForm());
-            // menuItems.Click += (s, e) => AbrirFormulario(new GestionarItemPersonalizadoForm());
             menuTipoEdif.Click += (s, e) => AbrirFormulario(new GestionarTipoEdificacionForm());
 
             menuUsuarios.Click += (s, e) => AbrirFormulario(new GestionarUsuariosForm());
@@ -37,7 +38,8 @@ namespace UI
 
                 if (resultado == DialogResult.OK)
                 {
-                    this.Close(); // o redirigir al LoginForm si lo preferís
+                    LoginBLL.GetInstance().Logout();
+                    LogoutRequested?.Invoke();
                 }
             };
 
@@ -45,7 +47,6 @@ namespace UI
 
         private void AbrirFormulario(Form form)
         {
-            // Ocultar bienvenida si es visible
             if (lblBienvenida.Visible)
                 lblBienvenida.Visible = false;
 

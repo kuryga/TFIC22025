@@ -148,6 +148,7 @@
     <Compile Include="GestionarUsuariosForm.Designer.cs">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LoginAppContext.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>

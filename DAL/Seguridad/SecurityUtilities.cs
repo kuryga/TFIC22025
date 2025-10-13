@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace Utilities
+namespace DAL.Seguridad
 {
     public static class SecurityUtilities
     {

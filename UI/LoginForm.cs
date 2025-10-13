@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BLL.Seguridad;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
@@ -8,6 +9,8 @@ namespace UI
 {
     public partial class LoginForm : Form
     {
+        public event Action LoginSucceeded;
+
         public LoginForm()
         {
             InitializeComponent();
@@ -20,32 +23,43 @@ namespace UI
             txtUsuario?.Focus();
         }
 
-        private void btnLogin_Click(object sender, EventArgs e)
+        private async void btnLogin_Click(object sender, EventArgs e)
         {
+            SetBusy(true);
+
             try
             {
-                var ok = BLL.Seguridad.LoginBLL.GetInstance()
-                    .TryLogin(txtUsuario.Text?.Trim(), txtContrasena.Text);
+                string usuario = txtUsuario.Text?.Trim();
+                string pass = txtContrasena.Text;
+                bool ok = await Task.Run(() =>
+                {
+                    return LoginBLL.GetInstance().TryLogin(usuario, pass);
+                });
 
                 if (ok)
                 {
-                    OpenAfterLogin(); 
+                    SetBusy(false);
+                    OpenAfterLogin();
                 }
                 else
                 {
+                    SetBusy(false);
                     MostrarLoginError();
                 }
             }
             catch (BloqueadoException)
             {
+                SetBusy(false);
                 MostrarLoginError();
             }
             catch (CredencialesException)
             {
+                SetBusy(false);
                 MostrarLoginError();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                SetBusy(false);
                 MessageBox.Show(
                     "Ocurrió un error al intentar iniciar sesión.",
                     "Error",
@@ -53,23 +67,25 @@ namespace UI
                     MessageBoxIcon.Error
                 );
             }
-            finally
-            {
-                btnLogin.Enabled = true;
-            }
         }
+
+        private void SetBusy(bool busy)
+        {
+            this.UseWaitCursor = busy;        
+            btnLogin.Enabled = !busy;
+            txtUsuario.Enabled = !busy;
+            txtContrasena.Enabled = !busy;
+
+            Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
+            Application.DoEvents();
+        }
+
         protected virtual void OpenAfterLogin()
         {
-
-            MessageBox.Show("sesion iniciada.", "Atención",
-                      MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            // TODO: abrir mmain
-            // using (var main = new MainForm())
-            // {
-            //     this.Hide();
-            //     main.ShowDialog();
-            //     this.Close();
-            // }
+            using (var main = new MainForm())
+            {
+                LoginSucceeded?.Invoke();
+            }
         }
 
         private void MostrarLoginError()

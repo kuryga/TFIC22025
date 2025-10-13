@@ -9,6 +9,8 @@ namespace UI
 {
     public partial class LoginForm : Form
     {
+        public event Action LoginSucceeded;
+
         public LoginForm()
         {
             InitializeComponent();
@@ -82,9 +84,7 @@ namespace UI
         {
             using (var main = new MainForm())
             {
-                this.Hide();
-                main.ShowDialog();
-                this.Close();
+                LoginSucceeded?.Invoke();
             }
         }
 

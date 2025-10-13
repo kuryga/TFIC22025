@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Windows.Forms;
+using LoginBLL = BLL.Seguridad.LoginBLL;
 
 namespace UI
 {
     public partial class MainForm : Form
     {
+        public event Action LogoutRequested;
+
         public MainForm()
         {
             InitializeComponent();
@@ -35,10 +38,8 @@ namespace UI
 
                 if (resultado == DialogResult.OK)
                 {
-                    this.Hide();
-                    var loginForm = new LoginForm();
-                    loginForm.Show();
-                    this.Close();
+                    LoginBLL.GetInstance().Logout();
+                    LogoutRequested?.Invoke();
                 }
             };
 

@@ -68,6 +68,9 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdUsuario = System.Convert.ToInt32(newId);
+
+            if (obj.IdUsuario > 0)
+                db.RefreshRowDvAndTableDvv(userTable, userIdCol, obj.IdUsuario, false);
         }
 
         public void Update(BE.Usuario obj)
@@ -96,9 +99,10 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
                 },
-                userTable, userIdCol,
+                userTable, userIdCol, obj.IdUsuario,
                 BE.Audit.AuditEvents.ModificacionUsuario,
-                "Modificación de usuario Id=" + obj.IdUsuario
+                "Modificación de usuario Id=" + obj.IdUsuario,
+                true
             );
         }
 
@@ -151,9 +155,10 @@ UPDATE " + userTable + @"
                     cmd.Parameters.Add("@intentos", SqlDbType.Int).Value = nuevosIntentos;
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
                 },
-                userTable, userIdCol,
+                userTable, userIdCol, idUsuario,
                 BE.Audit.AuditEvents.IntentosFallidosAcceso,
-                "Intento fallido. IdUsuario=" + idUsuario + " | Intentos=" + nuevosIntentos
+                "Intento fallido. IdUsuario=" + idUsuario + " | Intentos=" + nuevosIntentos,
+                true
             );
         }
 
@@ -172,9 +177,10 @@ UPDATE " + userTable + @"
                     cmd.Parameters.Add("@intentos", SqlDbType.Int).Value = intentos;
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
                 },
-                userTable, userIdCol,
+                userTable, userIdCol, idUsuario,
                 BE.Audit.AuditEvents.BloquearUsuario,
-                "Usuario bloqueado por superar intentos. IdUsuario=" + idUsuario
+                "Usuario bloqueado por superar intentos. IdUsuario=" + idUsuario,
+                true
             );
         }
 
@@ -188,9 +194,10 @@ UPDATE " + userTable + @"
             db.ExecuteNonQueryAndLog(
                 sql,
                 cmd => cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario,
-                userTable, userIdCol,
+                userTable, userIdCol, idUsuario,
                 BE.Audit.AuditEvents.IngresoSesion,
-                "Login OK. Reset de intentos. IdUsuario=" + idUsuario
+                "Login OK. Reset de intentos. IdUsuario=" + idUsuario,
+                true
             );
         }
 

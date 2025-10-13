@@ -20,10 +20,34 @@ public sealed class DalToolkit
         string sql,
         Action<SqlCommand> bindParams,
         string tableName, string pkName,
-        string accion, string mensaje)
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false)
     {
         int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
-        RecalculateTableDvsFromSelectAll(tableName, pkName);
+        if (shouldCalculate)
+            RecalculateTableDvsFromSelectAll(tableName, pkName);
+
+        BitacoraDAL.GetInstance().Log(accion, mensaje);
+        return rows;
+    }
+
+    public int ExecuteNonQueryAndLog(
+        string sql,
+        Action<SqlCommand> bindParams,
+        string tableName, string pkName, object pkValue,
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false)
+    {
+        int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
+        if (shouldCalculate)
+        {
+            if (pkValue != null)
+                RefreshRowDvAndTableDvv(tableName, pkName, pkValue, silent: false);
+            else
+                RecalculateTableDvsFromSelectAll(tableName, pkName);
+        }
         BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
@@ -32,10 +56,34 @@ public sealed class DalToolkit
         string sql,
         Action<SqlCommand> bindParams,
         string tableName, string pkName,
-        string accion, string mensaje)
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false)
     {
         object obj = ExecuteScalar(sql, bindParams, "SCALAR", tableName);
-        RecalculateTableDvsFromSelectAll(tableName, pkName);
+        if (shouldCalculate)
+            RecalculateTableDvsFromSelectAll(tableName, pkName);
+
+        BitacoraDAL.GetInstance().Log(accion, mensaje);
+        return obj;
+    }
+
+    public object ExecuteScalarAndLog(
+        string sql,
+        Action<SqlCommand> bindParams,
+        string tableName, string pkName, object pkValue,
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false)
+    {
+        object obj = ExecuteScalar(sql, bindParams, "SCALAR", tableName);
+        if (shouldCalculate)
+        {
+            if (pkValue != null)
+                RefreshRowDvAndTableDvv(tableName, pkName, pkValue, silent: false);
+            else
+                RecalculateTableDvsFromSelectAll(tableName, pkName);
+        }
         BitacoraDAL.GetInstance().Log(accion, mensaje);
         return obj;
     }
@@ -45,10 +93,14 @@ public sealed class DalToolkit
         Action<SqlCommand> bindParams,
         string tableName,
         string idColumn,
-        string accion, string mensaje) where T : new()
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false) where T : new()
     {
         var rows = ExecuteList<T>(sql, bindParams, "SELECT", tableName);
-        RecalculateTableDvsFromSelectAll(tableName, idColumn);
+        if (shouldCalculate)
+            RecalculateTableDvsFromSelectAll(tableName, idColumn);
+
         BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
     }
@@ -58,9 +110,11 @@ public sealed class DalToolkit
         Action<SqlCommand> bindParams,
         string tableName,
         string idColumn,
-        string accion, string mensaje) where T : new()
+        string accion,
+        string mensaje,
+        bool shouldCalculate = false) where T : new()
     {
-        var list = QueryListAndLog<T>(sql, bindParams, tableName, idColumn, accion, mensaje);
+        var list = QueryListAndLog<T>(sql, bindParams, tableName, idColumn, accion, mensaje, shouldCalculate);
         return list.Count > 0 ? list[0] : default(T);
     }
 
@@ -176,7 +230,7 @@ public sealed class DalToolkit
 
                         if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
                         {
-                            dvhOrdinal = i; // no 
+                            dvhOrdinal = i; // DVH no participa del cálculo
                             continue;
                         }
 
@@ -202,9 +256,7 @@ public sealed class DalToolkit
                             int ord = cols[c].Item2;
                             object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
 
-                            if (v == null)
-                            {
-                            }
+                            if (v == null) { }
                             else if (v is byte[] bytes)
                             {
                                 for (int k = 0; k < bytes.Length; k++)
@@ -232,7 +284,7 @@ public sealed class DalToolkit
 
                     conn.Close();
 
-
+                    // DVV
                     string dvvCalc = ComputeDvv(dvhs);
                     string dvvDb = GetCurrentDvv(tableName);
                     bool dvvMatch = string.Equals(dvvDb ?? string.Empty, dvvCalc ?? string.Empty, StringComparison.Ordinal);
@@ -266,6 +318,108 @@ public sealed class DalToolkit
             LogFailure("DV-REFRESH", tableName, ex);
             throw;
         }
+    }
+
+    public void RecalculateRowDvh(string tableName, string pkName, object pkValue)
+    {
+        if (pkValue == null) throw new ArgumentNullException(nameof(pkValue));
+
+        string sql = "SELECT * FROM " + tableName + " WHERE " + pkName + " = @id;";
+        string dvhCalc;
+
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+        {
+            cmd.Parameters.Add("@id", SqlDbType.Variant).Value = pkValue;
+            conn.Open();
+            using (var rdr = cmd.ExecuteReader(CommandBehavior.SingleRow))
+            {
+                if (!rdr.Read())
+                    throw new InvalidOperationException("No existe la fila con PK especificada para " + tableName + ".");
+
+                var cols = new List<Tuple<string, int>>();
+                for (int i = 0; i < rdr.FieldCount; i++)
+                {
+                    var name = rdr.GetName(i);
+                    if (string.Equals(name, "DVH", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    cols.Add(Tuple.Create(name, i));
+                }
+                cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
+
+                var sb = new StringBuilder();
+                for (int c = 0; c < cols.Count; c++)
+                {
+                    int ord = cols[c].Item2;
+                    object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+
+                    if (v == null) { }
+                    else if (v is byte[] bytes)
+                    {
+                        for (int k = 0; k < bytes.Length; k++)
+                            sb.Append(bytes[k].ToString("x2"));
+                    }
+                    else
+                    {
+                        sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
+                    }
+                }
+
+                dvhCalc = SimpleDv(sb.ToString());
+            }
+        }
+
+        UpdateRowDvh(tableName, pkName, pkValue, dvhCalc);
+    }
+
+    public void RecalculateDvvFromExistingDvhs(string tableName, bool silent = false)
+    {
+        var dvhs = new List<string>();
+
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand("SELECT DVH FROM " + tableName + ";", conn) { CommandType = CommandType.Text })
+        {
+            conn.Open();
+            using (var rdr = cmd.ExecuteReader())
+            {
+                if (!rdr.HasRows)
+                {
+                    conn.Close();
+                    string current = GetCurrentDvv(tableName);
+                    if (!string.Equals(current ?? string.Empty, string.Empty, StringComparison.Ordinal) && !silent)
+                    {
+                        string msg = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
+                        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
+                        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
+                    }
+                    UpsertDvvWithDvh(tableName, string.Empty);
+                    return;
+                }
+
+                while (rdr.Read())
+                {
+                    var dvh = rdr.IsDBNull(0) ? string.Empty : rdr.GetString(0);
+                    dvhs.Add(dvh ?? string.Empty);
+                }
+            }
+        }
+
+        string dvvCalc = ComputeDvv(dvhs);
+        string dvvDb = GetCurrentDvv(tableName);
+        if (!string.Equals(dvvDb ?? string.Empty, dvvCalc ?? string.Empty, StringComparison.Ordinal) && !silent)
+        {
+            string msgV = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
+            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgV);
+            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgV);
+        }
+
+        UpsertDvvWithDvh(tableName, dvvCalc);
+    }
+
+    public void RefreshRowDvAndTableDvv(string tableName, string pkName, object pkValue, bool silent = false)
+    {
+        RecalculateRowDvh(tableName, pkName, pkValue);
+        RecalculateDvvFromExistingDvhs(tableName, silent);
     }
 
     private void UpdateRowDvh(string table, string idColumn, object idValue, string dvh)

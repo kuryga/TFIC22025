@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System; 
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -119,8 +119,6 @@ ORDER BY rn;";
                         $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}).";
 
                     Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
-
-                    db.RecalculateTableDvsFromSelectAllSilent(TblBitacora, PkBitacora);
                 }
                 finally
                 {
@@ -174,9 +172,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 conn.Close();
             }
 
-            db.RecalculateTableDvsFromSelectAllSilent(TblBitacora, PkBitacora);
+            int newIdInt = (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
+            if (newIdInt > 0)
+                db.RefreshRowDvAndTableDvv(TblBitacora, PkBitacora, newIdInt, true);
 
-            return (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
+            return newIdInt;
         }
 
         public int Log(string accion, string mensaje)

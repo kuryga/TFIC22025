@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audit\BitacoraDAL.cs" />
+    <Compile Include="Audit\ParametrizacionDAL.cs" />
     <Compile Include="DalToolKit.cs" />
     <Compile Include="DbMapper.cs" />
     <Compile Include="Genericos\CotizacionDAL.cs" />

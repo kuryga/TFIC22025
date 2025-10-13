@@ -35,6 +35,8 @@ namespace BE.Audit
 
         public const string ActivacionUsuarioPorCorreo = "Usuario.ActivacionPorCorreo";
 
+        public const string ConsultaParametrizacion = "Parametrizacion.consulta";
+
         // ==== C4 (altas / acciones relevantes) ====
         public const string CambioContrasena = "Usuario.CambioContrasena";
         public const string CreacionUsuario = "Usuario.Creacion";
@@ -114,6 +116,7 @@ namespace BE.Audit
                 case ConsultaIdiomas:
                 case ExportacionCotizacion:
                 case ActivacionUsuarioPorCorreo:
+                case ConsultaParametrizacion:
                     return Criticidad.C5;
             }
 

@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Text;
+using System.Linq;
 using BitacoraDAL = DAL.Audit.BitacoraDAL;
 
 public sealed class DalToolkit
@@ -521,6 +522,111 @@ UPDATE " + dvvTable + @"
             for (int i = 0; i < hash.Length; i++)
                 sb.Append(hash[i].ToString("x2"));
             return sb.ToString();
+        }
+    }
+
+    private sealed class TablePkInfo
+    {
+        public string TableFullName { get; set; }   // ej: [dbo].[Material]
+        public string PkColumnName { get; set; }   // ej: idMaterial
+    }
+
+    private List<TablePkInfo> EnumerateTablesWithSinglePkAndDvh(params string[] extraExcludes)
+    {
+        var result = new List<TablePkInfo>();
+        var excludes = new HashSet<string>(
+            new[] { "[dbo].[DigitoVerificadorVertical]" }
+            .Concat(extraExcludes ?? Array.Empty<string>()),
+            StringComparer.OrdinalIgnoreCase);
+
+        const string sql = @"
+WITH PkCols AS (
+    SELECT
+        t.TABLE_SCHEMA,
+        t.TABLE_NAME,
+        COUNT(*) AS PkCount
+    FROM INFORMATION_SCHEMA.TABLES t
+    JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+      ON tc.TABLE_SCHEMA = t.TABLE_SCHEMA
+     AND tc.TABLE_NAME   = t.TABLE_NAME
+     AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+      ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+     AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME
+    WHERE t.TABLE_TYPE = 'BASE TABLE'
+    GROUP BY t.TABLE_SCHEMA, t.TABLE_NAME
+    HAVING COUNT(*) = 1
+),
+PkName AS (
+    SELECT
+        kcu.TABLE_SCHEMA,
+        kcu.TABLE_NAME,
+        MAX(kcu.COLUMN_NAME) AS PkColumn -- único porque COUNT(*)=1
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+      ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+     AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME
+    WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+    GROUP BY kcu.TABLE_SCHEMA, kcu.TABLE_NAME
+),
+HasDvh AS (
+    SELECT DISTINCT TABLE_SCHEMA, TABLE_NAME
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE COLUMN_NAME = 'DVH'
+)
+SELECT
+    t.TABLE_SCHEMA,
+    t.TABLE_NAME,
+    p.PkColumn
+FROM INFORMATION_SCHEMA.TABLES t
+JOIN PkCols pc
+  ON pc.TABLE_SCHEMA = t.TABLE_SCHEMA AND pc.TABLE_NAME = t.TABLE_NAME
+JOIN PkName p
+  ON p.TABLE_SCHEMA = t.TABLE_SCHEMA AND p.TABLE_NAME = t.TABLE_NAME
+JOIN HasDvh h
+  ON h.TABLE_SCHEMA = t.TABLE_SCHEMA AND h.TABLE_NAME = t.TABLE_NAME
+WHERE t.TABLE_TYPE = 'BASE TABLE';
+";
+
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+        {
+            conn.Open();
+            using (var rdr = cmd.ExecuteReader())
+            {
+                while (rdr.Read())
+                {
+                    var schema = rdr.GetString(0);
+                    var name = rdr.GetString(1);
+                    var pk = rdr.GetString(2);
+
+                    var full = $"[{schema}].[{name}]";
+                    if (excludes.Contains(full)) continue;
+
+                    result.Add(new TablePkInfo
+                    {
+                        TableFullName = full,
+                        PkColumnName = pk
+                    });
+                }
+            }
+        }
+        return result;
+    }
+    public void VerifyAndRepairAllTablesAuto(params string[] extraExcludes)
+    {
+        var tables = EnumerateTablesWithSinglePkAndDvh(extraExcludes);
+        for (int i = 0; i < tables.Count; i++)
+        {
+            var t = tables[i];
+            try
+            {
+                RecalculateTableDvsFromSelectAll(t.TableFullName, t.PkColumnName);
+            }
+            catch
+            {
+            //nada
+            }
         }
     }
 }

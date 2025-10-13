@@ -46,7 +46,6 @@
     <Compile Include="Crypto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegReader.cs" />
-    <Compile Include="SecurityUtilities.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="StringExtension.cs" />
   </ItemGroup>

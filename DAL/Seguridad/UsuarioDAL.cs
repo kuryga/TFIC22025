@@ -2,7 +2,7 @@
 using System.Data;
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
-using segUtils = Utilities.SecurityUtilities;
+using segUtils = DAL.Seguridad.SecurityUtilities;
 
 namespace DAL.Seguridad
 {
@@ -207,6 +207,11 @@ UPDATE " + userTable + @"
                 plainPassword ?? string.Empty,
                 storedHash ?? string.Empty
             );
+        }
+
+        public void VerifyAndRepairAllTablesAuto()
+        {
+            db.VerifyAndRepairAllTablesAuto();
         }
     }
 }

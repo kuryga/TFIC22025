@@ -15,8 +15,6 @@ namespace UI
             menuMoneda.Click += (s, e) => AbrirFormulario(new GestionarMonedaForm());
             menuServicios.Click += (s, e) => AbrirFormulario(new GestionarServicioAdicionalForm());
             menuBitacora.Click += (s, e) => AbrirFormulario(new ConsultarBitacoraForm());
-            //  menuPerfiles.Click += (s, e) => AbrirFormulario(new GestionarPerfilProfesionalForm());
-            // menuItems.Click += (s, e) => AbrirFormulario(new GestionarItemPersonalizadoForm());
             menuTipoEdif.Click += (s, e) => AbrirFormulario(new GestionarTipoEdificacionForm());
 
             menuUsuarios.Click += (s, e) => AbrirFormulario(new GestionarUsuariosForm());
@@ -37,7 +35,10 @@ namespace UI
 
                 if (resultado == DialogResult.OK)
                 {
-                    this.Close(); // o redirigir al LoginForm si lo preferís
+                    this.Hide();
+                    var loginForm = new LoginForm();
+                    loginForm.Show();
+                    this.Close();
                 }
             };
 
@@ -45,7 +46,6 @@ namespace UI
 
         private void AbrirFormulario(Form form)
         {
-            // Ocultar bienvenida si es visible
             if (lblBienvenida.Visible)
                 lblBienvenida.Visible = false;
 

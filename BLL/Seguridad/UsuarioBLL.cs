@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
+using SessionContext = DAL.Seguridad.SessionContext;
+
 namespace BLL.Seguridad
 {
     public class UsuarioBLL : BE.ICrud<BE.Usuario>
@@ -45,6 +47,11 @@ namespace BLL.Seguridad
             //catch (Exception) { throw; }
 
             return false;
+        }
+
+        public string GetSesionActivaNombreCompleto()
+        {
+            return SessionContext.Current.NombreCompleto;
         }
     }
 }

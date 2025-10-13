@@ -26,7 +26,8 @@ namespace DAL.Genericos
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaTiposEdificacion,
-                "Listado de tipos de edificación"
+                "Listado de tipos de edificación",
+                false
             );
         }
 
@@ -46,11 +47,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionTipoEdificacion,
-                "Alta de tipo de edificación: " + (obj.Descripcion ?? string.Empty)
+                "Alta de tipo de edificación: " + (obj.Descripcion ?? string.Empty),
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdTipoEdificacion = System.Convert.ToInt32(newId);
+
+            if (obj.IdTipoEdificacion > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdTipoEdificacion, false);
         }
 
         public void Update(BE.TipoEdificacion obj)
@@ -68,9 +73,10 @@ UPDATE " + table + @"
                     cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
                         (object)obj.Descripcion ?? System.DBNull.Value;
                 },
-                table, idCol,
+                table, idCol, obj.IdTipoEdificacion,
                 BE.Audit.AuditEvents.ModificacionTipoEdificacion,
-                "Modificación de tipo de edificación Id=" + obj.IdTipoEdificacion
+                "Modificación de tipo de edificación Id=" + obj.IdTipoEdificacion,
+                true
             );
         }
     }

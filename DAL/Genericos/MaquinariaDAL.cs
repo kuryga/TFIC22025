@@ -21,13 +21,13 @@ namespace DAL.Genericos
         {
             var sql = "SELECT " + publicCols + " FROM " + table + ";";
 
-            // SELECT + DV + LOG (acción de consulta)
             return db.QueryListAndLog<BE.Maquinaria>(
                 sql,
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaMaquinarias,
-                "Listado de maquinarias"
+                "Listado de maquinarias",
+                false
             );
         }
 
@@ -51,11 +51,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionMaquinaria,
-                "Alta de maquinaria: " + (obj.Nombre ?? string.Empty)
+                "Alta de maquinaria: " + (obj.Nombre ?? string.Empty),
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdMaquinaria = System.Convert.ToInt32(newId);
+
+            if (obj.IdMaquinaria > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdMaquinaria, false);
         }
 
         public void Update(BE.Maquinaria obj)
@@ -79,9 +83,10 @@ UPDATE " + table + @"
                     p.Precision = 18; p.Scale = 2;
                     p.Value = obj.CostoPorHora;
                 },
-                table, idCol,
+                table, idCol, obj.IdMaquinaria,
                 BE.Audit.AuditEvents.ModificacionMaquinaria,
-                "Modificación de maquinaria Id=" + obj.IdMaquinaria
+                "Modificación de maquinaria Id=" + obj.IdMaquinaria,
+                true
             );
         }
     }

@@ -26,7 +26,8 @@ namespace DAL.Genericos
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaIdiomas,
-                "Listado de idiomas"
+                "Listado de idiomas",
+                false
             );
         }
 
@@ -49,11 +50,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionIdioma,
-                "Alta de idioma: " + (obj.Nombre ?? string.Empty)
+                "Alta de idioma: " + (obj.Nombre ?? string.Empty),
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdIdioma = System.Convert.ToInt32(newId);
+
+            if (obj.IdIdioma > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdIdioma, false);
         }
 
         public void Update(BE.Idioma obj)
@@ -76,9 +81,10 @@ UPDATE " + table + @"
                     cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value =
                         (object)obj.CodigoISO ?? System.DBNull.Value;
                 },
-                table, idCol,
+                table, idCol, obj.IdIdioma,
                 BE.Audit.AuditEvents.ModificacionIdioma,
-                "Modificación de idioma Id=" + obj.IdIdioma
+                "Modificación de idioma Id=" + obj.IdIdioma,
+                true
             );
         }
     }

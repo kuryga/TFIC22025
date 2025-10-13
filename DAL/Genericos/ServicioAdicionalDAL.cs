@@ -26,7 +26,8 @@ namespace DAL.Genericos
                 null,
                 table, idCol,
                 BE.Audit.AuditEvents.ConsultaServicios,
-                "Listado de servicios adicionales"
+                "Listado de servicios adicionales",
+                false
             );
         }
 
@@ -50,11 +51,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionServicioAdicional,
-                "Alta de servicio adicional"
+                "Alta de servicio adicional",
+                false
             );
 
             if (newId != null && newId != System.DBNull.Value)
                 obj.IdServicio = System.Convert.ToInt32(newId);
+
+            if (obj.IdServicio > 0)
+                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdServicio, false);
         }
 
         public void Update(BE.ServicioAdicional obj)
@@ -78,9 +83,10 @@ UPDATE " + table + @"
                     pPrecio.Precision = 18; pPrecio.Scale = 2;
                     pPrecio.Value = obj.Precio;
                 },
-                table, idCol,
+                table, idCol, obj.IdServicio,
                 BE.Audit.AuditEvents.ModificacionServicioAdicional,
-                "Modificación de servicio adicional Id=" + obj.IdServicio
+                "Modificación de servicio adicional Id=" + obj.IdServicio,
+                true
             );
         }
     }

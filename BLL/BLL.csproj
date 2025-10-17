@@ -42,11 +42,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audit y params\BitacoraBLL.cs" />
+    <Compile Include="Audit y params\ParametrizacionBLL.cs" />
     <Compile Include="Genericos\CotizacionBLL.cs" />
     <Compile Include="Genericos\MaterialBLL.cs" />
     <Compile Include="Genericos\MonedaBLL.cs" />
     <Compile Include="Genericos\MaquinariaBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Seguridad\BackupBLL.cs" />
     <Compile Include="Seguridad\LoginBLL.cs" />
     <Compile Include="Seguridad\UsuarioBLL.cs" />
     <Compile Include="Genericos\TipoEdificacionBLL.cs" />

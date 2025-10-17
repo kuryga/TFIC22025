@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
 namespace UI
 {
@@ -43,6 +44,8 @@ namespace UI
                 }
             };
 
+            string Username = UsuarioBLL.GetInstance().GetSesionActivaNombreCompleto();
+            lblBienvenida.Text = $"Bienvenido al sistema {Username}";
         }
 
         private void AbrirFormulario(Form form)

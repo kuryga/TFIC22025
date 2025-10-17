@@ -8,6 +8,10 @@ namespace BE.Audit
         public const string IngresoSesion = "Autenticacion.IngresoSesion";
         public const string CierreSesion = "Autenticacion.CierreSesion";
 
+        public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
+        public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
+        public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
+
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";
@@ -34,6 +38,8 @@ namespace BE.Audit
         public const string ConsultaIdiomas = "Idioma.ConsultaDeListado";
 
         public const string ActivacionUsuarioPorCorreo = "Usuario.ActivacionPorCorreo";
+
+        public const string ConsultaParametrizacion = "Parametrizacion.consulta";
 
         // ==== C4 (altas / acciones relevantes) ====
         public const string CambioContrasena = "Usuario.CambioContrasena";
@@ -85,6 +91,8 @@ namespace BE.Audit
         public const string FalloConexionBD = "BaseDatos.FalloConexion";
         public const string FalloVerificacionIntegridad = "DV.FalloVerificacion";
         public const string ReparacionIntegridadDatos = "DV.ReparacionIntegridad";
+        public const string RespaldoBaseDatos = "BaseDatos.BackupCreado";
+        public const string RestauracionBaseDatos = "BaseDatos.RestoreEjecutado";
 
         // === Mapeo interno a criticidad ===
         public static Criticidad GetCriticidad(string accion)
@@ -114,6 +122,10 @@ namespace BE.Audit
                 case ConsultaIdiomas:
                 case ExportacionCotizacion:
                 case ActivacionUsuarioPorCorreo:
+                case ConsultaParametrizacion:
+                case ConsultaFamiliasPorUsuario:
+                case ConsultaPatentesPorUsuario:
+                case ConsultaPatentesPorFamilia:
                     return Criticidad.C5;
             }
 
@@ -176,6 +188,8 @@ namespace BE.Audit
                 case FalloConexionBD:
                 case FalloVerificacionIntegridad:
                 case ReparacionIntegridadDatos:
+                case RespaldoBaseDatos:
+                case RestauracionBaseDatos:
                     return Criticidad.C1;
             }
 

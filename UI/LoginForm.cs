@@ -1,19 +1,33 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Collections.Generic;
 using BLL.Seguridad;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
+using Parametrizacion = BE.Params.Parametrizacion;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using Idioma = BE.Idioma;
 
 namespace UI
 {
     public partial class LoginForm : Form
     {
         public event Action LoginSucceeded;
-
+        
         public LoginForm()
         {
             InitializeComponent();
+
+            Parametrizacion param = ParametrizacionBLL.GetInstance().GetParametrizacion();
+
+            this.Text = $"Inicio de sesion - {param.NombreEmpresa}";
+
+            List<Idioma> idiomas = ParametrizacionBLL.GetInstance().GetIdiomas();
+            cmbIdiomaInferior.DataSource = idiomas;
+            cmbIdiomaInferior.DisplayMember = "nombre";  
+            cmbIdiomaInferior.ValueMember = "nombre"; 
+            cmbIdiomaInferior.SelectedValue = idiomas.Find(r => r.IdIdioma == param.IdIdioma).Nombre;
 
             this.AcceptButton = btnLogin;
 

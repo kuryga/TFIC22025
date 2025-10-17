@@ -11,6 +11,7 @@ namespace BE.Audit
         public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
         public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
         public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
+        public const string ConsultaUsuariosPorPatente = "Usuarios.ConsultaPatentes";
         public const string ConsultaFamilias = "Familias.ConsultaDeListado";
         public const string ConsultaPatentes = "Patentes.ConsultaDeListado";
        
@@ -132,6 +133,7 @@ namespace BE.Audit
                 case ConsultaPatentesPorUsuario:
                 case ConsultaPatentesPorFamilia:
                 case ConsultaFamilias:
+                case ConsultaUsuariosPorPatente:
                     return Criticidad.C5;
             }
 

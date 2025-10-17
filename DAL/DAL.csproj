@@ -54,6 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IDAOInterface.cs" />
     <Compile Include="Seguridad\BackupDAL.cs" />
+    <Compile Include="Seguridad\PermisosBLL.cs" />
     <Compile Include="Seguridad\SecurityUtilities.cs" />
     <Compile Include="Seguridad\SessionContext.cs" />
     <Compile Include="Seguridad\UsuarioDAL.cs" />

@@ -8,6 +8,10 @@ namespace BE.Audit
         public const string IngresoSesion = "Autenticacion.IngresoSesion";
         public const string CierreSesion = "Autenticacion.CierreSesion";
 
+        public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
+        public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
+        public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
+
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";
@@ -119,6 +123,9 @@ namespace BE.Audit
                 case ExportacionCotizacion:
                 case ActivacionUsuarioPorCorreo:
                 case ConsultaParametrizacion:
+                case ConsultaFamiliasPorUsuario:
+                case ConsultaPatentesPorUsuario:
+                case ConsultaPatentesPorFamilia:
                     return Criticidad.C5;
             }
 

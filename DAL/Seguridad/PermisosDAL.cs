@@ -187,22 +187,31 @@ WHERE fp.idFamilia IN ({placeholders});";
         {
             var nuevasFamilias = (idsFamilia ?? Enumerable.Empty<int>()).Distinct().ToList();
 
-            // Validación previa (rápida): no dejar huérfanas patentes que perdería este usuario
             var patentesOld = new HashSet<int>(GetPatentesByUsuario(idUsuario).Select(p => p.IdPatente));
             var patDirectas = GetPatentesDirectasByUsuario(idUsuario) ?? new List<BE.Patente>();
             var patPorFamilias = GetPatentesPorFamilias(nuevasFamilias) ?? new List<BE.Patente>();
             var patentesNew = new HashSet<int>(
                 patDirectas.Select(p => p.IdPatente)
-                           .Concat(patPorFamilias.Select(p => p.IdPatente)));
+                           .Concat(patPorFamilias.Select(p => p.IdPatente))
+            );
 
             var patentesPerdidas = patentesOld.Except(patentesNew).ToList();
             foreach (var idPat in patentesPerdidas)
             {
                 var otros = new HashSet<int>(GetUsuariosConPatente(idPat));
                 otros.Remove(idUsuario);
+
                 if (otros.Count == 0)
+                {
+                    Audit.BitacoraDAL.GetInstance().Log(
+                        BE.Audit.AuditEvents.EliminacionPatentesCriticaUsuario,
+                        $"Intento de dejar patente Id={idPat} sin usuarios asignados (Usuario={idUsuario})."
+                    );
+
                     throw new InvalidOperationException(
-                        "No se puede quitar la patente Id=" + idPat + " porque quedaría sin ningún usuario asignado.");
+                        $"No se puede quitar la patente Id={idPat} porque quedaría sin ningún usuario asignado."
+                    );
+                }
             }
 
             string core;
@@ -271,20 +280,30 @@ END CATCH;";
         {
             var nuevasPatentes = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
 
-            // Validación previa (rápida)
             var patentesOld = new HashSet<int>(GetPatentesByUsuario(idUsuario).Select(p => p.IdPatente));
             var familiasActuales = GetFamiliasByUsuario(idUsuario) ?? new List<BE.Familia>();
             var patPorFamilias = GetPatentesPorFamilias(familiasActuales.Select(f => f.IdFamilia)) ?? new List<BE.Patente>();
-            var patentesNew = new HashSet<int>(nuevasPatentes.Concat(patPorFamilias.Select(p => p.IdPatente)));
+            var patentesNew = new HashSet<int>(
+                nuevasPatentes.Concat(patPorFamilias.Select(p => p.IdPatente))
+            );
 
             var patentesPerdidas = patentesOld.Except(patentesNew).ToList();
             foreach (var idPat in patentesPerdidas)
             {
                 var otros = new HashSet<int>(GetUsuariosConPatente(idPat));
                 otros.Remove(idUsuario);
+
                 if (otros.Count == 0)
+                {
+                    Audit.BitacoraDAL.GetInstance().Log(
+                        BE.Audit.AuditEvents.EliminacionPatentesCriticaUsuario,
+                        $"Intento de dejar patente Id={idPat} sin usuarios asignados (Usuario={idUsuario})."
+                    );
+
                     throw new InvalidOperationException(
-                        "No se puede quitar la patente Id=" + idPat + " porque quedaría sin ningún usuario asignado.");
+                        $"No se puede quitar la patente Id={idPat} porque quedaría sin ningún usuario asignado."
+                    );
+                }
             }
 
             string core;
@@ -347,6 +366,5 @@ END CATCH;";
                 shouldCalculate: true
             );
         }
-
     }
 }

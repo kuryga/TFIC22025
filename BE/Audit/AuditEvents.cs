@@ -92,6 +92,7 @@ namespace BE.Audit
         public const string EliminacionMaterial = "Material.Eliminacion";
         public const string IntentosFallidosAcceso = "Autenticacion.IntentosFallidos";
         public const string RespaldoBase = "BaseDatos.Respaldo";
+        public const string EliminacionPatentesCriticaUsuario = "Patentes.IntentoEliminacionCritica";
 
         // ==== C1 (muy críticas) ====
         public const string FalloConexionBD = "BaseDatos.FalloConexion";

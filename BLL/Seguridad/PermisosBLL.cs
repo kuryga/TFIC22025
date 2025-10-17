@@ -33,6 +33,11 @@ namespace BLL.Seguridad
         }
         public List<BE.Familia> GetAllFamilias()
             => PermisosDAL.GetInstance().GetAllFamilias();
+        public List<BE.Patente> GetAllPatentes()
+            => PermisosDAL.GetInstance().GetAllPatentes();
+
+        public void SetPatentesForUsuario(int idUsuario, IEnumerable<int> idsPatente)
+            => PermisosDAL.GetInstance().SetPatentesForUsuario(idUsuario, idsPatente);
 
         public void SetFamiliasForUsuario(int idUsuario, IEnumerable<int> idsFamilia)
             => PermisosDAL.GetInstance().SetFamiliasForUsuario(idUsuario, idsFamilia);

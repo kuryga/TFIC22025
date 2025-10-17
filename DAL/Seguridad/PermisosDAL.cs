@@ -34,6 +34,14 @@ namespace DAL.Seguridad
                 BE.Audit.AuditEvents.ConsultaFamilias, "Listado de familias");
         }
 
+        public List<BE.Patente> GetAllPatentes()
+        {
+            string sql = "SELECT idPatente AS IdPatente, nombrePatente AS NombrePatente, descripcion AS Descripcion FROM dbo.Patente ORDER BY nombrePatente;";
+            return db.QueryListAndLog<BE.Patente>(sql, null, "dbo.Patente", "idPatente",
+                BE.Audit.AuditEvents.ConsultaPatentes, "Listado de patentes");
+        }
+
+
         public List<BE.Familia> GetFamiliasByUsuario(int idUsuario)
         {
             string sql = @"
@@ -129,6 +137,31 @@ WHERE fp.idFamilia = @idFamilia;";
             }, "dbo.UsuarioFamilia", "idUsuario",
             BE.Audit.AuditEvents.ModificarFamiliasUsuario,
             "Asignar familias al usuario Id=" + idUsuario, shouldCalculate: true);
+        }
+
+        public void SetPatentesForUsuario(int idUsuario, IEnumerable<int> idsPatente)
+        {
+            var ids = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
+
+            string del = "DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u;";
+            db.ExecuteNonQueryAndLog(del, c => c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario,
+                "dbo.UsuarioPatente", "idUsuario",
+                BE.Audit.AuditEvents.ModificarPatentesUsuario,
+                "Limpiar patentes del usuario Id=" + idUsuario);
+
+            if (ids.Count == 0) return;
+
+            var values = string.Join(", ", ids.Select((_, i) => $"(@u, @p{i})"));
+            var ins = $"INSERT INTO dbo.UsuarioPatente (idUsuario, idPatente) VALUES {values};";
+
+            db.ExecuteNonQueryAndLog(ins, c =>
+            {
+                c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
+                for (int i = 0; i < ids.Count; i++)
+                    c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = ids[i];
+            }, "dbo.UsuarioPatente", "idUsuario",
+            BE.Audit.AuditEvents.ModificarPatentesUsuario,
+            "Asignar patentes al usuario Id=" + idUsuario, shouldCalculate: true);
         }
     }
 }

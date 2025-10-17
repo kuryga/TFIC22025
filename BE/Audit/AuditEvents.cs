@@ -12,8 +12,8 @@ namespace BE.Audit
         public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
         public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
         public const string ConsultaFamilias = "Familias.ConsultaDeListado";
-
-
+        public const string ConsultaPatentes = "Patentes.ConsultaDeListado";
+       
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";
@@ -80,6 +80,8 @@ namespace BE.Audit
         public const string ModificacionCotizacionHeader = "Cotizacion.ModificacionHeader";
         public const string ModificacionServicioAdicional = "ServicioAdicional.Modificacion";
         public const string ModificarFamiliasUsuario = "Familias.ModificacionPorUsuario";
+        public const string ModificarPatentesUsuario = "Patentes.ModificacionPorUsuario";
+        
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";

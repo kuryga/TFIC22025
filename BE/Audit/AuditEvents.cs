@@ -11,6 +11,8 @@ namespace BE.Audit
         public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
         public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
         public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
+        public const string ConsultaFamilias = "Familias.ConsultaDeListado";
+
 
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
@@ -77,6 +79,7 @@ namespace BE.Audit
         public const string ModificacionTipoEdificacion = "TipoEdificacion.Modificacion";
         public const string ModificacionCotizacionHeader = "Cotizacion.ModificacionHeader";
         public const string ModificacionServicioAdicional = "ServicioAdicional.Modificacion";
+        public const string ModificarFamiliasUsuario = "Familias.ModificacionPorUsuario";
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";
@@ -126,6 +129,7 @@ namespace BE.Audit
                 case ConsultaFamiliasPorUsuario:
                 case ConsultaPatentesPorUsuario:
                 case ConsultaPatentesPorFamilia:
+                case ConsultaFamilias:
                     return Criticidad.C5;
             }
 
@@ -166,6 +170,7 @@ namespace BE.Audit
                 case ModificacionTipoEdificacion:
                 case ModificacionCotizacionHeader:
                 case ModificacionServicioAdicional:
+                case ModificarFamiliasUsuario:
                     return Criticidad.C3;
             }
 

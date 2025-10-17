@@ -31,5 +31,10 @@ namespace BLL.Seguridad
             if (idFamilia <= 0) throw new ArgumentOutOfRangeException(nameof(idFamilia));
             return PermisosDAL.GetInstance().GetPatentesByFamilia(idFamilia);
         }
+        public List<BE.Familia> GetAllFamilias()
+            => PermisosDAL.GetInstance().GetAllFamilias();
+
+        public void SetFamiliasForUsuario(int idUsuario, IEnumerable<int> idsFamilia)
+            => PermisosDAL.GetInstance().SetFamiliasForUsuario(idUsuario, idsFamilia);
     }
 }

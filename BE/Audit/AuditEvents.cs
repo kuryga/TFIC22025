@@ -87,6 +87,8 @@ namespace BE.Audit
         public const string FalloConexionBD = "BaseDatos.FalloConexion";
         public const string FalloVerificacionIntegridad = "DV.FalloVerificacion";
         public const string ReparacionIntegridadDatos = "DV.ReparacionIntegridad";
+        public const string RespaldoBaseDatos = "BaseDatos.BackupCreado";
+        public const string RestauracionBaseDatos = "BaseDatos.RestoreEjecutado";
 
         // === Mapeo interno a criticidad ===
         public static Criticidad GetCriticidad(string accion)
@@ -179,6 +181,8 @@ namespace BE.Audit
                 case FalloConexionBD:
                 case FalloVerificacionIntegridad:
                 case ReparacionIntegridadDatos:
+                case RespaldoBaseDatos:
+                case RestauracionBaseDatos:
                     return Criticidad.C1;
             }
 

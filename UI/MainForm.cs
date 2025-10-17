@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using Parametrizacion = BE.Params.Parametrizacion;
 
 namespace UI
 {
@@ -46,6 +48,10 @@ namespace UI
 
             string Username = UsuarioBLL.GetInstance().GetSesionActivaNombreCompleto();
             lblBienvenida.Text = $"Bienvenido al sistema {Username}";
+
+            Parametrizacion param = ParametrizacionBLL.GetInstance().GetParametrizacion();
+
+            this.Text = $"Menu principal - {param.NombreEmpresa}";
         }
 
         private void AbrirFormulario(Form form)

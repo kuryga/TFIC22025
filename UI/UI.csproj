@@ -124,12 +124,6 @@
     <Compile Include="GestionarPatentesForm.Designer.cs">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarPerfilProfesionalForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GestionarPerfilProfesionalForm.Designer.cs">
-      <DependentUpon>GestionarPerfilProfesionalForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="GestionarServicioAdicionalForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -219,9 +213,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarPatentesForm.resx">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GestionarPerfilProfesionalForm.resx">
-      <DependentUpon>GestionarPerfilProfesionalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarServicioAdicionalForm.resx">
       <DependentUpon>GestionarServicioAdicionalForm.cs</DependentUpon>

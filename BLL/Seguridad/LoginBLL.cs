@@ -55,12 +55,12 @@ namespace BLL.Seguridad
                 }
             }
 
-            dal.ResetearIntentosFallidos(row.idUsuario);
-
             SessionContext.Current.UsuarioId = row.idUsuario;
             SessionContext.Current.UsuarioEmail = row.correoElectronico ?? string.Empty;
             SessionContext.Current.NombreCompleto =
                 ((row.nombreUsuario ?? string.Empty) + " " + (row.apellidoUsuario ?? string.Empty)).Trim();
+
+            dal.ResetearIntentosFallidos(row.idUsuario);
 
             try
             {

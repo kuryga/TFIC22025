@@ -37,7 +37,6 @@ namespace DAL.Seguridad
                 "Listado de usuarios"
             );
 
-            // Desencriptar correo antes de devolver
             if (list != null)
             {
                 for (int i = 0; i < list.Count; i++)
@@ -49,7 +48,7 @@ namespace DAL.Seguridad
                     }
                     catch
                     {
-                        // si fallara el formato, devolvemos lo que viene
+                        // nada
                     }
                 }
             }
@@ -75,7 +74,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
 
-                    // Encriptar reversible (determinístico) antes de guardar
                     string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
                     cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
 
@@ -117,7 +115,6 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
 
-                    // Encriptar reversible (determinístico) antes de actualizar
                     string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
                     cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
 
@@ -169,7 +166,6 @@ WHERE correoElectronico = @mail;";
                 "Búsqueda por correo (login): " + (correoElectronico ?? string.Empty)
             );
 
-            // Desencriptar el correo antes de devolver
             if (row != null)
             {
                 try
@@ -179,7 +175,7 @@ WHERE correoElectronico = @mail;";
                 }
                 catch
                 {
-                    // si falla el desencriptado, devolver crudo
+                    // nada
                 }
             }
 

@@ -27,7 +27,7 @@ public sealed class DalToolkit
     {
         int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
         if (shouldCalculate)
-            RecalculateTableDvsFromSelectAll(tableName, pkName);
+            RecalculateTableDvsFromSelectAll(tableName, pkName); 
 
         BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
@@ -185,141 +185,11 @@ public sealed class DalToolkit
         BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
     }
 
-    public void RecalculateTableDvsFromSelectAll(string tableName, string idColumn)
-        => RecalculateTableDvsFromSelectAllCore(tableName, idColumn, suppressDvErrorLog: false);
+    public void RecalculateTableDvsFromSelectAll(string tableName, string _ignoredIdColumn)
+        => RecalculateTableDvsFromSelectAllComposite(tableName, suppressDvErrorLog: false);
 
-    public void RecalculateTableDvsFromSelectAllSilent(string tableName, string idColumn)
-        => RecalculateTableDvsFromSelectAllCore(tableName, idColumn, suppressDvErrorLog: true);
-
-    private void RecalculateTableDvsFromSelectAllCore(string tableName, string idColumn, bool suppressDvErrorLog)
-    {
-        var rowValues = new List<(object IdValue, string DvhCalc)>();
-        var dvhs = new List<string>();
-
-        try
-        {
-            using (var conn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT * FROM " + tableName + ";", conn) { CommandType = CommandType.Text })
-            {
-                conn.Open();
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    if (!rdr.HasRows)
-                    {
-                        conn.Close();
-
-                        string currentDvv = GetCurrentDvv(tableName);
-                        if (!string.Equals(currentDvv ?? string.Empty, string.Empty, StringComparison.Ordinal)
-                            && !suppressDvErrorLog)
-                        {
-                            string msg = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
-                        }
-
-                        UpsertDvvWithDvh(tableName, string.Empty);
-                        return;
-                    }
-
-                    var cols = new List<Tuple<string, int>>();
-                    int idOrdinal = -1;
-                    int dvhOrdinal = -1;
-
-                    for (int i = 0; i < rdr.FieldCount; i++)
-                    {
-                        var colName = rdr.GetName(i);
-
-                        if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
-                        {
-                            dvhOrdinal = i; // DVH no participa del cálculo
-                            continue;
-                        }
-
-                        if (string.Equals(colName, idColumn, StringComparison.OrdinalIgnoreCase))
-                            idOrdinal = i;
-
-                        cols.Add(Tuple.Create(colName, i));
-                    }
-
-                    if (idOrdinal < 0)
-                        throw new InvalidOperationException("No se encontró la columna Id '" + idColumn + "' en " + tableName + ".");
-
-                    cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
-
-                    int mismatchesDvh = 0;
-
-                    while (rdr.Read())
-                    {
-                        var sb = new StringBuilder();
-
-                        for (int c = 0; c < cols.Count; c++)
-                        {
-                            int ord = cols[c].Item2;
-                            object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
-
-                            if (v == null) { }
-                            else if (v is byte[] bytes)
-                            {
-                                for (int k = 0; k < bytes.Length; k++)
-                                    sb.Append(bytes[k].ToString("x2"));
-                            }
-                            else
-                            {
-                                sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
-                            }
-                        }
-
-                        string dvhCalc = SimpleDv(sb.ToString());
-                        dvhs.Add(dvhCalc);
-
-                        if (dvhOrdinal >= 0)
-                        {
-                            var dvhDb = rdr.IsDBNull(dvhOrdinal) ? string.Empty : Convert.ToString(rdr.GetValue(dvhOrdinal));
-                            if (!string.Equals(dvhDb ?? string.Empty, dvhCalc ?? string.Empty, StringComparison.Ordinal))
-                                mismatchesDvh++;
-                        }
-
-                        object idValue = rdr.GetValue(idOrdinal);
-                        rowValues.Add((idValue, dvhCalc));
-                    }
-
-                    conn.Close();
-
-                    // DVV
-                    string dvvCalc = ComputeDvv(dvhs);
-                    string dvvDb = GetCurrentDvv(tableName);
-                    bool dvvMatch = string.Equals(dvvDb ?? string.Empty, dvvCalc ?? string.Empty, StringComparison.Ordinal);
-
-                    if (!suppressDvErrorLog)
-                    {
-                        if (mismatchesDvh > 0)
-                        {
-                            string msgH = "Error en dígito verificador horizontal en: " + tableName + ". Reparación realizada.";
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
-                        }
-                        if (!dvvMatch)
-                        {
-                            string msgV = "Error en dígito verificador vertical en: " + tableName + ". Reparación realizada.";
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgV);
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgV);
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < rowValues.Count; i++)
-                UpdateRowDvh(tableName, idColumn, rowValues[i].IdValue, rowValues[i].DvhCalc);
-
-            string newDvv = ComputeDvv(dvhs);
-            UpsertDvvWithDvh(tableName, newDvv);
-        }
-        catch (Exception ex)
-        {
-            LogFailure("DV-REFRESH", tableName, ex);
-            throw;
-        }
-    }
+    public void RecalculateTableDvsFromSelectAllSilent(string tableName, string _ignoredIdColumn)
+        => RecalculateTableDvsFromSelectAllComposite(tableName, suppressDvErrorLog: true);
 
     public void RecalculateRowDvh(string tableName, string pkName, object pkValue)
     {
@@ -370,7 +240,7 @@ public sealed class DalToolkit
             }
         }
 
-        UpdateRowDvh(tableName, pkName, pkValue, dvhCalc);
+        UpdateRowDvh_SinglePk(tableName, pkName, pkValue, dvhCalc);
     }
 
     public void RecalculateDvvFromExistingDvhs(string tableName, bool silent = false)
@@ -423,7 +293,7 @@ public sealed class DalToolkit
         RecalculateDvvFromExistingDvhs(tableName, silent);
     }
 
-    private void UpdateRowDvh(string table, string idColumn, object idValue, string dvh)
+    private void UpdateRowDvh_SinglePk(string table, string idColumn, object idValue, string dvh)
     {
         const string sqlTpl = "UPDATE {0} SET DVH = @dvh WHERE {1} = @id;";
         var sql = string.Format(sqlTpl, table, idColumn);
@@ -525,15 +395,15 @@ UPDATE " + dvvTable + @"
         }
     }
 
-    private sealed class TablePkInfo
+    private sealed class TablePkInfoComposite
     {
-        public string TableFullName { get; set; }   // ej: [dbo].[Material]
-        public string PkColumnName { get; set; }   // ej: idMaterial
+        public string TableFullName { get; set; }               // ej: [dbo].[UsuarioFamilia]
+        public List<string> PkColumnNames { get; set; } = new List<string>();  // ej: idUsuario, idFamilia
     }
 
-    private List<TablePkInfo> EnumerateTablesWithSinglePkAndDvh(params string[] extraExcludes)
+    private List<TablePkInfoComposite> EnumerateTablesWithAnyPkAndDvh(params string[] extraExcludes)
     {
-        var result = new List<TablePkInfo>();
+        var result = new List<TablePkInfoComposite>();
         var excludes = new HashSet<string>(
             new[] { "[dbo].[DigitoVerificadorVertical]" }
             .Concat(extraExcludes ?? Array.Empty<string>()),
@@ -542,51 +412,37 @@ UPDATE " + dvvTable + @"
         const string sql = @"
 WITH PkCols AS (
     SELECT
-        t.TABLE_SCHEMA,
-        t.TABLE_NAME,
-        COUNT(*) AS PkCount
-    FROM INFORMATION_SCHEMA.TABLES t
-    JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
-      ON tc.TABLE_SCHEMA = t.TABLE_SCHEMA
-     AND tc.TABLE_NAME   = t.TABLE_NAME
-     AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
-    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
-      ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
-     AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME
-    WHERE t.TABLE_TYPE = 'BASE TABLE'
-    GROUP BY t.TABLE_SCHEMA, t.TABLE_NAME
-    HAVING COUNT(*) = 1
-),
-PkName AS (
-    SELECT
-        kcu.TABLE_SCHEMA,
-        kcu.TABLE_NAME,
-        MAX(kcu.COLUMN_NAME) AS PkColumn -- único porque COUNT(*)=1
+        tc.TABLE_SCHEMA,
+        tc.TABLE_NAME,
+        kcu.COLUMN_NAME,
+        kcu.ORDINAL_POSITION
     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
     JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
       ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
      AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME
     WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
-    GROUP BY kcu.TABLE_SCHEMA, kcu.TABLE_NAME
 ),
 HasDvh AS (
     SELECT DISTINCT TABLE_SCHEMA, TABLE_NAME
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE COLUMN_NAME = 'DVH'
+),
+BaseTables AS (
+    SELECT TABLE_SCHEMA, TABLE_NAME
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_TYPE = 'BASE TABLE'
 )
 SELECT
-    t.TABLE_SCHEMA,
-    t.TABLE_NAME,
-    p.PkColumn
-FROM INFORMATION_SCHEMA.TABLES t
-JOIN PkCols pc
-  ON pc.TABLE_SCHEMA = t.TABLE_SCHEMA AND pc.TABLE_NAME = t.TABLE_NAME
-JOIN PkName p
-  ON p.TABLE_SCHEMA = t.TABLE_SCHEMA AND p.TABLE_NAME = t.TABLE_NAME
+    b.TABLE_SCHEMA,
+    b.TABLE_NAME,
+    p.COLUMN_NAME,
+    p.ORDINAL_POSITION
+FROM BaseTables b
+JOIN PkCols p
+  ON p.TABLE_SCHEMA = b.TABLE_SCHEMA AND p.TABLE_NAME = b.TABLE_NAME
 JOIN HasDvh h
-  ON h.TABLE_SCHEMA = t.TABLE_SCHEMA AND h.TABLE_NAME = t.TABLE_NAME
-WHERE t.TABLE_TYPE = 'BASE TABLE';
-";
+  ON h.TABLE_SCHEMA = b.TABLE_SCHEMA AND h.TABLE_NAME = b.TABLE_NAME
+ORDER BY b.TABLE_SCHEMA, b.TABLE_NAME, p.ORDINAL_POSITION;";
 
         using (var conn = new SqlConnection(connectionString))
         using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
@@ -594,38 +450,243 @@ WHERE t.TABLE_TYPE = 'BASE TABLE';
             conn.Open();
             using (var rdr = cmd.ExecuteReader())
             {
+             
+                var map = new Dictionary<string, List<(int Ord, string Col)>>(StringComparer.OrdinalIgnoreCase);
+
                 while (rdr.Read())
                 {
                     var schema = rdr.GetString(0);
                     var name = rdr.GetString(1);
-                    var pk = rdr.GetString(2);
+                    var col = rdr.GetString(2);
+                    var ord = rdr.IsDBNull(3) ? 0 : Convert.ToInt32(rdr.GetValue(3));
 
                     var full = $"[{schema}].[{name}]";
                     if (excludes.Contains(full)) continue;
 
-                    result.Add(new TablePkInfo
+                    if (!map.TryGetValue(full, out var list))
                     {
-                        TableFullName = full,
-                        PkColumnName = pk
+                        list = new List<(int Ord, string Col)>();
+                        map[full] = list;
+                    }
+                    list.Add((ord, col));
+                }
+
+                foreach (var kv in map)
+                {
+                    var pkCols = kv.Value
+                                   .OrderBy(x => x.Ord)
+                                   .Select(x => x.Col)
+                                   .Where(c => !string.IsNullOrWhiteSpace(c))
+                                   .ToList();
+
+                    if (pkCols.Count == 0) continue;
+
+                    result.Add(new TablePkInfoComposite
+                    {
+                        TableFullName = kv.Key,
+                        PkColumnNames = pkCols
                     });
                 }
             }
         }
         return result;
     }
+
+
+    private (string schema, string name) ParseSchemaAndName(string tableFullName)
+    {
+        var t = (tableFullName ?? "").Trim();
+        t = t.Replace("[", "").Replace("]", "");
+        var parts = t.Split('.');
+        if (parts.Length == 2) return (parts[0], parts[1]);
+        // fallback: dbo
+        return ("dbo", t);
+    }
+
+    private List<string> GetPkColumnsFromDb(string tableFullName)
+    {
+        var (schema, name) = ParseSchemaAndName(tableFullName);
+        const string sql = @"
+SELECT kcu.COLUMN_NAME
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+  ON kcu.CONSTRAINT_SCHEMA = tc.CONSTRAINT_SCHEMA
+ AND kcu.CONSTRAINT_NAME   = tc.CONSTRAINT_NAME
+WHERE tc.TABLE_SCHEMA = @s AND tc.TABLE_NAME = @n AND tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+ORDER BY kcu.ORDINAL_POSITION;";
+
+        var list = new List<string>();
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+        {
+            cmd.Parameters.Add("@s", SqlDbType.VarChar, 128).Value = schema;
+            cmd.Parameters.Add("@n", SqlDbType.VarChar, 128).Value = name;
+            conn.Open();
+            using (var rdr = cmd.ExecuteReader())
+            {
+                while (rdr.Read())
+                    list.Add(rdr.GetString(0));
+            }
+        }
+        return list;
+    }
+
+    private void RecalculateTableDvsFromSelectAllComposite(string tableFullName, bool suppressDvErrorLog)
+    {
+        var pkColumns = GetPkColumnsFromDb(tableFullName);
+        if (pkColumns.Count == 0)
+        {
+            return;
+        }
+
+        var dvhs = new List<string>();
+        var rowKeys = new List<Dictionary<string, object>>();
+
+        try
+        {
+            using (var conn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("SELECT * FROM " + tableFullName + ";", conn) { CommandType = CommandType.Text })
+            {
+                conn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    if (!rdr.HasRows)
+                    {
+                        conn.Close();
+                        string currentDvv = GetCurrentDvv(tableFullName);
+                        if (!string.Equals(currentDvv ?? string.Empty, string.Empty, StringComparison.Ordinal)
+                            && !suppressDvErrorLog)
+                        {
+                            string msg = "Error en dígito verificador vertical en: " + tableFullName + ". Reparación realizada.";
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msg);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msg);
+                        }
+
+                        UpsertDvvWithDvh(tableFullName, string.Empty);
+                        return;
+                    }
+
+                    var cols = new List<Tuple<string, int>>();
+                    int dvhOrdinal = -1;
+
+                    for (int i = 0; i < rdr.FieldCount; i++)
+                    {
+                        var colName = rdr.GetName(i);
+                        if (string.Equals(colName, "DVH", StringComparison.OrdinalIgnoreCase))
+                        {
+                            dvhOrdinal = i;
+                            continue;
+                        }
+                        cols.Add(Tuple.Create(colName, i));
+                    }
+
+                    cols.Sort((a, b) => string.Compare(a.Item1, b.Item1, StringComparison.Ordinal));
+
+                    int mismatchesDvh = 0;
+
+                    while (rdr.Read())
+                    {
+                        var sb = new StringBuilder();
+
+                        for (int c = 0; c < cols.Count; c++)
+                        {
+                            int ord = cols[c].Item2;
+                            object v = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+
+                            if (v == null) { }
+                            else if (v is byte[] bytes)
+                            {
+                                for (int k = 0; k < bytes.Length; k++)
+                                    sb.Append(bytes[k].ToString("x2"));
+                            }
+                            else
+                            {
+                                sb.Append(Convert.ToString(v, CultureInfo.InvariantCulture));
+                            }
+                        }
+
+                        string dvhCalc = SimpleDv(sb.ToString());
+                        dvhs.Add(dvhCalc);
+
+                        if (dvhOrdinal >= 0)
+                        {
+                            var dvhDb = rdr.IsDBNull(dvhOrdinal) ? string.Empty : Convert.ToString(rdr.GetValue(dvhOrdinal));
+                            if (!string.Equals(dvhDb ?? string.Empty, dvhCalc ?? string.Empty, StringComparison.Ordinal))
+                                mismatchesDvh++;
+                        }
+
+                        var key = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var pk in pkColumns)
+                        {
+                            int ord = rdr.GetOrdinal(pk);
+                            key[pk] = rdr.IsDBNull(ord) ? null : rdr.GetValue(ord);
+                        }
+                        rowKeys.Add(key);
+                    }
+
+                    conn.Close();
+
+                    if (!suppressDvErrorLog)
+                    {
+                        if (mismatchesDvh > 0)
+                        {
+                            string msgH = "Error en dígito verificador horizontal en: " + tableFullName + ". Reparación realizada.";
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
+                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < rowKeys.Count; i++)
+                UpdateRowDvhComposite(tableFullName, pkColumns, rowKeys[i], dvhs[i]);
+
+            string newDvv = ComputeDvv(dvhs);
+            UpsertDvvWithDvh(tableFullName, newDvv);
+        }
+        catch (Exception ex)
+        {
+            LogFailure("DV-REFRESH", tableFullName, ex);
+            throw;
+        }
+    }
+
+    private void UpdateRowDvhComposite(string tableFullName, List<string> pkColumns, Dictionary<string, object> keyValues, string dvh)
+    {
+        var where = string.Join(" AND ", pkColumns.Select((pk, i) => $"[{pk}] = @pk{i}"));
+        var sql = $"UPDATE {tableFullName} SET DVH = @dvh WHERE {where};";
+
+        using (var conn = new SqlConnection(connectionString))
+        using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+        {
+            cmd.Parameters.Add("@dvh", SqlDbType.VarChar, 256).Value = (object)dvh ?? string.Empty;
+
+            int i = 0;
+            foreach (var pk in pkColumns)
+            {
+                object val = keyValues.TryGetValue(pk, out var v) ? v : DBNull.Value;
+                cmd.Parameters.Add($"@pk{i}", SqlDbType.Variant).Value = val ?? DBNull.Value;
+                i++;
+            }
+
+            conn.Open();
+            cmd.ExecuteNonQuery();
+        }
+    }
+
     public void VerifyAndRepairAllTablesAuto(params string[] extraExcludes)
     {
-        var tables = EnumerateTablesWithSinglePkAndDvh(extraExcludes);
+        var tables = EnumerateTablesWithAnyPkAndDvh(extraExcludes);
         for (int i = 0; i < tables.Count; i++)
         {
             var t = tables[i];
             try
             {
-                RecalculateTableDvsFromSelectAll(t.TableFullName, t.PkColumnName);
+                RecalculateTableDvsFromSelectAllComposite(t.TableFullName, suppressDvErrorLog: false);
             }
             catch
             {
-            //nada
+                // nada
             }
         }
     }

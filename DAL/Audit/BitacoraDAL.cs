@@ -136,7 +136,7 @@ ORDER BY rn;";
             if (criticidad == null) criticidad = string.Empty;
 
             var ctx = SessionContext.Current;
-            int? uid = (ctx != null) ? ctx.UsuarioId : (int?)null;
+            int? uid = (ctx != null) ? ctx.UsuarioId : 0;
             string uname = (ctx != null && !string.IsNullOrEmpty(ctx.UsuarioEmail))
                            ? ctx.UsuarioEmail
                            : "Usuario deslogeado";

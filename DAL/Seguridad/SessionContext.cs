@@ -13,8 +13,7 @@ namespace DAL.Seguridad
 
         private SessionContext()
         {
-            // Mock
-            UsuarioId = 1;
+            UsuarioId = null;
             UsuarioEmail = "Usuario deslogeado";
             NombreCompleto = "Usuario deslogeado";
         }

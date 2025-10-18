@@ -23,8 +23,8 @@ namespace UI
             this.btnAgregar = new System.Windows.Forms.Button();
             this.btnEliminar = new System.Windows.Forms.Button();
             this.btnGuardar = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btnCrear = new System.Windows.Forms.Button();
+            this.btnModificar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDisponibles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignadas)).BeginInit();
@@ -151,27 +151,29 @@ namespace UI
             this.btnGuardar.Text = "Guardar";
             this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
             // 
-            // button1
+            // btnCrear
             // 
-            this.button1.Location = new System.Drawing.Point(23, 349);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(92, 30);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "Crear";
+            this.btnCrear.Location = new System.Drawing.Point(23, 349);
+            this.btnCrear.Name = "btnCrear";
+            this.btnCrear.Size = new System.Drawing.Size(92, 30);
+            this.btnCrear.TabIndex = 9;
+            this.btnCrear.Text = "Crear Familia";
+            this.btnCrear.Click += new System.EventHandler(this.btnCrear_Click);
             // 
-            // button2
+            // btnModificar
             // 
-            this.button2.Location = new System.Drawing.Point(308, 349);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(92, 30);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "Modificar";
+            this.btnModificar.Location = new System.Drawing.Point(281, 349);
+            this.btnModificar.Name = "btnModificar";
+            this.btnModificar.Size = new System.Drawing.Size(151, 30);
+            this.btnModificar.TabIndex = 10;
+            this.btnModificar.Text = "Modificar Familia";
+            this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
             // GestionarFamiliasForm
             // 
             this.ClientSize = new System.Drawing.Size(705, 391);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnModificar);
+            this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.lblUsuarios);
             this.Controls.Add(this.dgvUsuarios);
@@ -184,7 +186,7 @@ namespace UI
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GestionarFamiliasForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gestionar Familias";
+            this.Text = " ";
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDisponibles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignadas)).EndInit();
@@ -197,7 +199,7 @@ namespace UI
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private Button btnGuardar;
-        private Button button1;
-        private Button button2;
+        private Button btnCrear;
+        private Button btnModificar;
     }
 }

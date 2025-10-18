@@ -82,6 +82,12 @@
     <Compile Include="GestionarCotizaciones.Designer.cs">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </Compile>
+    <Compile Include="GestionarFamiliaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionarFamiliaForm.Designer.cs">
+      <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GestionarFamiliasForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -192,6 +198,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarCotizaciones.resx">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GestionarFamiliaForm.resx">
+      <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarFamiliasForm.resx">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>

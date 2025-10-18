@@ -11,6 +11,7 @@ namespace UI
     {
         private int _usuarioSeleccionadoId = 0;
         private HashSet<int> _familiasAsignadasOriginal = new HashSet<int>();
+        private bool _suspendSelectionEvents = false;
 
         public GestionarFamiliasForm()
         {
@@ -48,13 +49,13 @@ namespace UI
                 Name = "NombreCompleto",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
-
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Email",
                 Name = "correoElectronico",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
+
             dgvDisponibles.AutoGenerateColumns = false;
             dgvDisponibles.Columns.Clear();
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
@@ -70,7 +71,6 @@ namespace UI
                 Name = "NombreFamilia",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
-
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Descripcion",
@@ -93,7 +93,6 @@ namespace UI
                 Name = "NombreFamilia",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
-
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
                 HeaderText = "Descripcion",
@@ -102,12 +101,13 @@ namespace UI
             });
 
             dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
+            dgvDisponibles.SelectionChanged += DgvDisponibles_SelectionChanged;
+            dgvAsignadas.SelectionChanged += DgvAsignadas_SelectionChanged;
         }
 
         private void CargarUsuarios()
         {
             dgvUsuarios.Rows.Clear();
-
             var usuarios = UsuarioBLL.GetInstance().GetAll();
 
             foreach (var u in usuarios)
@@ -117,9 +117,7 @@ namespace UI
             }
 
             if (dgvUsuarios.Rows.Count > 0)
-            {
                 dgvUsuarios.ClearSelection();
-            }
         }
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)
@@ -137,7 +135,8 @@ namespace UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando familias: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error cargando familias: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -150,8 +149,7 @@ namespace UI
             var todas = PermisosBLL.GetInstance().GetAllFamilias();
             var asignadas = PermisosBLL.GetInstance().GetFamiliasByUsuario(idUsuario) ?? new List<BE.Familia>();
 
-            foreach (var f in asignadas)
-                _familiasAsignadasOriginal.Add(f.IdFamilia);
+            foreach (var f in asignadas) _familiasAsignadasOriginal.Add(f.IdFamilia);
 
             var setAsignadas = new HashSet<int>(asignadas.Select(f => f.IdFamilia));
 
@@ -162,6 +160,49 @@ namespace UI
                 else
                     dgvDisponibles.Rows.Add(f.IdFamilia, f.NombreFamilia, f.Descripcion);
             }
+
+            _suspendSelectionEvents = true;
+            dgvDisponibles.ClearSelection();
+            dgvDisponibles.CurrentCell = null;
+            dgvAsignadas.ClearSelection();
+            dgvAsignadas.CurrentCell = null;
+            _suspendSelectionEvents = false;
+
+            BeginInvoke((Action)(() =>
+            {
+                _suspendSelectionEvents = true;
+                dgvDisponibles.ClearSelection();
+                dgvDisponibles.CurrentCell = null;
+                dgvAsignadas.ClearSelection();
+                dgvAsignadas.CurrentCell = null;
+                _suspendSelectionEvents = false;
+            }));
+        }
+
+        private void DgvDisponibles_SelectionChanged(object sender, EventArgs e)
+        {
+            if (_suspendSelectionEvents) return;
+            _suspendSelectionEvents = true;
+
+            try
+            {
+                if (dgvDisponibles.Focused && dgvDisponibles.SelectedRows.Count > 0)
+                    dgvAsignadas.ClearSelection();
+            }
+            finally { _suspendSelectionEvents = false; }
+        }
+
+        private void DgvAsignadas_SelectionChanged(object sender, EventArgs e)
+        {
+            if (_suspendSelectionEvents) return;
+            _suspendSelectionEvents = true;
+
+            try
+            {
+                if (dgvAsignadas.Focused && dgvAsignadas.SelectedRows.Count > 0)
+                    dgvDisponibles.ClearSelection();
+            }
+            finally { _suspendSelectionEvents = false; }
         }
 
         private void btnAgregar_Click(object sender, EventArgs e)
@@ -170,9 +211,10 @@ namespace UI
 
             var id = Convert.ToInt32(dgvDisponibles.CurrentRow.Cells["IdFamilia"].Value);
             var nombre = Convert.ToString(dgvDisponibles.CurrentRow.Cells["NombreFamilia"].Value);
+            var desc = Convert.ToString(dgvDisponibles.CurrentRow.Cells["descripcion"].Value);
 
             dgvDisponibles.Rows.RemoveAt(dgvDisponibles.CurrentRow.Index);
-            dgvAsignadas.Rows.Add(id, nombre);
+            dgvAsignadas.Rows.Add(id, nombre, desc);
         }
 
         private void btnEliminar_Click(object sender, EventArgs e)
@@ -181,16 +223,18 @@ namespace UI
 
             var id = Convert.ToInt32(dgvAsignadas.CurrentRow.Cells["IdFamilia"].Value);
             var nombre = Convert.ToString(dgvAsignadas.CurrentRow.Cells["NombreFamilia"].Value);
+            var desc = Convert.ToString(dgvAsignadas.CurrentRow.Cells["descripcion"].Value);
 
             dgvAsignadas.Rows.RemoveAt(dgvAsignadas.CurrentRow.Index);
-            dgvDisponibles.Rows.Add(id, nombre);
+            dgvDisponibles.Rows.Add(id, nombre, desc);
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
             if (_usuarioSeleccionadoId <= 0)
             {
-                MessageBox.Show("Seleccione un usuario.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Seleccione un usuario.", "Aviso",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -202,12 +246,12 @@ namespace UI
                 asignadasAhora.Add(Convert.ToInt32(r.Cells["IdFamilia"].Value));
             }
 
-            var hayCambios =
-                !_familiasAsignadasOriginal.SetEquals(asignadasAhora);
+            var hayCambios = !_familiasAsignadasOriginal.SetEquals(asignadasAhora);
 
             if (!hayCambios)
             {
-                MessageBox.Show("No hay cambios para guardar.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("No hay cambios para guardar.", "Info",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -215,12 +259,63 @@ namespace UI
             {
                 PermisosBLL.GetInstance().SetFamiliasForUsuario(_usuarioSeleccionadoId, asignadasAhora);
                 _familiasAsignadasOriginal = new HashSet<int>(asignadasAhora);
-                MessageBox.Show("Familias asignadas guardadas correctamente.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Familias asignadas guardadas correctamente.", "OK",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al guardar: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private BE.Familia GetFamiliaSeleccionada()
+        {
+            DataGridViewRow row = null;
+
+            // Buscar en ambas grillas
+            if (dgvDisponibles.SelectedRows.Count > 0)
+                row = dgvDisponibles.SelectedRows[0];
+            else if (dgvAsignadas.SelectedRows.Count > 0)
+                row = dgvAsignadas.SelectedRows[0];
+
+            if (row == null || row.IsNewRow)
+                return new BE.Familia { IdFamilia = -1 };
+
+            var familia = new BE.Familia
+            {
+                IdFamilia = Convert.ToInt32(row.Cells["IdFamilia"].Value),
+                NombreFamilia = Convert.ToString(row.Cells["NombreFamilia"].Value) ?? string.Empty,
+                Descripcion = Convert.ToString(row.Cells["descripcion"].Value) ?? string.Empty
+            };
+
+            return familia;
+        }
+
+        private void btnCrear_Click(object sender, EventArgs e)
+        {
+
+            var form = new GestionarFamiliaForm(null); 
+            form.ShowDialog(this);
+
+
+            if (_usuarioSeleccionadoId > 0)
+                CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
+        }
+
+        private void btnModificar_Click(object sender, EventArgs e)
+        {
+            var sleccion = GetFamiliaSeleccionada();
+            if (sleccion.IdFamilia == -1)
+            {
+                MessageBox.Show("Seleccione una familia de alguna de las listas.", "Aviso",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var form = new GestionarFamiliaForm(sleccion);
+            form.ShowDialog(this);
+
         }
     }
 }

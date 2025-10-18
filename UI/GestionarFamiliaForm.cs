@@ -97,7 +97,6 @@ namespace UI
                 ? (PermisosBLL.GetInstance().GetPatentesByFamilia(idFamilia) ?? new List<BE.Patente>())
                 : new List<BE.Patente>();
 
-            // guardar set original para detectar cambios si hace falta luego
             foreach (var p in asignadas) _patentesAsignadasOriginal.Add(p.IdPatente);
 
             var setAsignadas = new HashSet<int>(asignadas.Select(p => p.IdPatente));
@@ -143,12 +142,18 @@ namespace UI
             var newIdx = dgvDisponibles.Rows.Add(id, nom, des);
             dgvDisponibles.Rows[newIdx].Selected = true;
         }
-
-        private void btnModificar_Click(object sender, EventArgs e)
+        private void btnFinalizar_Click(object sender, EventArgs e)
         {
-
             var nombre = (txtNombre.Text ?? string.Empty).Trim();
             var descripcion = (txtDesc.Text ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("El nombre de la familia es obligatorio.", "Validación",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNombre.Focus();
+                return;
+            }
 
             var patentesAhora = new HashSet<int>();
             foreach (DataGridViewRow r in dgvAsignadas.Rows)
@@ -158,27 +163,47 @@ namespace UI
                 patentesAhora.Add(Convert.ToInt32(r.Cells["IdPatente"].Value));
             }
 
-            if (_isEdit)
+            try
             {
-                // EDITAR familia existente
-                string resumen = $"Editar Familia Id={_familiaId}\nNombre=\"{nombre}\"\nDesc=\"{descripcion}\"\nPatentes: [{string.Join(", ", patentesAhora)}]";
-                MessageBox.Show(resumen, "Editar (simulado)", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (_isEdit)
+                {
+                    var fam = new BE.Familia
+                    {
+                        IdFamilia = _familiaId,
+                        NombreFamilia = nombre,
+                        Descripcion = descripcion
+                    };
 
-                // TODO: luego:
-                // 1) Validar datos
-                // 2) Llamar a BLL/DAL para actualizar Familia (nombre/descripcion)
-                // 3) Llamar a DAL para actualizar relaciones FamiliaPatente con 'patentesAhora'
+                    PermisosBLL.GetInstance().UpdateFamilia(fam, patentesAhora);
+
+                    MessageBox.Show("Familia actualizada correctamente.", "OK",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                else
+                {
+                    var fam = new BE.Familia
+                    {
+                        NombreFamilia = nombre,
+                        Descripcion = descripcion
+                    };
+
+                    int nuevoId = PermisosBLL.GetInstance()
+                        .CreateFamilia(fam, patentesAhora);
+
+                    MessageBox.Show("Familia creada correctamente. Id=" + nuevoId, "OK",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // CREAR nueva familia
-                string resumen = $"Crear Familia\nNombre=\"{nombre}\"\nDesc=\"{descripcion}\"\nPatentes: [{string.Join(", ", patentesAhora)}]";
-                MessageBox.Show(resumen, "Crear (simulado)", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // TODO: luego:
-                // 1) Crear familia y obtener nuevo Id
-                // 2) Insertar relaciones en FamiliaPatente según 'patentesAhora'
-                // 3) Refrescar DVH/DVV con tu DalToolkit
+                MessageBox.Show("Error: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

@@ -41,5 +41,11 @@ namespace BLL.Seguridad
 
         public void SetFamiliasForUsuario(int idUsuario, IEnumerable<int> idsFamilia)
             => PermisosDAL.GetInstance().SetFamiliasForUsuario(idUsuario, idsFamilia);
+       
+        public int CreateFamilia(BE.Familia familia, IEnumerable<int> idsPatente = null)
+            => PermisosDAL.GetInstance().CreateFamilia(familia, idsPatente ?? Array.Empty<int>());
+
+        public void UpdateFamilia(BE.Familia familia, IEnumerable<int> idsPatente)
+            => PermisosDAL.GetInstance().UpdateFamilia(familia, idsPatente ?? Array.Empty<int>());
     }
 }

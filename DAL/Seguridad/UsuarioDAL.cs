@@ -29,13 +29,32 @@ namespace DAL.Seguridad
         {
             var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
 
-            return db.QueryListAndLog<BE.Usuario>(
+            var list = db.QueryListAndLog<BE.Usuario>(
                 sql,
                 null,
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.ConsultaUsuarios,
                 "Listado de usuarios"
             );
+
+            // Desencriptar correo antes de devolver
+            if (list != null)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    try
+                    {
+                        list[i].CorreoElectronico =
+                            segUtils.DesencriptarReversible(list[i].CorreoElectronico ?? string.Empty);
+                    }
+                    catch
+                    {
+                        // si fallara el formato, devolvemos lo que viene
+                    }
+                }
+            }
+
+            return list;
         }
 
         public void Create(BE.Usuario obj)
@@ -55,7 +74,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 {
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? System.DBNull.Value;
+
+                    // Encriptar reversible (determinístico) antes de guardar
+                    string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
+
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
@@ -93,7 +116,11 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = obj.IdUsuario;
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)obj.CorreoElectronico ?? System.DBNull.Value;
+
+                    // Encriptar reversible (determinístico) antes de actualizar
+                    string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
+
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
@@ -119,6 +146,9 @@ WHERE " + userIdCol + @" = @idUsuario;";
 
         public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
         {
+            // Encriptar de forma determinística para poder buscar por igualdad en DB
+            string mailEnc = segUtils.EncriptarReversible((correoElectronico ?? string.Empty).Trim());
+
             string sql = @"
 SELECT TOP 1
     idUsuario,
@@ -131,14 +161,29 @@ SELECT TOP 1
 FROM dbo.Usuario
 WHERE correoElectronico = @mail;";
 
-            return db.QuerySingleOrDefaultAndLog<UsuarioLoginRow>(
+            var row = db.QuerySingleOrDefaultAndLog<UsuarioLoginRow>(
                 sql,
-                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value =
-                        (correoElectronico ?? string.Empty).Trim(),
+                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value = (mailEnc ?? string.Empty),
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
                 "Búsqueda por correo (login): " + (correoElectronico ?? string.Empty)
             );
+
+            // Desencriptar el correo antes de devolver
+            if (row != null)
+            {
+                try
+                {
+                    row.correoElectronico =
+                        segUtils.DesencriptarReversible(row.correoElectronico ?? string.Empty);
+                }
+                catch
+                {
+                    // si falla el desencriptado, devolver crudo
+                }
+            }
+
+            return row;
         }
 
         public void IncrementarIntentosFallidos(int idUsuario, int nuevosIntentos)

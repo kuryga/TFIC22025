@@ -366,5 +366,153 @@ END CATCH;";
                 shouldCalculate: true
             );
         }
+
+        public int CreateFamilia(BE.Familia familia, IEnumerable<int> idsPatente)
+        {
+            if (familia == null) throw new ArgumentNullException(nameof(familia));
+
+            var sqlInsert = @"
+INSERT INTO dbo.Familia (nombreFamilia, descripcion)
+VALUES (@n, @d);
+SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+            object newId = db.ExecuteScalarAndLog(
+                sqlInsert,
+                c =>
+                {
+                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                },
+                "dbo.Familia", "idFamilia",
+                BE.Audit.AuditEvents.AltaFamilia,
+                "Alta de familia: " + (familia.NombreFamilia ?? string.Empty),
+                shouldCalculate: false
+            );
+
+            int idNueva = (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
+            if (idNueva > 0)
+            {
+                familia.IdFamilia = idNueva;
+                // DVH/DVV para la fila creada
+                db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", idNueva, false);
+            }
+
+            var patList = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
+            if (idNueva > 0 && patList.Count > 0)
+            {
+                var values = string.Join(", ", patList.Select((_, i) => $"(@f, @p{i})"));
+                string sqlRel = $"INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
+
+                db.ExecuteNonQueryAndLog(
+                    sqlRel,
+                    c =>
+                    {
+                        c.Parameters.Add("@f", SqlDbType.Int).Value = idNueva;
+                        for (int i = 0; i < patList.Count; i++)
+                            c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = patList[i];
+                    },
+                    "dbo.FamiliaPatente", "idFamilia",
+                    BE.Audit.AuditEvents.AsignarPatentesAFamilia,
+                    "Asignación inicial de patentes a familia Id=" + idNueva,
+                    shouldCalculate: false
+                );
+            }
+
+            return idNueva;
+        }
+
+
+        public void UpdateFamilia(BE.Familia familia, IEnumerable<int> idsPatente)
+        {
+            if (familia == null) throw new ArgumentNullException(nameof(familia));
+            if (familia.IdFamilia <= 0) throw new ArgumentException("IdFamilia inválido.", nameof(familia));
+
+            var nuevasPatentes = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
+
+            string core;
+            Action<SqlCommand> binder;
+
+            if (nuevasPatentes.Count == 0)
+            {
+                core = @"
+UPDATE dbo.Familia
+   SET nombreFamilia = @n, descripcion = @d
+ WHERE idFamilia = @f;
+
+DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;";
+                binder = c =>
+                {
+                    c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
+                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                };
+            }
+            else
+            {
+                var values = string.Join(", ", nuevasPatentes.Select((_, i) => $"(@f, @p{i})"));
+                core = $@"
+UPDATE dbo.Familia
+   SET nombreFamilia = @n, descripcion = @d
+ WHERE idFamilia = @f;
+
+DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;
+INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
+
+                binder = c =>
+                {
+                    c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
+                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                    for (int i = 0; i < nuevasPatentes.Count; i++)
+                        c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = nuevasPatentes[i];
+                };
+            }
+
+
+            var sql = @"
+BEGIN TRY
+    BEGIN TRAN;
+
+    " + core + @"
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Patente p
+        WHERE NOT EXISTS (SELECT 1 FROM dbo.UsuarioPatente up WHERE up.idPatente = p.idPatente)
+          AND NOT EXISTS (
+              SELECT 1
+              FROM dbo.UsuarioFamilia uf
+              JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
+              WHERE fp.idPatente = p.idPatente
+          )
+    )
+    BEGIN
+        ROLLBACK TRAN;
+        THROW 51002, 'No se puede dejar una patente sin usuarios asignados (al modificar familia).', 1;
+    END
+
+    COMMIT TRAN;
+END TRY
+BEGIN CATCH
+    IF (XACT_STATE() <> 0) ROLLBACK TRAN;
+
+    -- Bitácora del fallo, más legible que el [NONQUERY] del toolkit
+    DECLARE @msg NVARCHAR(4000) = ERROR_MESSAGE();
+    -- opcional: podríamos loguearlo vía una SP; por ahora dejamos el THROW para que lo capture la capa .NET
+    THROW;
+END CATCH;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                binder,
+                "dbo.Familia", "idFamilia",
+                BE.Audit.AuditEvents.ModificacionFamilia,
+                "Modificación de familia Id=" + familia.IdFamilia,
+                shouldCalculate: false
+            );
+
+            // Recalcular DV de la fila de familia modificada
+            db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", familia.IdFamilia, false);
+        }
     }
 }

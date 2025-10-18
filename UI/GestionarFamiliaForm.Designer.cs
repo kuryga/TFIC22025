@@ -55,6 +55,7 @@ namespace UI
             this.btnFinalizar.Size = new System.Drawing.Size(92, 30);
             this.btnFinalizar.TabIndex = 19;
             this.btnFinalizar.Text = "Modificar";
+            this.btnFinalizar.Click += new System.EventHandler(this.btnFinalizar_Click);
             // 
             // lblDisponibles
             // 

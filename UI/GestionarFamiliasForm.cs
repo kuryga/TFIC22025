@@ -294,28 +294,51 @@ namespace UI
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
-
-            var form = new GestionarFamiliaForm(null); 
-            form.ShowDialog(this);
-
-
-            if (_usuarioSeleccionadoId > 0)
-                CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
+            try
+            {
+                using (var form = new GestionarFamiliaForm(null)) 
+                {
+                    var dr = form.ShowDialog(this);
+                    if (dr == DialogResult.OK && _usuarioSeleccionadoId > 0)
+                    {
+                        CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error creando familia: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnModificar_Click(object sender, EventArgs e)
         {
-            var sleccion = GetFamiliaSeleccionada();
-            if (sleccion.IdFamilia == -1)
+            var seleccion = GetFamiliaSeleccionada();
+            if (seleccion == null || seleccion.IdFamilia <= 0)
             {
                 MessageBox.Show("Seleccione una familia de alguna de las listas.", "Aviso",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            var form = new GestionarFamiliaForm(sleccion);
-            form.ShowDialog(this);
-
+            try
+            {
+                using (var form = new GestionarFamiliaForm(seleccion))
+                {
+                    var dr = form.ShowDialog(this);
+                    if (dr == DialogResult.OK && _usuarioSeleccionadoId > 0)
+                    {
+                        CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error modificando familia: " + ex.Message, "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
     }
 }

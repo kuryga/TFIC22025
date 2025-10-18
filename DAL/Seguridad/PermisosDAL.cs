@@ -19,17 +19,6 @@ namespace DAL.Seguridad
 
         private static readonly DalToolkit db = new DalToolkit();
 
-        private const string familiaTable = "dbo.Familia";
-        private const string familiaIdCol = "idFamilia";
-        private const string familiaCols = "idFamilia AS IdFamilia, nombreFamilia AS NombreFamilia, descripcion AS Descripcion";
-
-        private const string patenteTable = "dbo.Patente";
-        private const string patenteIdCol = "idPatente";
-        private const string patenteCols = "idPatente AS IdPatente, nombrePatente AS NombrePatente, descripcion AS Descripcion";
-
-        private const string usuarioIdCol = "idUsuario";
-
-
         public List<BE.Familia> GetAllFamilias()
         {
             string sql = "SELECT idFamilia AS IdFamilia, nombreFamilia AS NombreFamilia, descripcion AS Descripcion FROM dbo.Familia ORDER BY nombreFamilia;";
@@ -71,25 +60,29 @@ SELECT DISTINCT
     p.idPatente      AS IdPatente,
     p.nombrePatente  AS NombrePatente,
     p.descripcion    AS Descripcion
-FROM dbo.UsuarioPatente up
-JOIN dbo.Patente p ON p.idPatente = up.idPatente
-WHERE up.idUsuario = @idUsuario
-UNION
-SELECT DISTINCT
-    p.idPatente      AS IdPatente,
-    p.nombrePatente  AS NombrePatente,
-    p.descripcion    AS Descripcion
-FROM dbo.UsuarioFamilia uf
-JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
-JOIN dbo.Patente p ON p.idPatente = fp.idPatente
-WHERE uf.idUsuario = @idUsuario;";
+FROM dbo.Patente p
+WHERE
+    EXISTS (
+        SELECT 1
+        FROM dbo.UsuarioPatente up
+        WHERE up.idUsuario = @idUsuario
+          AND up.idPatente = p.idPatente
+    )
+    OR EXISTS (
+        SELECT 1
+        FROM dbo.UsuarioFamilia uf
+        JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
+        WHERE uf.idUsuario = @idUsuario
+          AND fp.idPatente = p.idPatente
+    )
+ORDER BY p.nombrePatente;";
 
             return db.QueryListAndLog<BE.Patente>(
                 sql,
                 cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
                 "dbo.Patente", "idPatente",
                 BE.Audit.AuditEvents.ConsultaPatentesPorUsuario,
-                "Patentes por usuario Id=" + idUsuario
+                "Patentes (directas y por familia) del usuario Id=" + idUsuario
             );
         }
 
@@ -276,15 +269,63 @@ END CATCH;";
         }
 
 
+        private sealed class _FamPatRow
+        {
+            public int idFamilia { get; set; }
+            public int idPatente { get; set; }
+        }
         public void SetPatentesForUsuario(int idUsuario, IEnumerable<int> idsPatente)
         {
             var nuevasPatentes = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
-
             var patentesOld = new HashSet<int>(GetPatentesByUsuario(idUsuario).Select(p => p.IdPatente));
+
+
             var familiasActuales = GetFamiliasByUsuario(idUsuario) ?? new List<BE.Familia>();
-            var patPorFamilias = GetPatentesPorFamilias(familiasActuales.Select(f => f.IdFamilia)) ?? new List<BE.Patente>();
+            var idsFamiliasActuales = familiasActuales.Select(f => f.IdFamilia).Distinct().ToList();
+
+            var familiasAEliminar = new List<int>();
+            if (idsFamiliasActuales.Count > 0)
+            {
+                var placeholdersF = string.Join(", ", idsFamiliasActuales.Select((_, i) => $"@ff{i}"));
+                string sqlFamPat = $@"
+SELECT fp.idFamilia, fp.idPatente
+FROM dbo.FamiliaPatente fp
+WHERE fp.idFamilia IN ({placeholdersF});";
+
+                var rows = db.QueryListAndLog<_FamPatRow>(
+                    sqlFamPat,
+                    c =>
+                    {
+                        for (int i = 0; i < idsFamiliasActuales.Count; i++)
+                            c.Parameters.Add($"@ff{i}", SqlDbType.Int).Value = idsFamiliasActuales[i];
+                    },
+                    "dbo.FamiliaPatente", "idFamilia",
+                    BE.Audit.AuditEvents.ConsultaPatentesPorFamilia,
+                    $"Mapeo familia→patentes para usuario Id={idUsuario}"
+                );
+
+
+                var setNuevas = new HashSet<int>(nuevasPatentes);
+                var famToPat = rows.GroupBy(r => r.idFamilia)
+                                   .ToDictionary(g => g.Key, g => g.Select(x => x.idPatente).ToList());
+
+                foreach (var kvp in famToPat)
+                {
+                    int idFam = kvp.Key;
+                    var patsFam = kvp.Value;
+                    bool familiaReponeAlgunaQuitada = patsFam.Any(p => !setNuevas.Contains(p));
+                    if (familiaReponeAlgunaQuitada)
+                        familiasAEliminar.Add(idFam);
+                }
+            }
+
+            var familiasQueQuedan = idsFamiliasActuales.Except(familiasAEliminar).ToList();
+            var patPorFamiliasQueQuedan = familiasQueQuedan.Count == 0
+                ? new List<BE.Patente>()
+                : (GetPatentesPorFamilias(familiasQueQuedan) ?? new List<BE.Patente>());
+
             var patentesNew = new HashSet<int>(
-                nuevasPatentes.Concat(patPorFamilias.Select(p => p.IdPatente))
+                nuevasPatentes.Concat(patPorFamiliasQueQuedan.Select(p => p.IdPatente))
             );
 
             var patentesPerdidas = patentesOld.Except(patentesNew).ToList();
@@ -292,37 +333,49 @@ END CATCH;";
             {
                 var otros = new HashSet<int>(GetUsuariosConPatente(idPat));
                 otros.Remove(idUsuario);
-
                 if (otros.Count == 0)
                 {
                     Audit.BitacoraDAL.GetInstance().Log(
                         BE.Audit.AuditEvents.EliminacionPatentesCriticaUsuario,
                         $"Intento de dejar patente Id={idPat} sin usuarios asignados (Usuario={idUsuario})."
                     );
-
                     throw new InvalidOperationException(
                         $"No se puede quitar la patente Id={idPat} porque quedaría sin ningún usuario asignado."
                     );
                 }
             }
 
-            string core;
+            string delFamiliasSql = string.Empty;
             Action<SqlCommand> binder;
 
+            if (familiasAEliminar.Count > 0)
+            {
+                var inFam = string.Join(", ", familiasAEliminar.Select((_, i) => $"@rf{i}"));
+                delFamiliasSql = $"DELETE FROM dbo.UsuarioFamilia WHERE idUsuario = @u AND idFamilia IN ({inFam});";
+            }
+
+            string core;
             if (nuevasPatentes.Count == 0)
             {
-                core = "DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u;";
-                binder = c => c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
+                core = (delFamiliasSql + " DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u;").Trim();
+                binder = c =>
+                {
+                    c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
+                    for (int i = 0; i < familiasAEliminar.Count; i++)
+                        c.Parameters.Add($"@rf{i}", SqlDbType.Int).Value = familiasAEliminar[i];
+                };
             }
             else
             {
                 var values = string.Join(", ", nuevasPatentes.Select((_, i) => $"(@u, @p{i})"));
-                core = $"DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u; " +
-                       $"INSERT INTO dbo.UsuarioPatente (idUsuario, idPatente) VALUES {values};";
+                core = (delFamiliasSql + " DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u; " +
+                       $"INSERT INTO dbo.UsuarioPatente (idUsuario, idPatente) VALUES {values};").Trim();
 
                 binder = c =>
                 {
                     c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
+                    for (int i = 0; i < familiasAEliminar.Count; i++)
+                        c.Parameters.Add($"@rf{i}", SqlDbType.Int).Value = familiasAEliminar[i];
                     for (int i = 0; i < nuevasPatentes.Count; i++)
                         c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = nuevasPatentes[i];
                 };
@@ -362,7 +415,7 @@ END CATCH;";
                 binder,
                 "dbo.UsuarioPatente", "idUsuario",
                 BE.Audit.AuditEvents.ModificarPatentesUsuario,
-                "Actualizar patentes (protección global no-orfandad de patentes). Usuario Id=" + idUsuario,
+                "Actualizar patentes directas. Usuario Id=" + idUsuario,
                 shouldCalculate: true
             );
         }
@@ -393,7 +446,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             if (idNueva > 0)
             {
                 familia.IdFamilia = idNueva;
-                // DVH/DVV para la fila creada
                 db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", idNueva, false);
             }
 
@@ -511,7 +563,6 @@ END CATCH;";
                 shouldCalculate: false
             );
 
-            // Recalcular DV de la fila de familia modificada
             db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", familia.IdFamilia, false);
         }
     }

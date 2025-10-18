@@ -120,6 +120,7 @@ namespace UI
             this.btnAgregar.Size = new System.Drawing.Size(50, 30);
             this.btnAgregar.TabIndex = 15;
             this.btnAgregar.Text = "→";
+            this.btnAgregar.Click += new System.EventHandler(this.btnAgregar_Click);
             // 
             // btnEliminar
             // 
@@ -128,6 +129,7 @@ namespace UI
             this.btnEliminar.Size = new System.Drawing.Size(50, 30);
             this.btnEliminar.TabIndex = 16;
             this.btnEliminar.Text = "←";
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // lblId
             // 

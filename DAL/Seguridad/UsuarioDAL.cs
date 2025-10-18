@@ -146,7 +146,7 @@ WHERE " + userIdCol + @" = @idUsuario;";
 
         public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
         {
-            // Encriptar de forma determinística para poder buscar por igualdad en DB
+
             string mailEnc = segUtils.EncriptarReversible((correoElectronico ?? string.Empty).Trim());
 
             string sql = @"

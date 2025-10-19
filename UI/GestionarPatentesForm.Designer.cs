@@ -39,7 +39,7 @@ namespace UI
             this.dgvUsuarios.Name = "dgvUsuarios";
             this.dgvUsuarios.ReadOnly = true;
             this.dgvUsuarios.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvUsuarios.Size = new System.Drawing.Size(480, 100);
+            this.dgvUsuarios.Size = new System.Drawing.Size(675, 133);
             this.dgvUsuarios.TabIndex = 1;
             this.dgvUsuarios.SelectionChanged += new System.EventHandler(this.dgvUsuarios_SelectionChanged);
             // 
@@ -60,10 +60,10 @@ namespace UI
             this.dgvDisponibles.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvDisponibles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn3});
-            this.dgvDisponibles.Location = new System.Drawing.Point(20, 169);
+            this.dgvDisponibles.Location = new System.Drawing.Point(20, 199);
             this.dgvDisponibles.Name = "dgvDisponibles";
             this.dgvDisponibles.ReadOnly = true;
-            this.dgvDisponibles.Size = new System.Drawing.Size(200, 150);
+            this.dgvDisponibles.Size = new System.Drawing.Size(304, 150);
             this.dgvDisponibles.TabIndex = 3;
             // 
             // dataGridViewTextBoxColumn3
@@ -77,10 +77,10 @@ namespace UI
             this.dgvAsignadas.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvAsignadas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn4});
-            this.dgvAsignadas.Location = new System.Drawing.Point(300, 169);
+            this.dgvAsignadas.Location = new System.Drawing.Point(386, 199);
             this.dgvAsignadas.Name = "dgvAsignadas";
             this.dgvAsignadas.ReadOnly = true;
-            this.dgvAsignadas.Size = new System.Drawing.Size(200, 150);
+            this.dgvAsignadas.Size = new System.Drawing.Size(309, 150);
             this.dgvAsignadas.TabIndex = 5;
             // 
             // dataGridViewTextBoxColumn4
@@ -99,7 +99,7 @@ namespace UI
             // 
             // lblDisponibles
             // 
-            this.lblDisponibles.Location = new System.Drawing.Point(20, 143);
+            this.lblDisponibles.Location = new System.Drawing.Point(20, 173);
             this.lblDisponibles.Name = "lblDisponibles";
             this.lblDisponibles.Size = new System.Drawing.Size(100, 23);
             this.lblDisponibles.TabIndex = 2;
@@ -107,7 +107,7 @@ namespace UI
             // 
             // lblAsignadas
             // 
-            this.lblAsignadas.Location = new System.Drawing.Point(300, 143);
+            this.lblAsignadas.Location = new System.Drawing.Point(383, 173);
             this.lblAsignadas.Name = "lblAsignadas";
             this.lblAsignadas.Size = new System.Drawing.Size(100, 23);
             this.lblAsignadas.TabIndex = 4;
@@ -115,7 +115,7 @@ namespace UI
             // 
             // btnAgregar
             // 
-            this.btnAgregar.Location = new System.Drawing.Point(235, 205);
+            this.btnAgregar.Location = new System.Drawing.Point(330, 235);
             this.btnAgregar.Name = "btnAgregar";
             this.btnAgregar.Size = new System.Drawing.Size(50, 30);
             this.btnAgregar.TabIndex = 6;
@@ -124,7 +124,7 @@ namespace UI
             // 
             // btnEliminar
             // 
-            this.btnEliminar.Location = new System.Drawing.Point(235, 245);
+            this.btnEliminar.Location = new System.Drawing.Point(330, 275);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(50, 30);
             this.btnEliminar.TabIndex = 7;
@@ -133,16 +133,16 @@ namespace UI
             // 
             // brnGuardar
             // 
-            this.brnGuardar.Location = new System.Drawing.Point(212, 325);
+            this.brnGuardar.Location = new System.Drawing.Point(308, 355);
             this.brnGuardar.Name = "brnGuardar";
             this.brnGuardar.Size = new System.Drawing.Size(92, 30);
             this.brnGuardar.TabIndex = 8;
             this.brnGuardar.Text = "Guardar";
             this.brnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
             // 
-            // GestionarFamiliasForm
+            // GestionarPatentesForm
             // 
-            this.ClientSize = new System.Drawing.Size(524, 366);
+            this.ClientSize = new System.Drawing.Size(707, 397);
             this.Controls.Add(this.brnGuardar);
             this.Controls.Add(this.lblUsuarios);
             this.Controls.Add(this.dgvUsuarios);

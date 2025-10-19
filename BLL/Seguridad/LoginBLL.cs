@@ -5,6 +5,7 @@ using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
 using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
+using System.Collections.Generic;
 
 namespace BLL.Seguridad
 {
@@ -55,12 +56,23 @@ namespace BLL.Seguridad
                 }
             }
 
-            dal.ResetearIntentosFallidos(row.idUsuario);
-
             SessionContext.Current.UsuarioId = row.idUsuario;
             SessionContext.Current.UsuarioEmail = row.correoElectronico ?? string.Empty;
             SessionContext.Current.NombreCompleto =
                 ((row.nombreUsuario ?? string.Empty) + " " + (row.apellidoUsuario ?? string.Empty)).Trim();
+
+            dal.ResetearIntentosFallidos(row.idUsuario);
+
+            try
+            {
+                var patentes = PermisosBLL.GetInstance().GetPatentesByUsuario(row.idUsuario) ?? new List<BE.Patente>();
+                SessionContext.Current.SetPatentes(patentes);
+            }
+            catch
+            {
+
+                SessionContext.Current.SetPatentes(null);
+            }
 
             try
             {
@@ -80,9 +92,7 @@ namespace BLL.Seguridad
                 .Log(BE.Audit.AuditEvents.CierreSesion, "Cierre de sesión del usuario actual");
 
             var ctx = DAL.Seguridad.SessionContext.Current;
-            ctx.UsuarioId = null;
-            ctx.UsuarioEmail = null;
-            ctx.NombreCompleto = null;
+            ctx.ClearSession();
         }
 
         private static void SleepRandomMs(int minInclusive, int maxInclusive)

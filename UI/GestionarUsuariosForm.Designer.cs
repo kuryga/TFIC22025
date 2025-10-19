@@ -55,6 +55,7 @@ namespace UI
             // 
             // txtId
             // 
+            this.txtId.Enabled = false;
             this.txtId.Location = new System.Drawing.Point(150, 180);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
@@ -77,8 +78,10 @@ namespace UI
             // 
             // txtCorreo
             // 
+            this.txtCorreo.Enabled = false;
             this.txtCorreo.Location = new System.Drawing.Point(562, 178);
             this.txtCorreo.Name = "txtCorreo";
+            this.txtCorreo.ReadOnly = true;
             this.txtCorreo.Size = new System.Drawing.Size(220, 20);
             this.txtCorreo.TabIndex = 8;
             // 
@@ -98,8 +101,10 @@ namespace UI
             // 
             // txtDocumento
             // 
+            this.txtDocumento.Enabled = false;
             this.txtDocumento.Location = new System.Drawing.Point(150, 270);
             this.txtDocumento.Name = "txtDocumento";
+            this.txtDocumento.ReadOnly = true;
             this.txtDocumento.Size = new System.Drawing.Size(200, 20);
             this.txtDocumento.TabIndex = 14;
             // 

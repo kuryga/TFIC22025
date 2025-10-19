@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using System.Security.Cryptography;
 
@@ -9,7 +8,7 @@ namespace DAL.Seguridad
     {
         private static byte[] _aesKey; // 32 bytes (AES-256)
         private const string DefaultPassphrase = "TFIUAI2025AAGK";         // TODO: mover a configuración
-        private const string AesSaltText = "UrbanSoft-AES-Key-Salt"; // sal fija para derivar la clave
+        private const string AesSaltText = "UrbanSoft-AES-Key-Salt";       // sal fija para derivar la clave
         private const int AesDeriveIterations = 100000;
 
         static SecurityUtilities()
@@ -27,17 +26,18 @@ namespace DAL.Seguridad
                 aes.Key = _aesKey;
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
-                aes.GenerateIV();
+
+                // IV determinístico derivado del texto plano
+                aes.IV = DeriveDeterministicIV(textoPlano);
 
                 byte[] plain = Encoding.UTF8.GetBytes(textoPlano);
                 byte[] cipher;
-
                 using (var enc = aes.CreateEncryptor())
                 {
                     cipher = enc.TransformFinalBlock(plain, 0, plain.Length);
                 }
 
-                // Empaqueta IV || CIPHER
+                // Formato: IV || CIPHER (en Base64)
                 var output = new byte[aes.IV.Length + cipher.Length];
                 Buffer.BlockCopy(aes.IV, 0, output, 0, aes.IV.Length);
                 Buffer.BlockCopy(cipher, 0, output, aes.IV.Length, cipher.Length);
@@ -58,7 +58,7 @@ namespace DAL.Seguridad
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
 
-                int blockBytes = aes.BlockSize / 8;
+                int blockBytes = aes.BlockSize / 8; // 16 bytes para AES
                 if (combined.Length < blockBytes + 1)
                     throw new ArgumentException("Entrada inválida (muy corta).", nameof(base64IvYCifrado));
 
@@ -113,13 +113,17 @@ namespace DAL.Seguridad
             }
         }
 
-        private static string ToHex(byte[] data)
+        private static byte[] DeriveDeterministicIV(string textoPlano)
         {
-            if (data == null || data.Length == 0) return string.Empty;
-            var sb = new StringBuilder(data.Length * 2);
-            for (int i = 0; i < data.Length; i++)
-                sb.Append(data[i].ToString("x2"));
-            return sb.ToString();
+            const string Pepper = "UrbanSoft-AES-IV";
+            using (var sha = SHA256.Create())
+            {
+                var bytes = Encoding.UTF8.GetBytes((textoPlano ?? string.Empty) + "|" + Pepper);
+                var hash = sha.ComputeHash(bytes);
+                var iv = new byte[16]; // 128 bits
+                Buffer.BlockCopy(hash, 0, iv, 0, 16);
+                return iv;
+            }
         }
 
         private static bool ConstantTimeEquals(string a, string b)

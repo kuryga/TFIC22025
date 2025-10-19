@@ -29,6 +29,7 @@ namespace DAL.Genericos
                 SELECT p.nombreEmpresa, p.cuit, p.idIdioma, i.nombre, i.codigoISO
                 FROM " + TblParametrizacion + @" p
                 LEFT JOIN " + TblIdioma + " i ON p.idIdioma = i.idIdioma; ";
+            // TODO: sacar el 1 aca arriba ^^^ por un archivo config
 
             var result = db.QuerySingleOrDefaultAndLog<Parametrizacion>(
                 sql,

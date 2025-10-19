@@ -11,7 +11,10 @@ namespace BE.Audit
         public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
         public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
         public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
-
+        public const string ConsultaUsuariosPorPatente = "Usuarios.ConsultaPatentes";
+        public const string ConsultaFamilias = "Familias.ConsultaDeListado";
+        public const string ConsultaPatentes = "Patentes.ConsultaDeListado";
+       
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";
@@ -77,6 +80,10 @@ namespace BE.Audit
         public const string ModificacionTipoEdificacion = "TipoEdificacion.Modificacion";
         public const string ModificacionCotizacionHeader = "Cotizacion.ModificacionHeader";
         public const string ModificacionServicioAdicional = "ServicioAdicional.Modificacion";
+        public const string ModificarFamiliasUsuario = "Familias.ModificacionPorUsuario";
+        public const string ModificarPatentesUsuario = "Patentes.ModificacionPorUsuario";
+        public const string AsignarPatentesAFamilia = "Familia.AsignacionDePatente";
+        public const string ModificacionFamilia = "Familia.Modificacion";
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";
@@ -86,6 +93,8 @@ namespace BE.Audit
         public const string EliminacionMaterial = "Material.Eliminacion";
         public const string IntentosFallidosAcceso = "Autenticacion.IntentosFallidos";
         public const string RespaldoBase = "BaseDatos.Respaldo";
+        public const string EliminacionPatentesCriticaUsuario = "Patentes.IntentoEliminacionCritica";
+        public const string AltaFamilia = "Familia.Alta";
 
         // ==== C1 (muy críticas) ====
         public const string FalloConexionBD = "BaseDatos.FalloConexion";
@@ -94,7 +103,7 @@ namespace BE.Audit
         public const string RespaldoBaseDatos = "BaseDatos.BackupCreado";
         public const string RestauracionBaseDatos = "BaseDatos.RestoreEjecutado";
 
-        // === Mapeo interno a criticidad ===
+        // === Mapeo interno ===
         public static Criticidad GetCriticidad(string accion)
         {
             if (string.IsNullOrEmpty(accion)) return Criticidad.C5;
@@ -126,6 +135,8 @@ namespace BE.Audit
                 case ConsultaFamiliasPorUsuario:
                 case ConsultaPatentesPorUsuario:
                 case ConsultaPatentesPorFamilia:
+                case ConsultaFamilias:
+                case ConsultaUsuariosPorPatente:
                     return Criticidad.C5;
             }
 
@@ -166,6 +177,9 @@ namespace BE.Audit
                 case ModificacionTipoEdificacion:
                 case ModificacionCotizacionHeader:
                 case ModificacionServicioAdicional:
+                case ModificarFamiliasUsuario:
+                case AsignarPatentesAFamilia:
+                case ModificacionFamilia:
                     return Criticidad.C3;
             }
 
@@ -179,6 +193,7 @@ namespace BE.Audit
                 case EliminacionMaterial:
                 case IntentosFallidosAcceso:
                 case RespaldoBase:
+                case AltaFamilia:
                     return Criticidad.C2;
             }
 
@@ -193,7 +208,6 @@ namespace BE.Audit
                     return Criticidad.C1;
             }
 
-            // Por defecto
             return Criticidad.C5;
         }
     }

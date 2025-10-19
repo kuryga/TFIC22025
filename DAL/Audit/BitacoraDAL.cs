@@ -129,6 +129,7 @@ ORDER BY rn;";
             return items;
         }
 
+
         public int Log(string accion, string mensaje, string criticidad)
         {
             if (accion == null) accion = string.Empty;
@@ -142,7 +143,7 @@ ORDER BY rn;";
                            : "Usuario deslogeado";
 
             const string sql = @"
-INSERT INTO " + TblBitacora + @"
+INSERT INTO dbo.Bitacora
 ( fecha, criticidad, accion, mensaje, idEjecutor, UsuarioEjecutor, DVH )
 VALUES ( @fecha, @criticidad, @accion, @mensaje, @idEjecutor, @usuarioEjecutor, @DVH );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
@@ -157,13 +158,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
                 cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
 
-                if (uid.HasValue)
-                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = uid.Value;
-                else
-                    cmd.Parameters.Add("@idEjecutor", SqlDbType.Int).Value = DBNull.Value;
+                
+                var idValue = uid.HasValue ? (object)uid.Value : DBNull.Value;
+                var userValue = string.IsNullOrWhiteSpace(uname) ? (object)DBNull.Value : uname;
 
-                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value =
-                    (object)uname ?? DBNull.Value;
+                var pId = cmd.Parameters.Add("@idEjecutor", SqlDbType.Int);
+                pId.IsNullable = true;
+                pId.Value = idValue;
+
+                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value = userValue;
 
                 cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
 
@@ -174,7 +177,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             int newIdInt = (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
             if (newIdInt > 0)
-                db.RefreshRowDvAndTableDvv(TblBitacora, PkBitacora, newIdInt, true);
+                db.RefreshRowDvAndTableDvv("dbo.Bitacora", "idRegistro", newIdInt, true);
 
             return newIdInt;
         }

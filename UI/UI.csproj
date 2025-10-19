@@ -82,6 +82,12 @@
     <Compile Include="GestionarCotizaciones.Designer.cs">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </Compile>
+    <Compile Include="GestionarFamiliaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionarFamiliaForm.Designer.cs">
+      <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GestionarFamiliasForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -123,12 +129,6 @@
     </Compile>
     <Compile Include="GestionarPatentesForm.Designer.cs">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GestionarPerfilProfesionalForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GestionarPerfilProfesionalForm.Designer.cs">
-      <DependentUpon>GestionarPerfilProfesionalForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GestionarServicioAdicionalForm.cs">
       <SubType>Form</SubType>
@@ -199,6 +199,9 @@
     <EmbeddedResource Include="GestionarCotizaciones.resx">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GestionarFamiliaForm.resx">
+      <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GestionarFamiliasForm.resx">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -219,9 +222,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarPatentesForm.resx">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GestionarPerfilProfesionalForm.resx">
-      <DependentUpon>GestionarPerfilProfesionalForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GestionarServicioAdicionalForm.resx">
       <DependentUpon>GestionarServicioAdicionalForm.cs</DependentUpon>

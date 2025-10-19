@@ -49,6 +49,7 @@ namespace DAL.Seguridad
         public bool TieneAlguna(params string[] codigos)
         {
             if (codigos == null || codigos.Length == 0) return false;
+            bool asd = codigos.Any(c => TienePatente(c)); ;
             return codigos.Any(c => TienePatente(c));
         }
     }

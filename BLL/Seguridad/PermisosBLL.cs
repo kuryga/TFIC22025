@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DAL.Seguridad;
+using CodigoPatentes = BE.Seguridad.CodigoPatente;
 
 namespace BLL.Seguridad
 {
@@ -48,18 +49,30 @@ namespace BLL.Seguridad
         public void UpdateFamilia(BE.Familia familia, IEnumerable<int> idsPatente)
             => PermisosDAL.GetInstance().UpdateFamilia(familia, idsPatente ?? Array.Empty<int>());
 
-        private bool TieneAlguna(params string[] codes) => SessionContext.Current.TieneAlguna(codes);
+        private bool TieneAlguna(params CodigoPatentes[] codigos)
+        {
+            var codigosStr = new List<string>();
+            foreach (var c in codigos)
+                codigosStr.Add(c.ToString());
 
-        public bool DebeVerUsuarios() => TieneAlguna("PT_SEG_USUARIOS_ABM");
-        public bool DebeVerFamilias() => TieneAlguna("PT_SEG_FAMILIAS_VER", "PT_SEG_FAMILIAS_CREAR", "PT_SEG_FAMILIAS_MODIFICAR");
-        public bool DebeVerPatentes() => TieneAlguna("PT_SEG_PATENTES_VER", "PT_SEG_PATENTES_ASIGNAR");
-        public bool DebeVerBitacora() => TieneAlguna("PT_SEG_BITACORA_VER");
-        public bool DebeVerMaquinaria() => TieneAlguna("PT_MAQ_ABM");
-        public bool DebeVerMateriales() => TieneAlguna("PT_MAT_ABM");
-        public bool DebeVerServicios() => TieneAlguna("PT_SRV_ABM");
-        public bool DebeVerTipoEdificacion() => TieneAlguna("PT_TED_ABM");
-        public bool DebeVerMoneda() => TieneAlguna("PT_MON_ABM");
-        public bool DebeVerCotizaciones() => TieneAlguna("PT_COT_VER", "PT_COT_CREAR");
-        public bool DebeCrearCotizacion() => TieneAlguna("PT_COT_CREAR");
+            return SessionContext.Current.TieneAlguna(codigosStr.ToArray());
+        }
+
+        public bool DebeVerUsuarios() => TieneAlguna(CodigoPatentes.PT_SEG_USUARIOS_ABM);
+        public bool DebeVerFamilias() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_VER, CodigoPatentes.PT_SEG_FAMILIAS_CREAR, CodigoPatentes.PT_SEG_FAMILIAS_MODIFICAR);
+        public bool DebeVerPatentes() => TieneAlguna(CodigoPatentes.PT_SEG_PATENTES_VER, CodigoPatentes.PT_SEG_PATENTES_ASIGNAR);
+        public bool DebeVerBitacora() => TieneAlguna(CodigoPatentes.PT_SEG_BITACORA_VER);
+
+        public bool DebeVerMaquinaria() => TieneAlguna(CodigoPatentes.PT_MAQ_ABM);
+        public bool DebeVerMateriales() => TieneAlguna(CodigoPatentes.PT_MAT_ABM);
+        public bool DebeVerServicios() => TieneAlguna(CodigoPatentes.PT_SRV_ABM);
+        public bool DebeVerTipoEdificacion() => TieneAlguna(CodigoPatentes.PT_TED_ABM);
+        public bool DebeVerMoneda() => TieneAlguna(CodigoPatentes.PT_MON_ABM);
+
+        public bool DebeVerCotizaciones() => TieneAlguna(CodigoPatentes.PT_COT_VER, CodigoPatentes.PT_COT_CREAR);
+        public bool DebeCrearCotizacion() => TieneAlguna(CodigoPatentes.PT_COT_CREAR);
+
+        public bool PuedeEjecutarBackup() => TieneAlguna(CodigoPatentes.PT_SEG_BACKUP_EJECUTAR);
+        public bool PuedeEjecutarRestore() => TieneAlguna(CodigoPatentes.PT_SEG_RESTORE_EJECUTAR);
     }
 }

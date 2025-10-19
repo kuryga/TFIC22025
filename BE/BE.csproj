@@ -55,6 +55,7 @@
     <Compile Include="Genericos\TipoEdificacion.cs" />
     <Compile Include="Genericos\ICrud.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Seguridad\CodigoPatente.cs" />
     <Compile Include="Seguridad\Familia.cs" />
     <Compile Include="Seguridad\LoginExceptions.cs" />
     <Compile Include="Seguridad\Patente.cs" />

@@ -58,6 +58,8 @@ namespace BLL.Seguridad
             return SessionContext.Current.TieneAlguna(codigosStr.ToArray());
         }
 
+
+        // gestor de permisos especificos
         public bool DebeVerUsuarios() => TieneAlguna(CodigoPatentes.PT_SEG_USUARIOS_ABM);
         public bool DebeVerFamilias() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_VER, CodigoPatentes.PT_SEG_FAMILIAS_CREAR, CodigoPatentes.PT_SEG_FAMILIAS_MODIFICAR);
         public bool DebeVerPatentes() => TieneAlguna(CodigoPatentes.PT_SEG_PATENTES_VER, CodigoPatentes.PT_SEG_PATENTES_ASIGNAR);
@@ -74,5 +76,9 @@ namespace BLL.Seguridad
 
         public bool PuedeEjecutarBackup() => TieneAlguna(CodigoPatentes.PT_SEG_BACKUP_EJECUTAR);
         public bool PuedeEjecutarRestore() => TieneAlguna(CodigoPatentes.PT_SEG_RESTORE_EJECUTAR);
+
+        public bool PuedeCrearFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_CREAR);
+        public bool PuedeModificarFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_MODIFICAR);
+        public bool PuedeAsignarFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIA_ASIGNAR);
     }
 }

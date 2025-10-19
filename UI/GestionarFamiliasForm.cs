@@ -18,6 +18,8 @@ namespace UI
             InitializeComponent();
             ConfigurarGrids();
             CargarUsuarios();
+
+            this.Shown += (s, e) => AplicarPermisosFamilias();
         }
 
         private void ConfigurarGrids()
@@ -118,6 +120,24 @@ namespace UI
 
             if (dgvUsuarios.Rows.Count > 0)
                 dgvUsuarios.ClearSelection();
+        }
+
+        private void AplicarPermisosFamilias()
+        {
+            try
+            {
+                bool puedeCrear = PermisosBLL.GetInstance().PuedeCrearFamilia();
+                bool puedeModificar = PermisosBLL.GetInstance().PuedeModificarFamilia();
+                bool puedeGuerdar = PermisosBLL.GetInstance().PuedeAsignarFamilia();
+                btnCrear.Enabled = puedeCrear;
+                btnModificar.Enabled = puedeModificar;
+                btnGuardar.Enabled = puedeGuerdar;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al aplicar permisos en Familias: " + ex.Message,
+                    "Permisos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)

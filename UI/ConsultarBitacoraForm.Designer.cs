@@ -30,6 +30,8 @@ namespace UI
             this.btnPrev = new System.Windows.Forms.Button();
             this.btnNext = new System.Windows.Forms.Button();
             this.lblPageInfo = new System.Windows.Forms.Label();
+            this.cmbCriticidad = new System.Windows.Forms.ComboBox();
+            this.lblCriticidad = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBitacora)).BeginInit();
             this.SuspendLayout();
             // 
@@ -69,7 +71,7 @@ namespace UI
             // 
             // btnConsultar
             // 
-            this.btnConsultar.Location = new System.Drawing.Point(888, 18);
+            this.btnConsultar.Location = new System.Drawing.Point(878, 17);
             this.btnConsultar.Name = "btnConsultar";
             this.btnConsultar.Size = new System.Drawing.Size(75, 23);
             this.btnConsultar.TabIndex = 4;
@@ -118,9 +120,28 @@ namespace UI
             this.lblPageInfo.Text = "Pagina: 1";
             this.lblPageInfo.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // cmbCriticidad
+            // 
+            this.cmbCriticidad.FormattingEnabled = true;
+            this.cmbCriticidad.Location = new System.Drawing.Point(695, 17);
+            this.cmbCriticidad.Name = "cmbCriticidad";
+            this.cmbCriticidad.Size = new System.Drawing.Size(121, 21);
+            this.cmbCriticidad.TabIndex = 9;
+            // 
+            // lblCriticidad
+            // 
+            this.lblCriticidad.AutoSize = true;
+            this.lblCriticidad.Location = new System.Drawing.Point(624, 20);
+            this.lblCriticidad.Name = "lblCriticidad";
+            this.lblCriticidad.Size = new System.Drawing.Size(53, 13);
+            this.lblCriticidad.TabIndex = 10;
+            this.lblCriticidad.Text = "Criticidad:";
+            // 
             // ConsultarBitacoraForm
             // 
             this.ClientSize = new System.Drawing.Size(965, 493);
+            this.Controls.Add(this.lblCriticidad);
+            this.Controls.Add(this.cmbCriticidad);
             this.Controls.Add(this.lblPageInfo);
             this.Controls.Add(this.btnNext);
             this.Controls.Add(this.btnPrev);
@@ -141,5 +162,7 @@ namespace UI
         private Button btnPrev;
         private Button btnNext;
         private Label lblPageInfo;
+        private ComboBox cmbCriticidad;
+        private Label lblCriticidad;
     }
 }

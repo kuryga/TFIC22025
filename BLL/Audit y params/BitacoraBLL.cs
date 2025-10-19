@@ -16,24 +16,39 @@ namespace BLL.Audit
         }
 
         public PagedResult GetBitacora(
-            DateTime? desde,
-            DateTime? hasta,
-            int page = 1,
-            int pageSize = 30)
+             DateTime? desde,
+             DateTime? hasta,
+             int page = 1,
+             int pageSize = 30,
+             string criticidad = null)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 30;
 
-            var items = BitacoraDAL.GetInstance().GetBitacoraList(desde, hasta, page, pageSize);
+            var items = BitacoraDAL.GetInstance().GetBitacoraList(desde, hasta, page, pageSize, criticidad);
 
             return new PagedResult
             {
                 Items = items ?? new List<BE.Audit.Bitacora>(),
-                Total = items.Count,
+                Total = items?.Count ?? 0,
                 Page = page,
                 PageSize = pageSize
             };
         }
+
+        public PagedResult GetBitacora(
+            DateTime? desde,
+            DateTime? hasta,
+            int page,
+            int pageSize,
+            BE.Audit.Criticidad criticidad)
+        {
+            string crit = (criticidad == BE.Audit.Criticidad.None) ? null : criticidad.ToString();
+            return GetBitacora(desde, hasta, page, pageSize, crit);
+        }
+
+        public List<BE.Audit.Criticidad> GetCriticidades()
+            => BitacoraDAL.GetInstance().GetCriticidades();
 
         public int Log(string accion, string mensaje)
             => BitacoraDAL.GetInstance().Log(accion, mensaje);

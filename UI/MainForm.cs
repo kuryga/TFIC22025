@@ -31,6 +31,10 @@ namespace UI
             menuConsultar.Click += (s, e) => AbrirFormulario(new ConsultarCotizacionesForm());
             menuNuevaCotizacion.Click += (s, e) => AbrirFormulario(new NuevaCotizacionForm());
 
+            // TODO: poner la UI correcta vvvvv
+            menuBackup.Click += (s, e) => AbrirFormulario(new ConsultarCotizacionesForm());
+            menuRestore.Click += (s, e) => AbrirFormulario(new NuevaCotizacionForm());
+
             menuCerrarSesion.Click += (s, e) =>
             {
                 var resultado = MessageBox.Show(
@@ -75,10 +79,14 @@ namespace UI
                 SetItemVisibility(menuConsultar, permisosBLL.DebeVerCotizaciones());
                 SetItemVisibility(menuNuevaCotizacion, permisosBLL.DebeCrearCotizacion());
 
+                SetItemVisibility(menuBackup, permisosBLL.DebeVerBackup());
+                SetItemVisibility(menuRestore, permisosBLL.DebeVerRestore());
+
                 SetItemVisibility(gestionesMenu, HayAlgunoVisible(menuMaquinaria, menuMateriales, menuServicios, menuTipoEdif, menuMoneda));
                 SetItemVisibility(usuariosMenu, HayAlgunoVisible(menuUsuarios, menuFamilias, menuPatentes));
                 SetItemVisibility(cotizacionesMenu, HayAlgunoVisible(menuConsultar, menuNuevaCotizacion));
                 SetItemVisibility(seguridadMenu, HayAlgunoVisible(menuBitacora));
+                SetItemVisibility(sistemaMenu, HayAlgunoVisible(menuBackup, menuRestore));
 
                 menuStrip1.PerformLayout();
                 menuStrip1.Refresh();

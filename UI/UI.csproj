@@ -64,12 +64,6 @@
     <Compile Include="GestionesForms\AgregarForms\AgregarServiciosAdicionalesForm.Designer.cs">
       <DependentUpon>AgregarServiciosAdicionalesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BaseForms\BaseForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BaseForms\BaseForm.Designer.cs">
-      <DependentUpon>BaseForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="AuditoriaForms\ConsultarBitacoraForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -159,12 +153,6 @@
     </Compile>
     <Compile Include="UsuYPermisForms\GestionarUsuariosForm.Designer.cs">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BaseForms\LoadingOverlayForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="BaseForms\LoadingOverlayForm.Designer.cs">
-      <DependentUpon>LoadingOverlayForm.cs</DependentUpon>
     </Compile>
     <Compile Include="LoginAppContext.cs" />
     <Compile Include="MainYLoginForms\LoginForm.cs">

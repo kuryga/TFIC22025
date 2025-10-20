@@ -140,7 +140,7 @@ namespace UI
             // 
             // DetalleCotizacionForm
             // 
-            this.ClientSize = new System.Drawing.Size(938, 400);
+            this.ClientSize = new System.Drawing.Size(923, 383);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);

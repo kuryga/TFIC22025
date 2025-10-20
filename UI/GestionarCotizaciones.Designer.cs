@@ -66,7 +66,7 @@ namespace UI
             // 
             // ConsultarCotizacionesForm
             // 
-            this.ClientSize = new System.Drawing.Size(592, 351);
+            this.ClientSize = new System.Drawing.Size(592, 327);
             this.Controls.Add(this.dgvCotizaciones);
             this.Controls.Add(this.btnExportar);
             this.Controls.Add(this.btnVerDetalles);

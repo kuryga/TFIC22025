@@ -139,7 +139,7 @@ namespace UI
             // 
             // ConsultarBitacoraForm
             // 
-            this.ClientSize = new System.Drawing.Size(965, 493);
+            this.ClientSize = new System.Drawing.Size(989, 500);
             this.Controls.Add(this.lblCriticidad);
             this.Controls.Add(this.cmbCriticidad);
             this.Controls.Add(this.lblPageInfo);

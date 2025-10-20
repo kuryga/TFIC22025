@@ -125,8 +125,8 @@ namespace UI
             form.Show();
             form.PerformLayout();
 
-            var desiredWidth = form.Width + panelContenedor.Margin.Horizontal + 40;
-            var desiredHeight = form.Height + menuStrip1.Height + panelContenedor.Margin.Vertical + 60;
+            var desiredWidth = form.Width + panelContenedor.Margin.Horizontal + 13;
+            var desiredHeight = form.Height + menuStrip1.Height + panelContenedor.Margin.Vertical + 35;
 
             this.Size = new System.Drawing.Size(desiredWidth, desiredHeight);
         }

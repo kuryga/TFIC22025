@@ -102,7 +102,7 @@ namespace UI
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(220, 280);
+            this.btnModificar.Location = new System.Drawing.Point(214, 280);
             this.btnModificar.Name = "btnModificar";
             this.btnModificar.Size = new System.Drawing.Size(75, 23);
             this.btnModificar.TabIndex = 8;
@@ -120,7 +120,7 @@ namespace UI
             // 
             // GestionarServicioAdicionalForm
             // 
-            this.ClientSize = new System.Drawing.Size(500, 330);
+            this.ClientSize = new System.Drawing.Size(500, 316);
             this.Controls.Add(this.dgvServicios);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);

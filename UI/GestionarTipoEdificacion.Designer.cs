@@ -103,7 +103,7 @@ namespace UI
             // 
             // GestionarTipoEdificacionForm
             // 
-            this.ClientSize = new System.Drawing.Size(440, 310);
+            this.ClientSize = new System.Drawing.Size(452, 294);
             this.Controls.Add(this.dgvTipos);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);

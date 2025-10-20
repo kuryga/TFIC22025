@@ -56,7 +56,7 @@ namespace UI
             this.btnCarpeta.Name = "btnCarpeta";
             this.btnCarpeta.Size = new System.Drawing.Size(118, 23);
             this.btnCarpeta.TabIndex = 2;
-            this.btnCarpeta.Text = "Carpeta";
+            this.btnCarpeta.Text = "Explorar...";
             // 
             // lblPartes
             // 
@@ -90,7 +90,7 @@ namespace UI
             // 
             // btnBackup
             // 
-            this.btnBackup.Location = new System.Drawing.Point(269, 308);
+            this.btnBackup.Location = new System.Drawing.Point(295, 308);
             this.btnBackup.Name = "btnBackup";
             this.btnBackup.Size = new System.Drawing.Size(120, 32);
             this.btnBackup.TabIndex = 5;
@@ -108,7 +108,7 @@ namespace UI
             // 
             // BackupForm
             // 
-            this.ClientSize = new System.Drawing.Size(704, 353);
+            this.ClientSize = new System.Drawing.Size(713, 349);
             this.Controls.Add(this.lblUnidad);
             this.Controls.Add(this.cboDestino);
             this.Controls.Add(this.btnCarpeta);

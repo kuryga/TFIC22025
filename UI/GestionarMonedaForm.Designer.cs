@@ -142,7 +142,7 @@ namespace UI
             // 
             // GestionarMonedaForm
             // 
-            this.ClientSize = new System.Drawing.Size(484, 302);
+            this.ClientSize = new System.Drawing.Size(503, 309);
             this.Controls.Add(this.lblSimbolo);
             this.Controls.Add(this.txtSimbolo);
             this.Controls.Add(this.dgvMoneda);

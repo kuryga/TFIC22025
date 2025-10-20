@@ -1,9 +1,9 @@
-﻿// BackupForm.cs
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BLL.Seguridad.Mantenimiento;
 
 namespace UI
 {
@@ -18,7 +18,7 @@ namespace UI
 
             this.Load += BackupForm_Load;
             btnCarpeta.Click += BtnCarpeta_Click;
-            //btnBackup.Click += BtnBackup_Click;
+            btnBackup.Click += BtnBackup_Click;
         }
 
         private void BackupForm_Load(object sender, EventArgs e)
@@ -54,11 +54,15 @@ namespace UI
             }
         }
 
-        /*
         private async void BtnBackup_Click(object sender, EventArgs e)
         {
             btnBackup.Enabled = false;
+            btnCarpeta.Enabled = false;
+            cboDestino.Enabled = false;
+            nudPartes.Enabled = false;
+            UseWaitCursor = true;
             txtResultado.Clear();
+
             try
             {
                 var destino = (cboDestino.SelectedItem ?? "C:").ToString();
@@ -68,11 +72,12 @@ namespace UI
 
                 var files = await Task.Run(() =>
                 {
-                    return BackupDAL.GetInstance().BackupFull(destino, partes);
+                    return BackupBLL.GetInstance().BackupFull(destino, partes);
                 });
 
                 txtResultado.AppendText("Backup finalizado. Archivos generados:" + Environment.NewLine);
-                foreach (var f in files) txtResultado.AppendText(" - " + f + Environment.NewLine);
+                foreach (var f in files)
+                    txtResultado.AppendText(" - " + f + Environment.NewLine);
 
                 MessageBox.Show("Backup realizado con éxito.", "Backup", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -83,9 +88,12 @@ namespace UI
             }
             finally
             {
+                UseWaitCursor = false;
                 btnBackup.Enabled = true;
+                btnCarpeta.Enabled = true;
+                cboDestino.Enabled = true;
+                nudPartes.Enabled = true;
             }
         }
-        */
     }
 }

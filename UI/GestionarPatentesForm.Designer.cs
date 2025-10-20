@@ -133,7 +133,7 @@ namespace UI
             // 
             // brnGuardar
             // 
-            this.brnGuardar.Location = new System.Drawing.Point(308, 355);
+            this.brnGuardar.Location = new System.Drawing.Point(311, 355);
             this.brnGuardar.Name = "brnGuardar";
             this.brnGuardar.Size = new System.Drawing.Size(92, 30);
             this.brnGuardar.TabIndex = 8;
@@ -142,7 +142,7 @@ namespace UI
             // 
             // GestionarPatentesForm
             // 
-            this.ClientSize = new System.Drawing.Size(707, 397);
+            this.ClientSize = new System.Drawing.Size(714, 392);
             this.Controls.Add(this.brnGuardar);
             this.Controls.Add(this.lblUsuarios);
             this.Controls.Add(this.dgvUsuarios);

@@ -77,7 +77,7 @@ namespace UI
             // 
             // btnRestaurar
             // 
-            this.btnRestaurar.Location = new System.Drawing.Point(288, 378);
+            this.btnRestaurar.Location = new System.Drawing.Point(295, 378);
             this.btnRestaurar.Name = "btnRestaurar";
             this.btnRestaurar.Size = new System.Drawing.Size(120, 32);
             this.btnRestaurar.TabIndex = 5;
@@ -95,7 +95,7 @@ namespace UI
             // 
             // RestoreForm
             // 
-            this.ClientSize = new System.Drawing.Size(704, 428);
+            this.ClientSize = new System.Drawing.Size(712, 417);
             this.Controls.Add(this.lblArchivos);
             this.Controls.Add(this.txtArchivos);
             this.Controls.Add(this.btnSeleccionar);

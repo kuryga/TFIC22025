@@ -171,7 +171,7 @@ namespace UI
             // 
             // GestionarFamiliasForm
             // 
-            this.ClientSize = new System.Drawing.Size(705, 391);
+            this.ClientSize = new System.Drawing.Size(717, 391);
             this.Controls.Add(this.btnModificar);
             this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnGuardar);

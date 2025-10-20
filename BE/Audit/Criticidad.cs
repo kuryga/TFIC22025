@@ -8,10 +8,11 @@ namespace BE.Audit
 {
     public enum Criticidad
     {
-      C1,
-      C2,
-      C3,
-      C4,
-      C5
+        None,
+        C1,
+        C2,
+        C3,
+        C4,
+        C5
     }
 }

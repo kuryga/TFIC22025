@@ -20,6 +20,10 @@ namespace UI
         private void InitializeComponent()
         {
             this.dgvItems = new System.Windows.Forms.DataGridView();
+            this.idItem = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.descripcion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.unidad = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.precioUnitario = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtId = new System.Windows.Forms.TextBox();
             this.txtDescripcion = new System.Windows.Forms.TextBox();
             this.txtUnidad = new System.Windows.Forms.TextBox();
@@ -31,10 +35,6 @@ namespace UI
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
             this.btnBorrar = new System.Windows.Forms.Button();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvItems)).BeginInit();
             this.SuspendLayout();
             // 
@@ -43,10 +43,10 @@ namespace UI
             this.dgvItems.AllowUserToAddRows = false;
             this.dgvItems.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvItems.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn4});
+            this.idItem,
+            this.descripcion,
+            this.unidad,
+            this.precioUnitario});
             this.dgvItems.Location = new System.Drawing.Point(20, 20);
             this.dgvItems.MultiSelect = false;
             this.dgvItems.Name = "dgvItems";
@@ -56,33 +56,57 @@ namespace UI
             this.dgvItems.TabIndex = 0;
             this.dgvItems.SelectionChanged += new System.EventHandler(this.dgvItems_SelectionChanged);
             // 
+            // idItem
+            // 
+            this.idItem.HeaderText = "ID";
+            this.idItem.Name = "idItem";
+            this.idItem.ReadOnly = true;
+            // 
+            // descripcion
+            // 
+            this.descripcion.HeaderText = "Descripción";
+            this.descripcion.Name = "descripcion";
+            this.descripcion.ReadOnly = true;
+            // 
+            // unidad
+            // 
+            this.unidad.HeaderText = "Unidad";
+            this.unidad.Name = "unidad";
+            this.unidad.ReadOnly = true;
+            // 
+            // precioUnitario
+            // 
+            this.precioUnitario.HeaderText = "Precio Unitario";
+            this.precioUnitario.Name = "precioUnitario";
+            this.precioUnitario.ReadOnly = true;
+            // 
             // txtId
             // 
             this.txtId.Location = new System.Drawing.Point(130, 180);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 23);
+            this.txtId.Size = new System.Drawing.Size(150, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtDescripcion
             // 
             this.txtDescripcion.Location = new System.Drawing.Point(130, 210);
             this.txtDescripcion.Name = "txtDescripcion";
-            this.txtDescripcion.Size = new System.Drawing.Size(430, 23);
+            this.txtDescripcion.Size = new System.Drawing.Size(430, 20);
             this.txtDescripcion.TabIndex = 4;
             // 
             // txtUnidad
             // 
             this.txtUnidad.Location = new System.Drawing.Point(130, 240);
             this.txtUnidad.Name = "txtUnidad";
-            this.txtUnidad.Size = new System.Drawing.Size(150, 23);
+            this.txtUnidad.Size = new System.Drawing.Size(150, 20);
             this.txtUnidad.TabIndex = 6;
             // 
             // txtPrecio
             // 
             this.txtPrecio.Location = new System.Drawing.Point(130, 270);
             this.txtPrecio.Name = "txtPrecio";
-            this.txtPrecio.Size = new System.Drawing.Size(150, 23);
+            this.txtPrecio.Size = new System.Drawing.Size(150, 20);
             this.txtPrecio.TabIndex = 8;
             // 
             // lblId
@@ -144,33 +168,9 @@ namespace UI
             this.btnBorrar.Text = "Borrar ítem";
             this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
             // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.HeaderText = "ID";
-            this.dataGridViewTextBoxColumn1.Name = "idItem";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.HeaderText = "Descripción";
-            this.dataGridViewTextBoxColumn2.Name = "descripcion";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Unidad";
-            this.dataGridViewTextBoxColumn3.Name = "unidad";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Precio Unitario";
-            this.dataGridViewTextBoxColumn4.Name = "precioUnitario";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
             // GestionarItemPersonalizadoForm
             // 
-            this.ClientSize = new System.Drawing.Size(580, 360);
+            this.ClientSize = new System.Drawing.Size(582, 345);
             this.Controls.Add(this.dgvItems);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);
@@ -197,5 +197,9 @@ namespace UI
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private DataGridViewTextBoxColumn idItem;
+        private DataGridViewTextBoxColumn descripcion;
+        private DataGridViewTextBoxColumn unidad;
+        private DataGridViewTextBoxColumn precioUnitario;
     }
 }

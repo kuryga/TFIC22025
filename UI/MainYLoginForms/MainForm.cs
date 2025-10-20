@@ -31,6 +31,9 @@ namespace UI
             menuConsultar.Click += (s, e) => AbrirFormulario(new ConsultarCotizacionesForm());
             menuNuevaCotizacion.Click += (s, e) => AbrirFormulario(new NuevaCotizacionForm());
 
+            menuBackup.Click += (s, e) => AbrirFormulario(new BackupForm());
+            menuRestore.Click += (s, e) => AbrirFormulario(new RestoreForm());
+
             menuCerrarSesion.Click += (s, e) =>
             {
                 var resultado = MessageBox.Show(
@@ -75,10 +78,14 @@ namespace UI
                 SetItemVisibility(menuConsultar, permisosBLL.DebeVerCotizaciones());
                 SetItemVisibility(menuNuevaCotizacion, permisosBLL.DebeCrearCotizacion());
 
+                SetItemVisibility(menuBackup, permisosBLL.DebeVerBackup());
+                SetItemVisibility(menuRestore, permisosBLL.DebeVerRestore());
+
                 SetItemVisibility(gestionesMenu, HayAlgunoVisible(menuMaquinaria, menuMateriales, menuServicios, menuTipoEdif, menuMoneda));
                 SetItemVisibility(usuariosMenu, HayAlgunoVisible(menuUsuarios, menuFamilias, menuPatentes));
                 SetItemVisibility(cotizacionesMenu, HayAlgunoVisible(menuConsultar, menuNuevaCotizacion));
-                SetItemVisibility(seguridadMenu, HayAlgunoVisible(menuBitacora));
+                SetItemVisibility(auditoriaMenu, HayAlgunoVisible(menuBitacora));
+                SetItemVisibility(sistemaMenu, HayAlgunoVisible(menuBackup, menuRestore));
 
                 menuStrip1.PerformLayout();
                 menuStrip1.Refresh();
@@ -118,8 +125,8 @@ namespace UI
             form.Show();
             form.PerformLayout();
 
-            var desiredWidth = form.Width + panelContenedor.Margin.Horizontal + 40;
-            var desiredHeight = form.Height + menuStrip1.Height + panelContenedor.Margin.Vertical + 60;
+            var desiredWidth = form.Width + panelContenedor.Margin.Horizontal + 13;
+            var desiredHeight = form.Height + menuStrip1.Height + panelContenedor.Margin.Vertical + 35;
 
             this.Size = new System.Drawing.Size(desiredWidth, desiredHeight);
         }

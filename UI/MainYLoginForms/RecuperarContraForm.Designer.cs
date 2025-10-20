@@ -27,33 +27,33 @@ namespace UI
             // lblInstruccion
             // 
             this.lblInstruccion.AutoSize = true;
-            this.lblInstruccion.Location = new System.Drawing.Point(83, 32);
+            this.lblInstruccion.Location = new System.Drawing.Point(71, 28);
             this.lblInstruccion.Name = "lblInstruccion";
-            this.lblInstruccion.Size = new System.Drawing.Size(162, 15);
+            this.lblInstruccion.Size = new System.Drawing.Size(147, 13);
             this.lblInstruccion.TabIndex = 0;
             this.lblInstruccion.Text = "Ingrese su correo electrónico:";
             // 
             // txtEmail
             // 
-            this.txtEmail.Location = new System.Drawing.Point(25, 50);
+            this.txtEmail.Location = new System.Drawing.Point(21, 43);
             this.txtEmail.Name = "txtEmail";
-            this.txtEmail.Size = new System.Drawing.Size(280, 23);
+            this.txtEmail.Size = new System.Drawing.Size(241, 20);
             this.txtEmail.TabIndex = 1;
             // 
             // btnEnviar
             // 
-            this.btnEnviar.Location = new System.Drawing.Point(126, 79);
+            this.btnEnviar.Location = new System.Drawing.Point(108, 68);
             this.btnEnviar.Name = "btnEnviar";
-            this.btnEnviar.Size = new System.Drawing.Size(75, 30);
+            this.btnEnviar.Size = new System.Drawing.Size(64, 26);
             this.btnEnviar.TabIndex = 2;
             this.btnEnviar.Text = "Enviar";
             this.btnEnviar.UseVisualStyleBackColor = true;
             // 
             // RecuperarContraForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(340, 140);
+            this.ClientSize = new System.Drawing.Size(281, 120);
             this.Controls.Add(this.lblInstruccion);
             this.Controls.Add(this.txtEmail);
             this.Controls.Add(this.btnEnviar);

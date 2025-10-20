@@ -74,8 +74,8 @@ namespace BLL.Seguridad
         public bool DebeVerCotizaciones() => TieneAlguna(CodigoPatentes.PT_COT_VER, CodigoPatentes.PT_COT_CREAR);
         public bool DebeCrearCotizacion() => TieneAlguna(CodigoPatentes.PT_COT_CREAR);
 
-        public bool PuedeEjecutarBackup() => TieneAlguna(CodigoPatentes.PT_SEG_BACKUP_EJECUTAR);
-        public bool PuedeEjecutarRestore() => TieneAlguna(CodigoPatentes.PT_SEG_RESTORE_EJECUTAR);
+        public bool DebeVerBackup() => TieneAlguna(CodigoPatentes.PT_SEG_BACKUP_EJECUTAR);
+        public bool DebeVerRestore() => TieneAlguna(CodigoPatentes.PT_SEG_RESTORE_EJECUTAR);
 
         public bool PuedeCrearFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_CREAR);
         public bool PuedeModificarFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_MODIFICAR);

@@ -35,10 +35,10 @@ namespace DAL.Mantenimiento
             }
         }
 
-        public List<string> BackupFull(string destinationDrive, int parts = 1)
+        public List<string> BackupFull(string destinationPath, int parts = 1)
         {
-            if (string.IsNullOrWhiteSpace(destinationDrive) || destinationDrive.Length < 2 || destinationDrive[1] != ':')
-                throw new ArgumentException("Unidad de destino inválida.", nameof(destinationDrive));
+            if (string.IsNullOrWhiteSpace(destinationPath))
+                throw new ArgumentException("Debe indicar una unidad o carpeta de destino.", nameof(destinationPath));
             if (parts < 1 || parts > 5)
                 throw new ArgumentOutOfRangeException(nameof(parts), "El número de partes debe estar entre 1 y 5.");
 
@@ -48,9 +48,33 @@ namespace DAL.Mantenimiento
             var baseName = $"{dbName}_FULL_{stamp}";
 
             var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var backupFolder = Path.Combine(desktopPath, "Backups");
-            if (!Directory.Exists(backupFolder))
-                Directory.CreateDirectory(backupFolder);
+            var fallbackFolder = Path.Combine(desktopPath, "Backups");
+            string backupFolder;
+
+            try
+            {
+                if (Directory.Exists(destinationPath))
+                {
+                    backupFolder = destinationPath;
+                }
+                else if (destinationPath.Length >= 2 && destinationPath[1] == ':')
+                {
+                    backupFolder = Path.Combine(destinationPath.TrimEnd('\\') + "\\", "Backups");
+                }
+                else
+                {
+                    backupFolder = fallbackFolder;
+                }
+
+                if (!Directory.Exists(backupFolder))
+                    Directory.CreateDirectory(backupFolder);
+            }
+            catch
+            {
+                backupFolder = fallbackFolder;
+                if (!Directory.Exists(backupFolder))
+                    Directory.CreateDirectory(backupFolder);
+            }
 
             var files = new List<string>(parts);
             for (int i = 1; i <= parts; i++)
@@ -64,11 +88,8 @@ namespace DAL.Mantenimiento
             var sql = $"BACKUP DATABASE [{dbName}] TO {toClauses} WITH COMPRESSION, STATS = 5, SKIP;";
             ExecNonQuery(sql);
 
-            foreach (var f in files)
-            {
-                var verify = $"RESTORE VERIFYONLY FROM DISK = N'{f.Replace("'", "''")}';";
-                ExecNonQuery(verify);
-            }
+            var verifyAll = $"RESTORE VERIFYONLY FROM {toClauses};";
+            ExecNonQuery(verifyAll);
 
             BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.RespaldoBaseDatos,
                 $"Backup total de {dbName}. Partes {parts}. Carpeta {backupFolder}.");
@@ -83,16 +104,14 @@ namespace DAL.Mantenimiento
 
             var dbName = CurrentDbName;
 
+            var fromClauses = string.Join(", ", sourceFiles.ConvertAll(f => $"DISK = N'{f.Replace("'", "''")}'"));
+
             if (verifyBefore)
             {
-                foreach (var f in sourceFiles)
-                {
-                    var verify = $"RESTORE VERIFYONLY FROM DISK = N'{f.Replace("'", "''")}';";
-                    ExecNonQuery(verify);
-                }
+                var verifyAll = $"RESTORE VERIFYONLY FROM {fromClauses};";
+                ExecNonQuery(verifyAll);
             }
 
-            var fromClauses = string.Join(", ", sourceFiles.ConvertAll(f => $"DISK = N'{f.Replace("'", "''")}'"));
             var replace = withReplace ? ", REPLACE" : "";
             var sql = $"RESTORE DATABASE [{dbName}] FROM {fromClauses} WITH RECOVERY{replace}, STATS = 5;";
             ExecNonQuery(sql);

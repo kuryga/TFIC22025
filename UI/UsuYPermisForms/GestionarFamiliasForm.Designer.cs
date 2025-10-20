@@ -3,7 +3,7 @@ using System;
 
 namespace UI
 {
-    partial class GestionarPatentesForm
+    partial class GestionarFamiliasForm
     {
         private DataGridView dgvUsuarios, dgvDisponibles, dgvAsignadas;
         private Label lblUsuarios, lblDisponibles, lblAsignadas;
@@ -22,7 +22,9 @@ namespace UI
             this.lblAsignadas = new System.Windows.Forms.Label();
             this.btnAgregar = new System.Windows.Forms.Button();
             this.btnEliminar = new System.Windows.Forms.Button();
-            this.brnGuardar = new System.Windows.Forms.Button();
+            this.btnGuardar = new System.Windows.Forms.Button();
+            this.btnCrear = new System.Windows.Forms.Button();
+            this.btnModificar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDisponibles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignadas)).BeginInit();
@@ -30,6 +32,9 @@ namespace UI
             // 
             // dgvUsuarios
             // 
+            this.dgvUsuarios.AllowUserToAddRows = false;
+            this.dgvUsuarios.AllowUserToDeleteRows = false;
+            this.dgvUsuarios.AllowUserToResizeRows = false;
             this.dgvUsuarios.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvUsuarios.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1,
@@ -39,7 +44,7 @@ namespace UI
             this.dgvUsuarios.Name = "dgvUsuarios";
             this.dgvUsuarios.ReadOnly = true;
             this.dgvUsuarios.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvUsuarios.Size = new System.Drawing.Size(675, 133);
+            this.dgvUsuarios.Size = new System.Drawing.Size(673, 100);
             this.dgvUsuarios.TabIndex = 1;
             this.dgvUsuarios.SelectionChanged += new System.EventHandler(this.dgvUsuarios_SelectionChanged);
             // 
@@ -57,35 +62,41 @@ namespace UI
             // 
             // dgvDisponibles
             // 
+            this.dgvDisponibles.AllowUserToAddRows = false;
+            this.dgvDisponibles.AllowUserToDeleteRows = false;
+            this.dgvDisponibles.AllowUserToResizeRows = false;
             this.dgvDisponibles.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvDisponibles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn3});
-            this.dgvDisponibles.Location = new System.Drawing.Point(20, 199);
+            this.dgvDisponibles.Location = new System.Drawing.Point(20, 169);
             this.dgvDisponibles.Name = "dgvDisponibles";
             this.dgvDisponibles.ReadOnly = true;
-            this.dgvDisponibles.Size = new System.Drawing.Size(304, 150);
+            this.dgvDisponibles.Size = new System.Drawing.Size(308, 150);
             this.dgvDisponibles.TabIndex = 3;
             // 
             // dataGridViewTextBoxColumn3
             // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Patentes";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Familia";
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.ReadOnly = true;
             // 
             // dgvAsignadas
             // 
+            this.dgvAsignadas.AllowUserToAddRows = false;
+            this.dgvAsignadas.AllowUserToDeleteRows = false;
+            this.dgvAsignadas.AllowUserToResizeRows = false;
             this.dgvAsignadas.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvAsignadas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn4});
-            this.dgvAsignadas.Location = new System.Drawing.Point(386, 199);
+            this.dgvAsignadas.Location = new System.Drawing.Point(390, 169);
             this.dgvAsignadas.Name = "dgvAsignadas";
             this.dgvAsignadas.ReadOnly = true;
-            this.dgvAsignadas.Size = new System.Drawing.Size(309, 150);
+            this.dgvAsignadas.Size = new System.Drawing.Size(303, 150);
             this.dgvAsignadas.TabIndex = 5;
             // 
             // dataGridViewTextBoxColumn4
             // 
-            this.dataGridViewTextBoxColumn4.HeaderText = "Patentes";
+            this.dataGridViewTextBoxColumn4.HeaderText = "Familia";
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
             // 
@@ -99,7 +110,7 @@ namespace UI
             // 
             // lblDisponibles
             // 
-            this.lblDisponibles.Location = new System.Drawing.Point(20, 173);
+            this.lblDisponibles.Location = new System.Drawing.Point(20, 143);
             this.lblDisponibles.Name = "lblDisponibles";
             this.lblDisponibles.Size = new System.Drawing.Size(100, 23);
             this.lblDisponibles.TabIndex = 2;
@@ -107,7 +118,7 @@ namespace UI
             // 
             // lblAsignadas
             // 
-            this.lblAsignadas.Location = new System.Drawing.Point(383, 173);
+            this.lblAsignadas.Location = new System.Drawing.Point(387, 143);
             this.lblAsignadas.Name = "lblAsignadas";
             this.lblAsignadas.Size = new System.Drawing.Size(100, 23);
             this.lblAsignadas.TabIndex = 4;
@@ -115,7 +126,7 @@ namespace UI
             // 
             // btnAgregar
             // 
-            this.btnAgregar.Location = new System.Drawing.Point(330, 235);
+            this.btnAgregar.Location = new System.Drawing.Point(334, 212);
             this.btnAgregar.Name = "btnAgregar";
             this.btnAgregar.Size = new System.Drawing.Size(50, 30);
             this.btnAgregar.TabIndex = 6;
@@ -124,26 +135,46 @@ namespace UI
             // 
             // btnEliminar
             // 
-            this.btnEliminar.Location = new System.Drawing.Point(330, 275);
+            this.btnEliminar.Location = new System.Drawing.Point(334, 252);
             this.btnEliminar.Name = "btnEliminar";
             this.btnEliminar.Size = new System.Drawing.Size(50, 30);
             this.btnEliminar.TabIndex = 7;
             this.btnEliminar.Text = "←";
             this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
-            // brnGuardar
+            // btnGuardar
             // 
-            this.brnGuardar.Location = new System.Drawing.Point(308, 355);
-            this.brnGuardar.Name = "brnGuardar";
-            this.brnGuardar.Size = new System.Drawing.Size(92, 30);
-            this.brnGuardar.TabIndex = 8;
-            this.brnGuardar.Text = "Guardar";
-            this.brnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
+            this.btnGuardar.Location = new System.Drawing.Point(601, 349);
+            this.btnGuardar.Name = "btnGuardar";
+            this.btnGuardar.Size = new System.Drawing.Size(92, 30);
+            this.btnGuardar.TabIndex = 8;
+            this.btnGuardar.Text = "Guardar";
+            this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
             // 
-            // GestionarPatentesForm
+            // btnCrear
             // 
-            this.ClientSize = new System.Drawing.Size(707, 397);
-            this.Controls.Add(this.brnGuardar);
+            this.btnCrear.Location = new System.Drawing.Point(23, 349);
+            this.btnCrear.Name = "btnCrear";
+            this.btnCrear.Size = new System.Drawing.Size(92, 30);
+            this.btnCrear.TabIndex = 9;
+            this.btnCrear.Text = "Crear Familia";
+            this.btnCrear.Click += new System.EventHandler(this.btnCrear_Click);
+            // 
+            // btnModificar
+            // 
+            this.btnModificar.Location = new System.Drawing.Point(281, 349);
+            this.btnModificar.Name = "btnModificar";
+            this.btnModificar.Size = new System.Drawing.Size(151, 30);
+            this.btnModificar.TabIndex = 10;
+            this.btnModificar.Text = "Modificar Familia";
+            this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
+            // 
+            // GestionarFamiliasForm
+            // 
+            this.ClientSize = new System.Drawing.Size(717, 391);
+            this.Controls.Add(this.btnModificar);
+            this.Controls.Add(this.btnCrear);
+            this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.lblUsuarios);
             this.Controls.Add(this.dgvUsuarios);
             this.Controls.Add(this.lblDisponibles);
@@ -153,9 +184,9 @@ namespace UI
             this.Controls.Add(this.btnAgregar);
             this.Controls.Add(this.btnEliminar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Name = "GestionarPatentesForm";
+            this.Name = "GestionarFamiliasForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Gestionar Patentes";
+            this.Text = " ";
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDisponibles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignadas)).EndInit();
@@ -167,6 +198,8 @@ namespace UI
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private Button brnGuardar;
+        private Button btnGuardar;
+        private Button btnCrear;
+        private Button btnModificar;
     }
 }

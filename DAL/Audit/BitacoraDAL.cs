@@ -1,4 +1,4 @@
-﻿using System; 
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -21,10 +21,17 @@ namespace DAL.Audit
 
         private const string TblBitacora = "dbo.Bitacora";
         private const string PkBitacora = "idRegistro";
+        private const string TblCriticidad = "dbo.Criticidad";
 
         private static bool _isListingBitacora;
 
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize)
+        {
+            return GetBitacoraList(desde, hasta, page, pageSize, null);
+        }
+
+        public List<BE.Audit.Bitacora> GetBitacoraList(
+    DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 30;
@@ -47,7 +54,12 @@ WITH CTE AS (
         ROW_NUMBER() OVER (ORDER BY b.fecha DESC, b." + PkBitacora + @" DESC) AS rn
     FROM " + TblBitacora + @" b
     WHERE (@desde IS NULL OR CAST(b.fecha AS date) >= @desde)
-      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)
+      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)";
+
+            if (!string.IsNullOrWhiteSpace(criticidad))
+                sql += " AND b.criticidad = @criticidad";
+
+            sql += @"
 )
 SELECT
     " + PkBitacora + @" AS idRegistro,
@@ -70,6 +82,9 @@ ORDER BY rn;";
                     hasta.HasValue ? (object)hasta.Value.Date : DBNull.Value;
                 cmd.Parameters.Add("@start", SqlDbType.Int).Value = start;
                 cmd.Parameters.Add("@end", SqlDbType.Int).Value = end;
+
+                if (!string.IsNullOrWhiteSpace(criticidad))
+                    cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
 
                 conn.Open();
                 using (var rdr = cmd.ExecuteReader())
@@ -116,7 +131,8 @@ ORDER BY rn;";
                     string msg =
                         $"Listado de bitácora (página={page}, tamaño={pageSize}, " +
                         $"desde={(desde.HasValue ? desde.Value.ToString("yyyy-MM-dd") : "-")}, " +
-                        $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}).";
+                        $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}, " +
+                        $"criticidad={(string.IsNullOrWhiteSpace(criticidad) ? "Todas" : criticidad)}).";
 
                     Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
                 }
@@ -158,7 +174,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
                 cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
 
-                
                 var idValue = uid.HasValue ? (object)uid.Value : DBNull.Value;
                 var userValue = string.IsNullOrWhiteSpace(uname) ? (object)DBNull.Value : uname;
 
@@ -186,6 +201,37 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         {
             var crit = BE.Audit.AuditEvents.GetCriticidad(accion).ToString();
             return Log(accion, mensaje ?? string.Empty, crit);
+        }
+
+        public List<BE.Audit.Criticidad> GetCriticidades()
+        {
+            var list = new List<BE.Audit.Criticidad>();
+
+            const string sql = @"SELECT codigo FROM dbo.Criticidad WHERE codigo IS NOT NULL ORDER BY codigo;";
+
+            using (var conn = new SqlConnection(DalToolkit.connectionString))
+            using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+            {
+                conn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    int oCodigo = rdr.GetOrdinal("codigo");
+
+                    while (rdr.Read())
+                    {
+                        if (!rdr.IsDBNull(oCodigo))
+                        {
+                            string codigo = rdr.GetString(oCodigo).Trim();
+
+                            if (Enum.TryParse(codigo, true, out BE.Audit.Criticidad crit))
+                                list.Add(crit);
+                        }
+                    }
+                }
+                conn.Close();
+            }
+
+            return list;
         }
     }
 }

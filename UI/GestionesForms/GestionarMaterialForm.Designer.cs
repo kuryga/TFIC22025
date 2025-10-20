@@ -137,7 +137,7 @@ namespace UI
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(268, 280);
+            this.btnModificar.Location = new System.Drawing.Point(264, 280);
             this.btnModificar.Name = "btnModificar";
             this.btnModificar.Size = new System.Drawing.Size(75, 23);
             this.btnModificar.TabIndex = 12;
@@ -155,7 +155,7 @@ namespace UI
             // 
             // GestionarMaterialForm
             // 
-            this.ClientSize = new System.Drawing.Size(600, 330);
+            this.ClientSize = new System.Drawing.Size(600, 321);
             this.Controls.Add(this.dgvMaterial);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);

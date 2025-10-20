@@ -46,217 +46,229 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AgregarMaquinariasForm.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AgregarMaquinariasForm.Designer.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.Designer.cs">
       <DependentUpon>AgregarMaquinariasForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AgregarMaterialesForm.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarMaterialesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AgregarMaterialesForm.Designer.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarMaterialesForm.Designer.cs">
       <DependentUpon>AgregarMaterialesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AgregarServiciosAdicionalesForm.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarServiciosAdicionalesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AgregarServiciosAdicionalesForm.Designer.cs">
+    <Compile Include="GestionesForms\AgregarForms\AgregarServiciosAdicionalesForm.Designer.cs">
       <DependentUpon>AgregarServiciosAdicionalesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ConsultarBitacoraForm.cs">
+    <Compile Include="BaseForms\BaseForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConsultarBitacoraForm.Designer.cs">
+    <Compile Include="BaseForms\BaseForm.Designer.cs">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AuditoriaForms\ConsultarBitacoraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AuditoriaForms\ConsultarBitacoraForm.Designer.cs">
       <DependentUpon>ConsultarBitacoraForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DetalleCotizacionForm.cs">
+    <Compile Include="CotizacionesForms\DetalleCotizacionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DetalleCotizacionForm.Designer.cs">
+    <Compile Include="CotizacionesForms\DetalleCotizacionForm.Designer.cs">
       <DependentUpon>DetalleCotizacionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BackupForm.cs">
+    <Compile Include="GestionesSisForm\BackupForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BackupForm.Designer.cs">
+    <Compile Include="GestionesSisForm\BackupForm.Designer.cs">
       <DependentUpon>BackupForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarCotizaciones.cs">
+    <Compile Include="CotizacionesForms\GestionarCotizaciones.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarCotizaciones.Designer.cs">
+    <Compile Include="CotizacionesForms\GestionarCotizaciones.Designer.cs">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarFamiliaForm.cs">
+    <Compile Include="UsuYPermisForms\GestionarFamiliaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarFamiliaForm.Designer.cs">
+    <Compile Include="UsuYPermisForms\GestionarFamiliaForm.Designer.cs">
       <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarFamiliasForm.cs">
+    <Compile Include="UsuYPermisForms\GestionarFamiliasForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarFamiliasForm.Designer.cs">
+    <Compile Include="UsuYPermisForms\GestionarFamiliasForm.Designer.cs">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarItemPersonalizadoForm.cs">
+    <Compile Include="GestionesForms\GestionarItemPersonalizadoForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarItemPersonalizadoForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarItemPersonalizadoForm.Designer.cs">
       <DependentUpon>GestionarItemPersonalizadoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarMaquinariaForm.cs">
+    <Compile Include="GestionesForms\GestionarMaquinariaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarMaquinariaForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarMaquinariaForm.Designer.cs">
       <DependentUpon>GestionarMaquinariaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarMaquinariasForm.cs">
+    <Compile Include="GestionesForms\GestionarMaquinariasForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarMaquinariasForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarMaquinariasForm.Designer.cs">
       <DependentUpon>GestionarMaquinariasForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarMaterialForm.cs">
+    <Compile Include="GestionesForms\GestionarMaterialForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarMaterialForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarMaterialForm.Designer.cs">
       <DependentUpon>GestionarMaterialForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarMonedaForm.cs">
+    <Compile Include="GestionesForms\GestionarMonedaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarMonedaForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarMonedaForm.Designer.cs">
       <DependentUpon>GestionarMonedaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarPatentesForm.cs">
+    <Compile Include="UsuYPermisForms\GestionarPatentesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarPatentesForm.Designer.cs">
+    <Compile Include="UsuYPermisForms\GestionarPatentesForm.Designer.cs">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarServicioAdicionalForm.cs">
+    <Compile Include="GestionesForms\GestionarServicioAdicionalForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarServicioAdicionalForm.Designer.cs">
+    <Compile Include="GestionesForms\GestionarServicioAdicionalForm.Designer.cs">
       <DependentUpon>GestionarServicioAdicionalForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarTipoEdificacion.cs">
+    <Compile Include="GestionesForms\GestionarTipoEdificacion.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarTipoEdificacion.Designer.cs">
+    <Compile Include="GestionesForms\GestionarTipoEdificacion.Designer.cs">
       <DependentUpon>GestionarTipoEdificacion.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionarUsuariosForm.cs">
+    <Compile Include="UsuYPermisForms\GestionarUsuariosForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GestionarUsuariosForm.Designer.cs">
+    <Compile Include="UsuYPermisForms\GestionarUsuariosForm.Designer.cs">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoginAppContext.cs" />
-    <Compile Include="LoginForm.cs">
+    <Compile Include="BaseForms\LoadingOverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoginForm.Designer.cs">
+    <Compile Include="BaseForms\LoadingOverlayForm.Designer.cs">
+      <DependentUpon>LoadingOverlayForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoginAppContext.cs" />
+    <Compile Include="MainYLoginForms\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainYLoginForms\LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainForm.cs">
+    <Compile Include="MainYLoginForms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="MainYLoginForms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NuevaContrasenaForm.cs">
+    <Compile Include="MainYLoginForms\NuevaContrasenaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NuevaContrasenaForm.Designer.cs">
+    <Compile Include="MainYLoginForms\NuevaContrasenaForm.Designer.cs">
       <DependentUpon>NuevaContrasenaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="NuevaCotizacionForm.cs">
+    <Compile Include="CotizacionesForms\NuevaCotizacionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="NuevaCotizacionForm.Designer.cs">
+    <Compile Include="CotizacionesForms\NuevaCotizacionForm.Designer.cs">
       <DependentUpon>NuevaCotizacionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecuperarContraForm.cs">
+    <Compile Include="MainYLoginForms\RecuperarContraForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="RecuperarContraForm.Designer.cs">
+    <Compile Include="MainYLoginForms\RecuperarContraForm.Designer.cs">
       <DependentUpon>RecuperarContraForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="RestoreForm.cs">
+    <Compile Include="GestionesSisForm\RestoreForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="RestoreForm.Designer.cs">
+    <Compile Include="GestionesSisForm\RestoreForm.Designer.cs">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="AgregarMaquinariasForm.resx">
+    <EmbeddedResource Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.resx">
       <DependentUpon>AgregarMaquinariasForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AgregarMaterialesForm.resx">
+    <EmbeddedResource Include="GestionesForms\AgregarForms\AgregarMaterialesForm.resx">
       <DependentUpon>AgregarMaterialesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AgregarServiciosAdicionalesForm.resx">
+    <EmbeddedResource Include="GestionesForms\AgregarForms\AgregarServiciosAdicionalesForm.resx">
       <DependentUpon>AgregarServiciosAdicionalesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConsultarBitacoraForm.resx">
+    <EmbeddedResource Include="AuditoriaForms\ConsultarBitacoraForm.resx">
       <DependentUpon>ConsultarBitacoraForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DetalleCotizacionForm.resx">
+    <EmbeddedResource Include="CotizacionesForms\DetalleCotizacionForm.resx">
       <DependentUpon>DetalleCotizacionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BackupForm.resx">
+    <EmbeddedResource Include="GestionesSisForm\BackupForm.resx">
       <DependentUpon>BackupForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarCotizaciones.resx">
+    <EmbeddedResource Include="CotizacionesForms\GestionarCotizaciones.resx">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarFamiliaForm.resx">
+    <EmbeddedResource Include="UsuYPermisForms\GestionarFamiliaForm.resx">
       <DependentUpon>GestionarFamiliaForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarFamiliasForm.resx">
+    <EmbeddedResource Include="UsuYPermisForms\GestionarFamiliasForm.resx">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarItemPersonalizadoForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarItemPersonalizadoForm.resx">
       <DependentUpon>GestionarItemPersonalizadoForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarMaquinariaForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarMaquinariaForm.resx">
       <DependentUpon>GestionarMaquinariaForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarMaquinariasForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarMaquinariasForm.resx">
       <DependentUpon>GestionarMaquinariasForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarMaterialForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarMaterialForm.resx">
       <DependentUpon>GestionarMaterialForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarMonedaForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarMonedaForm.resx">
       <DependentUpon>GestionarMonedaForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarPatentesForm.resx">
+    <EmbeddedResource Include="UsuYPermisForms\GestionarPatentesForm.resx">
       <DependentUpon>GestionarPatentesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarServicioAdicionalForm.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarServicioAdicionalForm.resx">
       <DependentUpon>GestionarServicioAdicionalForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarTipoEdificacion.resx">
+    <EmbeddedResource Include="GestionesForms\GestionarTipoEdificacion.resx">
       <DependentUpon>GestionarTipoEdificacion.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GestionarUsuariosForm.resx">
+    <EmbeddedResource Include="UsuYPermisForms\GestionarUsuariosForm.resx">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoginForm.resx">
+    <EmbeddedResource Include="MainYLoginForms\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="MainYLoginForms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NuevaContrasenaForm.resx">
+    <EmbeddedResource Include="MainYLoginForms\NuevaContrasenaForm.resx">
       <DependentUpon>NuevaContrasenaForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="NuevaCotizacionForm.resx">
+    <EmbeddedResource Include="CotizacionesForms\NuevaCotizacionForm.resx">
       <DependentUpon>NuevaCotizacionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -267,11 +279,12 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="RecuperarContraForm.resx">
+    <EmbeddedResource Include="MainYLoginForms\RecuperarContraForm.resx">
       <DependentUpon>RecuperarContraForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="RestoreForm.resx">
+    <EmbeddedResource Include="GestionesSisForm\RestoreForm.resx">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
@@ -296,6 +309,10 @@
       <Project>{38085bf5-0990-4e95-b74c-d7213180839f}</Project>
       <Name>BLL</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\loader_gif.gif" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

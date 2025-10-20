@@ -11,7 +11,7 @@ namespace UI
         private ToolStripMenuItem gestionesMenu;
         private ToolStripMenuItem usuariosMenu;
         private ToolStripMenuItem cotizacionesMenu;
-        private ToolStripMenuItem seguridadMenu;
+        private ToolStripMenuItem auditoriaMenu;
         private ToolStripMenuItem menuCerrarSesion;
 
         private ToolStripMenuItem menuMaquinaria, menuMateriales, menuMoneda,
@@ -35,14 +35,14 @@ namespace UI
             this.menuUsuarios = new System.Windows.Forms.ToolStripMenuItem();
             this.menuFamilias = new System.Windows.Forms.ToolStripMenuItem();
             this.menuPatentes = new System.Windows.Forms.ToolStripMenuItem();
-            this.seguridadMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.auditoriaMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBitacora = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuCerrarSesion = new System.Windows.Forms.ToolStripMenuItem();
-            this.panelContenedor = new System.Windows.Forms.Panel();
-            this.lblBienvenida = new System.Windows.Forms.Label();
             this.sistemaMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBackup = new System.Windows.Forms.ToolStripMenuItem();
             this.menuRestore = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuCerrarSesion = new System.Windows.Forms.ToolStripMenuItem();
+            this.panelContenedor = new System.Windows.Forms.Panel();
+            this.lblBienvenida = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.panelContenedor.SuspendLayout();
             this.SuspendLayout();
@@ -53,7 +53,7 @@ namespace UI
             this.cotizacionesMenu,
             this.gestionesMenu,
             this.usuariosMenu,
-            this.seguridadMenu,
+            this.auditoriaMenu,
             this.sistemaMenu,
             this.menuCerrarSesion});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -152,19 +152,40 @@ namespace UI
             this.menuPatentes.Size = new System.Drawing.Size(119, 22);
             this.menuPatentes.Text = "Patentes";
             // 
-            // seguridadMenu
+            // auditoriaMenu
             // 
-            this.seguridadMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.auditoriaMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuBitacora});
-            this.seguridadMenu.Name = "seguridadMenu";
-            this.seguridadMenu.Size = new System.Drawing.Size(72, 20);
-            this.seguridadMenu.Text = "Seguridad";
+            this.auditoriaMenu.Name = "auditoriaMenu";
+            this.auditoriaMenu.Size = new System.Drawing.Size(68, 20);
+            this.auditoriaMenu.Text = "Auditoria";
             // 
             // menuBitacora
             // 
             this.menuBitacora.Name = "menuBitacora";
             this.menuBitacora.Size = new System.Drawing.Size(180, 22);
             this.menuBitacora.Text = "Consultar Bitacora";
+            // 
+            // sistemaMenu
+            // 
+            this.sistemaMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuBackup,
+            this.menuRestore});
+            this.sistemaMenu.Name = "sistemaMenu";
+            this.sistemaMenu.Size = new System.Drawing.Size(60, 20);
+            this.sistemaMenu.Text = "Sistema";
+            // 
+            // menuBackup
+            // 
+            this.menuBackup.Name = "menuBackup";
+            this.menuBackup.Size = new System.Drawing.Size(113, 22);
+            this.menuBackup.Text = "Backup";
+            // 
+            // menuRestore
+            // 
+            this.menuRestore.Name = "menuRestore";
+            this.menuRestore.Size = new System.Drawing.Size(113, 22);
+            this.menuRestore.Text = "Restore";
             // 
             // menuCerrarSesion
             // 
@@ -193,27 +214,6 @@ namespace UI
             this.lblBienvenida.TabIndex = 0;
             this.lblBienvenida.Text = "Bienvenido al sistema \'\'Usuario logueado\'\'";
             this.lblBienvenida.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // sistemaMenu
-            // 
-            this.sistemaMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuBackup,
-            this.menuRestore});
-            this.sistemaMenu.Name = "sistemaMenu";
-            this.sistemaMenu.Size = new System.Drawing.Size(60, 20);
-            this.sistemaMenu.Text = "Sistema";
-            // 
-            // menuBackup
-            // 
-            this.menuBackup.Name = "menuBackup";
-            this.menuBackup.Size = new System.Drawing.Size(180, 22);
-            this.menuBackup.Text = "Backup";
-            // 
-            // menuRestore
-            // 
-            this.menuRestore.Name = "menuRestore";
-            this.menuRestore.Size = new System.Drawing.Size(180, 22);
-            this.menuRestore.Text = "Restore";
             // 
             // MainForm
             // 

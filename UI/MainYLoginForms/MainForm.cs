@@ -84,7 +84,7 @@ namespace UI
                 SetItemVisibility(gestionesMenu, HayAlgunoVisible(menuMaquinaria, menuMateriales, menuServicios, menuTipoEdif, menuMoneda));
                 SetItemVisibility(usuariosMenu, HayAlgunoVisible(menuUsuarios, menuFamilias, menuPatentes));
                 SetItemVisibility(cotizacionesMenu, HayAlgunoVisible(menuConsultar, menuNuevaCotizacion));
-                SetItemVisibility(seguridadMenu, HayAlgunoVisible(menuBitacora));
+                SetItemVisibility(auditoriaMenu, HayAlgunoVisible(menuBitacora));
                 SetItemVisibility(sistemaMenu, HayAlgunoVisible(menuBackup, menuRestore));
 
                 menuStrip1.PerformLayout();

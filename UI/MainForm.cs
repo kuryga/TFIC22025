@@ -31,7 +31,6 @@ namespace UI
             menuConsultar.Click += (s, e) => AbrirFormulario(new ConsultarCotizacionesForm());
             menuNuevaCotizacion.Click += (s, e) => AbrirFormulario(new NuevaCotizacionForm());
 
-            // TODO: poner la UI correcta vvvvv
             menuBackup.Click += (s, e) => AbrirFormulario(new BackupForm());
             menuRestore.Click += (s, e) => AbrirFormulario(new RestoreForm());
 

@@ -7,7 +7,7 @@ using BLL.Seguridad;
 
 namespace UI
 {
-    public partial class GestionarPatentesForm : Form
+    public partial class GestionarPatentesForm : BaseForm
     {
         private int _usuarioSeleccionadoId = 0;
         private HashSet<int> _patentesAsignadasOriginal = new HashSet<int>();

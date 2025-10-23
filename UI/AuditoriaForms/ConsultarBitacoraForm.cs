@@ -8,7 +8,7 @@ using BitacoraDTO = BE.Audit.Bitacora;
 
 namespace UI
 {
-    public partial class ConsultarBitacoraForm : Form
+    public partial class ConsultarBitacoraForm : BaseForm
     {
         // paginado
         private int _page = 1;
@@ -18,6 +18,7 @@ namespace UI
         public ConsultarBitacoraForm()
         {
             InitializeComponent();
+            cmbCriticidad.DropDownStyle = ComboBoxStyle.DropDownList;
 
             dtpHasta.MaxDate = DateTime.Today;
             dtpHasta.Value = DateTime.Today;

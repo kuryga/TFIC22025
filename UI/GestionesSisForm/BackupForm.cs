@@ -7,7 +7,7 @@ using BLL.Seguridad.Mantenimiento;
 
 namespace UI
 {
-    public partial class BackupForm : Form
+    public partial class BackupForm : BaseForm
     {
         private FolderBrowserDialog fbd;
 
@@ -19,6 +19,7 @@ namespace UI
             this.Load += BackupForm_Load;
             btnCarpeta.Click += BtnCarpeta_Click;
             btnBackup.Click += BtnBackup_Click;
+            ((TextBox)nudPartes.Controls[1]).ReadOnly = true;
         }
 
         private void BackupForm_Load(object sender, EventArgs e)

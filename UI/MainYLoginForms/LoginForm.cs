@@ -11,7 +11,7 @@ using Idioma = BE.Idioma;
 
 namespace UI
 {
-    public partial class LoginForm : Form
+    public partial class LoginForm : BaseForm
     {
         public event Action LoginSucceeded;
         
@@ -64,7 +64,7 @@ namespace UI
             catch (BloqueadoException)
             {
                 SetBusy(false);
-                MostrarLoginError();
+                MostrarBloqueadoError();
             }
             catch (CredencialesException)
             {
@@ -107,6 +107,19 @@ namespace UI
             MessageBox.Show(
                 "Usuario o contraseña incorrectos.",
                 "Error de autenticación",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+
+            txtContrasena.Clear();
+            txtContrasena.Focus();
+        }
+
+        private void MostrarBloqueadoError()
+        {
+            MessageBox.Show(
+                "Por motivos de seguridad, tu cuenta fue bloqueada. Recuperá tu contraseña o contactá con un administrador para obtener ayuda.",
+                "Usuario Bloqueado",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );

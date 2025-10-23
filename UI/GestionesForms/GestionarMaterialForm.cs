@@ -5,7 +5,7 @@ using MaterialBLL = BLL.Genericos.MaterialBLL;
 
 namespace UI
 {
-    public partial class GestionarMaterialForm : Form
+    public partial class GestionarMaterialForm : BaseForm
     {
         public GestionarMaterialForm()
         {

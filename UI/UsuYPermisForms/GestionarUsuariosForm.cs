@@ -5,11 +5,13 @@ using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
 namespace UI
 {
-    public partial class GestionarUsuariosForm : Form
+    public partial class GestionarUsuariosForm : BaseForm
     {
         public GestionarUsuariosForm()
         {
             InitializeComponent();
+
+            txtTelefono.Tag = "AR_PHONE";
             CargarDatos();
         }
 

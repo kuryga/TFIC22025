@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +91,8 @@
     <Compile Include="CotizacionesForms\GestionarCotizaciones.Designer.cs">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\InputSanitizer.cs" />
+    <Compile Include="Helpers\PhoneValidator.cs" />
     <Compile Include="UsuYPermisForms\GestionarFamiliaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,7 +159,7 @@
     <Compile Include="UsuYPermisForms\GestionarUsuariosForm.Designer.cs">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoginAppContext.cs" />
+    <Compile Include="Helpers\LoginAppContext.cs" />
     <Compile Include="MainYLoginForms\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>

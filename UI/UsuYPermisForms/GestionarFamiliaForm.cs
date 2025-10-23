@@ -7,7 +7,7 @@ using BLL.Seguridad;
 
 namespace UI
 {
-    public partial class GestionarFamiliaForm : Form
+    public partial class GestionarFamiliaForm : BaseForm
     {
         private readonly bool _isEdit;
         private readonly int _familiaId;

@@ -7,7 +7,7 @@ using BLL.Seguridad;
 
 namespace UI
 {
-    public partial class GestionarFamiliasForm : Form
+    public partial class GestionarFamiliasForm : BaseForm
     {
         private int _usuarioSeleccionadoId = 0;
         private HashSet<int> _familiasAsignadasOriginal = new HashSet<int>();

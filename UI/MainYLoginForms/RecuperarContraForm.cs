@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace UI
 {
-    public partial class RecuperarContraForm : Form
+    public partial class RecuperarContraForm : BaseForm
     {
         public RecuperarContraForm()
         {

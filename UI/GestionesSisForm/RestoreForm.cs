@@ -8,7 +8,7 @@ using BLL.Seguridad.Mantenimiento;
 
 namespace UI
 {
-    public partial class RestoreForm : Form
+    public partial class RestoreForm : BaseForm
     {
         private OpenFileDialog ofd;
 

@@ -8,7 +8,7 @@ using PermisosBLL = BLL.Seguridad.PermisosBLL;
 
 namespace UI
 {
-    public partial class MainForm : Form
+    public partial class MainForm : BaseForm
     {
         public event Action LogoutRequested;
         private readonly PermisosBLL permisosBLL = PermisosBLL.GetInstance();

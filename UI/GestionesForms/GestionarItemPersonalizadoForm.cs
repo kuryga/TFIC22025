@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace UI
 {
-    public partial class GestionarItemPersonalizadoForm : Form
+    public partial class GestionarItemPersonalizadoForm : BaseForm
     {
         public GestionarItemPersonalizadoForm()
         {

@@ -13,7 +13,7 @@ namespace UI
     public partial class LoginForm : BaseForm
     {
         public event Action LoginSucceeded;
-        
+
         public LoginForm()
         {
             InitializeComponent();
@@ -25,8 +25,8 @@ namespace UI
             int idiomaSeleccionado = ParametrizacionBLL.GetInstance().GetIdIdioma();
 
             cmbIdiomaInferior.DataSource = idiomas;
-            cmbIdiomaInferior.DisplayMember = "nombre";  
-            cmbIdiomaInferior.ValueMember = "nombre"; 
+            cmbIdiomaInferior.DisplayMember = "nombre";
+            cmbIdiomaInferior.ValueMember = "nombre";
             cmbIdiomaInferior.SelectedValue = idiomas.Find(r => r.IdIdioma == idiomaSeleccionado).Nombre;
 
             cmbIdiomaInferior.SelectedValueChanged += CmbIdiomaInferior_SelectedValueChanged;
@@ -86,8 +86,8 @@ namespace UI
             {
                 SetBusy(false);
                 MessageBox.Show(
-                    "Ocurrió un error al intentar iniciar sesión.",
-                    "Error",
+                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_message"),
+                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_title"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -96,7 +96,7 @@ namespace UI
 
         private void SetBusy(bool busy)
         {
-            this.UseWaitCursor = busy;        
+            this.UseWaitCursor = busy;
             btnLogin.Enabled = !busy;
             txtUsuario.Enabled = !busy;
             txtContrasena.Enabled = !busy;
@@ -116,8 +116,8 @@ namespace UI
         private void MostrarLoginError()
         {
             MessageBox.Show(
-                "Usuario o contraseña incorrectos.",
-                "Error de autenticación",
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -129,8 +129,8 @@ namespace UI
         private void MostrarBloqueadoError()
         {
             MessageBox.Show(
-                "Por motivos de seguridad, tu cuenta fue bloqueada. Recuperá tu contraseña o contactá con un administrador para obtener ayuda.",
-                "Usuario Bloqueado",
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -140,7 +140,8 @@ namespace UI
         }
 
         private void UpdateTexts()
-        { 
+        {
+            txtUsuario.Tag = "MAIL_URBANSOFT";
             lblUsuario.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_username_label");
             lblContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_password_label");
             lblIdiomaInferior.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_language_label");

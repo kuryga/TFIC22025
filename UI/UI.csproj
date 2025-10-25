@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UsuYPermisForms\GestionarUsuarioForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UsuYPermisForms\GestionarUsuarioForm.Designer.cs">
+      <DependentUpon>GestionarUsuarioForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\BaseForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -198,6 +204,9 @@
     <Compile Include="GestionesSisForm\RestoreForm.Designer.cs">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="UsuYPermisForms\GestionarUsuarioForm.resx">
+      <DependentUpon>GestionarUsuarioForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.resx">
       <DependentUpon>AgregarMaquinariasForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -5,11 +5,6 @@ using System.Windows.Forms;
 
 namespace UI
 {
-    using System;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Windows.Forms;
-
     public static class InputSanitizer
     {
         public const string AllowedPattern = @"^[a-zA-Z0-9!@#$^&?_+<>.:]+$";
@@ -88,5 +83,17 @@ namespace UI
 
         public static bool IsValidArPhone(string input) =>
             TryNormalizeArPhoneToE164(input, out _);
+
+        public static bool IsValidNumeric(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            return Regex.IsMatch(input.Trim(), @"^\d{1,12}$");
+        }
+
+        public static bool IsValidUrbansoftEmail(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            return Regex.IsMatch(input.Trim(), @"^[a-zA-Z0-9._%+-]+@urbansoft\.com$", RegexOptions.IgnoreCase);
+        }
     }
 }

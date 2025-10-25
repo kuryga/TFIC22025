@@ -25,16 +25,20 @@ namespace DAL.Seguridad
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
             "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado";
 
+        private const int AdminUserId = 999;
+
         public List<BE.Usuario> GetAll()
         {
-            var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
+            // Excluir el usuario admin del listado
+            var sql = "SELECT " + userPublicCols + " FROM " + userTable +
+                      " WHERE " + userIdCol + " <> " + AdminUserId + ";";
 
             var list = db.QueryListAndLog<BE.Usuario>(
                 sql,
                 null,
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.ConsultaUsuarios,
-                "Listado de usuarios"
+                "Listado de usuarios (sin admin)"
             );
 
             if (list != null)
@@ -143,7 +147,6 @@ WHERE " + userIdCol + @" = @idUsuario;";
 
         public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
         {
-
             string mailEnc = segUtils.EncriptarReversible((correoElectronico ?? string.Empty).Trim());
 
             string sql = @"

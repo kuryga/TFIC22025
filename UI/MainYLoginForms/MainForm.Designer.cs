@@ -163,7 +163,7 @@ namespace UI
             // menuBitacora
             // 
             this.menuBitacora.Name = "menuBitacora";
-            this.menuBitacora.Size = new System.Drawing.Size(180, 22);
+            this.menuBitacora.Size = new System.Drawing.Size(171, 22);
             this.menuBitacora.Text = "Consultar Bitacora";
             // 
             // sistemaMenu
@@ -178,13 +178,13 @@ namespace UI
             // menuBackup
             // 
             this.menuBackup.Name = "menuBackup";
-            this.menuBackup.Size = new System.Drawing.Size(113, 22);
+            this.menuBackup.Size = new System.Drawing.Size(180, 22);
             this.menuBackup.Text = "Backup";
             // 
             // menuRestore
             // 
             this.menuRestore.Name = "menuRestore";
-            this.menuRestore.Size = new System.Drawing.Size(113, 22);
+            this.menuRestore.Size = new System.Drawing.Size(180, 22);
             this.menuRestore.Text = "Restore";
             // 
             // menuCerrarSesion
@@ -206,14 +206,13 @@ namespace UI
             // lblBienvenida
             // 
             this.lblBienvenida.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lblBienvenida.AutoSize = true;
             this.lblBienvenida.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            this.lblBienvenida.Location = new System.Drawing.Point(499, 537);
+            this.lblBienvenida.Location = new System.Drawing.Point(399, 610);
             this.lblBienvenida.Name = "lblBienvenida";
-            this.lblBienvenida.Size = new System.Drawing.Size(388, 25);
+            this.lblBienvenida.Size = new System.Drawing.Size(565, 25);
             this.lblBienvenida.TabIndex = 0;
             this.lblBienvenida.Text = "Bienvenido al sistema \'\'Usuario logueado\'\'";
-            this.lblBienvenida.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblBienvenida.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             // 
             // MainForm
             // 
@@ -227,7 +226,6 @@ namespace UI
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panelContenedor.ResumeLayout(false);
-            this.panelContenedor.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

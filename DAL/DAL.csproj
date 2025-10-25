@@ -57,6 +57,7 @@
     <Compile Include="Seguridad\PermisosDAL.cs" />
     <Compile Include="Seguridad\SecurityUtilities.cs" />
     <Compile Include="Seguridad\SessionContext.cs" />
+    <Compile Include="Seguridad\TraduccionContext.cs" />
     <Compile Include="Seguridad\UsuarioDAL.cs" />
     <Compile Include="Genericos\TipoEdificacionDAL.cs" />
     <Compile Include="Genericos\ServicioAdicionalDAL.cs" />

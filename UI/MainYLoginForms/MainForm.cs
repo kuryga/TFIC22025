@@ -2,9 +2,8 @@
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
-using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
-using Parametrizacion = BE.Params.Parametrizacion;
 using PermisosBLL = BLL.Seguridad.PermisosBLL;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
@@ -53,9 +52,9 @@ namespace UI
             string Username = UsuarioBLL.GetInstance().GetSesionActivaNombreCompleto();
             lblBienvenida.Text = $"Bienvenido al sistema {Username}";
 
-            Parametrizacion param = ParametrizacionBLL.GetInstance().GetParametrizacion();
+            string NombreEmpresa = ParametrizacionBLL.GetInstance().GetNombreEmpresa();
 
-            this.Text = $"Menu principal - {param.NombreEmpresa}";
+            this.Text = $"Menu principal - {NombreEmpresa}";
 
             this.Shown += (s, e) => AplicarPermisos();
         }

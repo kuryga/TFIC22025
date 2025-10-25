@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using ParametrizacionDAL = DAL.Genericos.ParametrizacionDAL;
-using Parametrizacion = BE.Params.Parametrizacion;
-using IdiomanDAL = DAL.Genericos.IdiomaDAL;
+using SessionContext = DAL.Seguridad.SessionContext;
+using TranslationContext = DAL.Genericos.TraduccionContext;
+using IdiomaDAL = DAL.Genericos.IdiomaDAL;
 
 namespace BLL.Genericos
 {
@@ -18,11 +19,12 @@ namespace BLL.Genericos
             return instance;
         }
 
-        public Parametrizacion GetParametrizacion()
+        public void LoadParametrizacion()
         {
             try
             {
-                return ParametrizacionDAL.GetInstance().GetParametrizacion();
+                SessionContext.Current.parametrizacion = ParametrizacionDAL.GetInstance().GetParametrizacion();
+                TranslationContext.CargarTraducciones();
             }
             catch (Exception)
             {
@@ -30,16 +32,44 @@ namespace BLL.Genericos
             }
         }
 
-        public List<BE.Idioma> GetIdiomas()
+        public void LoadLocalizablesForIdioma(int idIdioma)
         {
             try
             {
-                return IdiomanDAL.GetInstance().GetAll();
+                TranslationContext.CargarTraduccionesEspecificas(idIdioma);
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+
+        public List<BE.Idioma> GetIdiomas()
+        {
+            try
+            {
+                return IdiomaDAL.GetInstance().GetAll();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public string GetNombreEmpresa()
+        {
+            return SessionContext.Current.parametrizacion.NombreEmpresa;
+        }
+
+        public int GetIdIdioma()
+        {
+            return SessionContext.Current.parametrizacion.IdIdioma;
+        }
+
+        public string GetLocalizable(string cod)
+        {
+            return TranslationContext.Traducir(cod);
         }
     }
 }

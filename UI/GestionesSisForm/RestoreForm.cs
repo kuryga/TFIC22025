@@ -77,16 +77,12 @@ namespace UI
             files = OrdenarPartes(files);
 
             var doVerify = chkVerify.Checked;
-            var doReplace = chkReplace.Checked;
 
-            if (doReplace)
-            {
-                var resp = MessageBox.Show(
-                    "Se restaurará la base de datos con la opción REPLACE.\r\n" +
-                    "Esto sobrescribirá el estado actual.\r\n¿Desea continuar?",
-                    "Confirmar restore", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                if (resp != DialogResult.OK) return;
-            }
+            var resp = MessageBox.Show(
+                "Se restaurará la base de datos.\r\n" +
+                "Esto sobrescribirá el estado actual.\r\n¿Desea continuar?",
+                "Confirmar restore", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (resp != DialogResult.OK) return;
 
             btnRestaurar.Enabled = false;
             btnSeleccionar.Enabled = false;
@@ -98,11 +94,11 @@ namespace UI
                 txtLog.AppendText("Iniciando restore..." + Environment.NewLine);
                 txtLog.AppendText("Archivos seleccionados:" + Environment.NewLine);
                 foreach (var f in files) txtLog.AppendText(" - " + f + Environment.NewLine);
-                txtLog.AppendText("Opciones: VERIFY=" + (doVerify ? "SI" : "NO") + " REPLACE=" + (doReplace ? "SI" : "NO") + Environment.NewLine);
+                txtLog.AppendText("Opciones: VERIFY=" + (doVerify ? "SI" : "NO") + " REPLACE=" + "SI" + Environment.NewLine);
 
                 await Task.Run(() =>
                 {
-                    BackupBLL.GetInstance().RestoreFull(files, withReplace: doReplace, verifyBefore: doVerify);
+                    BackupBLL.GetInstance().RestoreFull(files, withReplace: true, verifyBefore: doVerify);
                 });
 
                 txtLog.AppendText("Restore finalizado correctamente." + Environment.NewLine);

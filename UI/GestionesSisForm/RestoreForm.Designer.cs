@@ -11,7 +11,6 @@ namespace UI
         private TextBox txtArchivos;
         private Button btnSeleccionar;
         private CheckBox chkVerify;
-        private CheckBox chkReplace;
         private Button btnRestaurar;
         private TextBox txtLog;
 
@@ -28,7 +27,6 @@ namespace UI
             this.txtArchivos = new System.Windows.Forms.TextBox();
             this.btnSeleccionar = new System.Windows.Forms.Button();
             this.chkVerify = new System.Windows.Forms.CheckBox();
-            this.chkReplace = new System.Windows.Forms.CheckBox();
             this.btnRestaurar = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
@@ -67,14 +65,6 @@ namespace UI
             this.chkVerify.TabIndex = 3;
             this.chkVerify.Text = "Verificar antes (VERIFYONLY)";
             // 
-            // chkReplace
-            // 
-            this.chkReplace.Location = new System.Drawing.Point(248, 82);
-            this.chkReplace.Name = "chkReplace";
-            this.chkReplace.Size = new System.Drawing.Size(120, 24);
-            this.chkReplace.TabIndex = 4;
-            this.chkReplace.Text = "REPLACE";
-            // 
             // btnRestaurar
             // 
             this.btnRestaurar.Location = new System.Drawing.Point(295, 378);
@@ -100,7 +90,6 @@ namespace UI
             this.Controls.Add(this.txtArchivos);
             this.Controls.Add(this.btnSeleccionar);
             this.Controls.Add(this.chkVerify);
-            this.Controls.Add(this.chkReplace);
             this.Controls.Add(this.btnRestaurar);
             this.Controls.Add(this.txtLog);
             this.Name = "RestoreForm";

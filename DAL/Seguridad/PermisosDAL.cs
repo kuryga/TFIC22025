@@ -43,7 +43,6 @@ SELECT DISTINCT
 FROM dbo.UsuarioFamilia uf
 JOIN dbo.Familia f ON f.idFamilia = uf.idFamilia
 WHERE uf.idUsuario = @idUsuario;";
-
             return db.QueryListAndLog<BE.Familia>(
                 sql,
                 cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
@@ -76,7 +75,6 @@ JOIN dbo.Patente p ON p.idPatente = fp.idPatente
 WHERE uf.idUsuario = @idUsuario
 
 ORDER BY NombrePatente;";
-
             return db.QueryListAndLog<BE.Patente>(
                 sql,
                 cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
@@ -96,7 +94,6 @@ SELECT DISTINCT
 FROM dbo.FamiliaPatente fp
 JOIN dbo.Patente p ON p.idPatente = fp.idPatente
 WHERE fp.idFamilia = @idFamilia;";
-
             return db.QueryListAndLog<BE.Patente>(
                 sql,
                 cmd => cmd.Parameters.Add("@idFamilia", SqlDbType.Int).Value = idFamilia,
@@ -124,7 +121,6 @@ OR EXISTS (
     WHERE uf.idUsuario = u.idUsuario
       AND fp.idPatente = @p
 );";
-
             return db.QueryListAndLog<int>(
                 sql,
                 c => c.Parameters.Add("@p", SqlDbType.Int).Value = idPatente,
@@ -167,7 +163,6 @@ SELECT DISTINCT
 FROM dbo.FamiliaPatente fp
 JOIN dbo.Patente p ON p.idPatente = fp.idPatente
 WHERE fp.idFamilia IN ({placeholders});";
-
             return db.QueryListAndLog<BE.Patente>(
                 sql,
                 c =>
@@ -262,7 +257,6 @@ BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
     THROW;
 END CATCH;";
-
             db.ExecuteNonQueryAndLog(
                 sql,
                 binder,
@@ -365,7 +359,6 @@ BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
     THROW;
 END CATCH;";
-
             db.ExecuteNonQueryAndLog(
                 sql,
                 binder,
@@ -381,9 +374,29 @@ END CATCH;";
             if (familia == null) throw new ArgumentNullException(nameof(familia));
 
             var sqlInsert = @"
-INSERT INTO dbo.Familia (nombreFamilia, descripcion)
-VALUES (@n, @d);
-SELECT CAST(SCOPE_IDENTITY() AS int);";
+BEGIN TRY
+    BEGIN TRAN;
+
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Familia
+        WHERE UPPER(LTRIM(RTRIM(nombreFamilia))) = UPPER(LTRIM(RTRIM(@n)))
+    )
+    BEGIN
+        ROLLBACK TRAN;
+        THROW 51010, 'Ya existe una familia con ese nombre.', 1;
+    END
+
+    INSERT INTO dbo.Familia (nombreFamilia, descripcion)
+    VALUES (@n, @d);
+    SELECT CAST(SCOPE_IDENTITY() AS int);
+
+    COMMIT TRAN;
+END TRY
+BEGIN CATCH
+    IF (XACT_STATE() <> 0) ROLLBACK TRAN;
+    THROW;
+END CATCH;";
 
             object newId = db.ExecuteScalarAndLog(
                 sqlInsert,
@@ -479,6 +492,17 @@ INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
 BEGIN TRY
     BEGIN TRAN;
 
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Familia
+        WHERE UPPER(LTRIM(RTRIM(nombreFamilia))) = UPPER(LTRIM(RTRIM(@n)))
+          AND idFamilia <> @f
+    )
+    BEGIN
+        ROLLBACK TRAN;
+        THROW 51011, 'Ya existe una familia con ese nombre.', 1;
+    END
+
     " + core + @"
 
     IF EXISTS (
@@ -501,7 +525,6 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
-
     DECLARE @msg NVARCHAR(4000) = ERROR_MESSAGE();
     THROW;
 END CATCH;";

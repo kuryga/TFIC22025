@@ -11,7 +11,6 @@ namespace UI
     {
         private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
-        // Estructura para mantener la línea base del usuario seleccionado
         private class Baseline
         {
             public int Id { get; set; }
@@ -21,8 +20,6 @@ namespace UI
             public string Direccion { get; set; } = "";
             public string Correo { get; set; } = "";
             public string Documento { get; set; } = "";
-            public bool Bloqueado { get; set; }
-            public bool Deshabilitado { get; set; }
         }
 
         private Baseline _baseline = new Baseline();
@@ -31,23 +28,23 @@ namespace UI
         {
             InitializeComponent();
 
-            txtNombre.TextChanged += InputsChanged;
-            txtApellido.TextChanged += InputsChanged;
-            txtTelefono.TextChanged += InputsChanged;
-            txtDireccion.TextChanged += InputsChanged;
-            txtCorreo.TextChanged += InputsChanged;
-            txtDocumento.TextChanged += InputsChanged;
+            txtNombre.TextChanged -= InputsChanged; txtNombre.TextChanged += InputsChanged;
+            txtApellido.TextChanged -= InputsChanged; txtApellido.TextChanged += InputsChanged;
+            txtTelefono.TextChanged -= InputsChanged; txtTelefono.TextChanged += InputsChanged;
+            txtDireccion.TextChanged -= InputsChanged; txtDireccion.TextChanged += InputsChanged;
+            txtCorreo.TextChanged -= InputsChanged; txtCorreo.TextChanged += InputsChanged;
+            txtDocumento.TextChanged -= InputsChanged; txtDocumento.TextChanged += InputsChanged;
 
-            dgvUsuarios.CellValueChanged += DgvUsuarios_CellValueChanged;
-            dgvUsuarios.CurrentCellDirtyStateChanged += (s, e) =>
-            {
-                if (dgvUsuarios.IsCurrentCellDirty)
-                    dgvUsuarios.CommitEdit(DataGridViewDataErrorContexts.Commit);
-            };
+            btnBloquear.Click -= btnBloquear_Click; btnBloquear.Click += btnBloquear_Click;
+            btnDeshabilitar.Click -= btnDeshabilitar_Click; btnDeshabilitar.Click += btnDeshabilitar_Click;
+            btnModificar.Click -= btnModificar_Click; btnModificar.Click += btnModificar_Click;
+            btnCrear.Click -= btnCrear_Click; btnCrear.Click += btnCrear_Click;
+
+            dgvUsuarios.SelectionChanged -= dgvUsuarios_SelectionChanged;
+            dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
 
             UpdateTexts();
             CargarDatos();
-
             btnModificar.Enabled = false;
         }
 
@@ -95,7 +92,7 @@ namespace UI
                 Name = "colBloqueado",
                 DataPropertyName = "Bloqueado",
                 HeaderText = param.GetLocalizable("user_blocked_label"),
-                ReadOnly = false,
+                ReadOnly = true,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
             });
             dgvUsuarios.Columns.Add(new DataGridViewCheckBoxColumn
@@ -103,7 +100,7 @@ namespace UI
                 Name = "colDeshabilitado",
                 DataPropertyName = "Deshabilitado",
                 HeaderText = param.GetLocalizable("user_disabled_label"),
-                ReadOnly = false,
+                ReadOnly = true,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
             });
 
@@ -128,6 +125,7 @@ namespace UI
 
             SetBaselineFrom(u);
             btnModificar.Enabled = false;
+            UpdateActionButtonsText(u);
         }
 
         private void btnCrear_Click(object sender, EventArgs e)
@@ -165,8 +163,7 @@ namespace UI
                     return;
                 }
 
-                if (!int.TryParse(txtId.Text, out int id) || id <= 0)
-                    return;
+                if (!int.TryParse(txtId.Text, out int id) || id <= 0) return;
 
                 var uOrig = dgvUsuarios.CurrentRow.DataBoundItem as BE.Usuario;
                 if (uOrig == null) return;
@@ -178,18 +175,13 @@ namespace UI
                 string newCorreo = (txtCorreo.Text ?? "").Trim();
                 string newDocumento = (txtDocumento.Text ?? "").Trim();
 
-                bool newBloqueado = dgvUsuarios.CurrentRow.Cells["colBloqueado"].Value is bool b1 && b1;
-                bool newDeshabilitado = dgvUsuarios.CurrentRow.Cells["colDeshabilitado"].Value is bool b2 && b2;
-
                 bool hayCambios =
                     !string.Equals(uOrig.NombreUsuario ?? "", newNombre, StringComparison.Ordinal) ||
                     !string.Equals(uOrig.ApellidoUsuario ?? "", newApellido, StringComparison.Ordinal) ||
                     !string.Equals(uOrig.TelefonoContacto ?? "", newTelefono, StringComparison.Ordinal) ||
                     !string.Equals(uOrig.DireccionUsuario ?? "", newDireccion, StringComparison.Ordinal) ||
                     !string.Equals(uOrig.CorreoElectronico ?? "", newCorreo, StringComparison.Ordinal) ||
-                    !string.Equals(uOrig.NumeroDocumento ?? "", newDocumento, StringComparison.Ordinal) ||
-                    newBloqueado != uOrig.Bloqueado ||
-                    newDeshabilitado != uOrig.Deshabilitado;
+                    !string.Equals(uOrig.NumeroDocumento ?? "", newDocumento, StringComparison.Ordinal);
 
                 if (!hayCambios)
                 {
@@ -203,13 +195,13 @@ namespace UI
 
                 var faltantes = new[]
                 {
-                    (Campo: param.GetLocalizable("user_firstname_label"), Valor: newNombre),
-                    (Campo: param.GetLocalizable("user_lastname_label"),  Valor: newApellido),
-                    (Campo: param.GetLocalizable("user_phone_label"),     Valor: newTelefono),
-                    (Campo: param.GetLocalizable("user_address_label"),   Valor: newDireccion)
+                    (param.GetLocalizable("user_firstname_label"), newNombre),
+                    (param.GetLocalizable("user_lastname_label"),  newApellido),
+                    (param.GetLocalizable("user_phone_label"),     newTelefono),
+                    (param.GetLocalizable("user_address_label"),   newDireccion)
                 }
-                .Where(x => string.IsNullOrWhiteSpace(x.Valor))
-                .Select(x => x.Campo)
+                .Where(x => string.IsNullOrWhiteSpace(x.Item2))
+                .Select(x => x.Item1)
                 .ToList();
 
                 if (faltantes.Any())
@@ -217,8 +209,7 @@ namespace UI
                     MessageBox.Show(
                         param.GetLocalizable("user_required_fields_message") + string.Join(", ", faltantes),
                         param.GetLocalizable("user_required_fields_title"),
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning
-                    );
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -231,26 +222,13 @@ namespace UI
                     TelefonoContacto = newTelefono,
                     DireccionUsuario = newDireccion,
                     NumeroDocumento = newDocumento,
-                    Bloqueado = newBloqueado,
-                    Deshabilitado = newDeshabilitado
+                    Bloqueado = uOrig.Bloqueado,
+                    Deshabilitado = uOrig.Deshabilitado
                 };
 
                 UsuarioBLL.GetInstance().Update(u);
                 CargarDatos();
-
-                foreach (DataGridViewRow r in dgvUsuarios.Rows)
-                {
-                    if (r.DataBoundItem is BE.Usuario uRow && uRow.IdUsuario == id)
-                    {
-                        r.Selected = true;
-                        dgvUsuarios.CurrentCell = r.Cells[0];
-                        SetBaselineFrom(uRow);
-                        break;
-                    }
-                }
-
-                btnModificar.Enabled = false;
-
+                ReselectAndSync(id);
                 MessageBox.Show(
                     param.GetLocalizable("user_modified_success"),
                     param.GetLocalizable("user_modified_success_title"),
@@ -260,6 +238,88 @@ namespace UI
             {
                 MessageBox.Show(
                     param.GetLocalizable("user_modify_error_message") + ex.Message,
+                    param.GetLocalizable("user_modify_error_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnBloquear_Click(object sender, EventArgs e)
+        {
+            if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0)
+            {
+                MessageBox.Show(
+                    param.GetLocalizable("user_select_from_list_message"),
+                    param.GetLocalizable("user_select_from_list_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var u = dgvUsuarios.CurrentRow.DataBoundItem as BE.Usuario;
+            if (u == null) return;
+
+            bool target = !u.Bloqueado;
+            string msg = target ? param.GetLocalizable("user_block_confirm_message")
+                                : param.GetLocalizable("user_unblock_confirm_message");
+            string title = param.GetLocalizable("confirm_title");
+
+            if (!ShowConfirm(msg, title)) return;
+
+            try
+            {
+                u.Bloqueado = target;
+                UsuarioBLL.GetInstance().Update(u);
+                CargarDatos();
+                ReselectAndSync(u.IdUsuario);
+                MessageBox.Show(
+                    target ? param.GetLocalizable("user_block_success") : param.GetLocalizable("user_unblock_success"),
+                    param.GetLocalizable("ok_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    (target ? param.GetLocalizable("user_block_error_message") : param.GetLocalizable("user_unblock_error_message")) + ex.Message,
+                    param.GetLocalizable("user_modify_error_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnDeshabilitar_Click(object sender, EventArgs e)
+        {
+            if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0)
+            {
+                MessageBox.Show(
+                    param.GetLocalizable("user_select_from_list_message"),
+                    param.GetLocalizable("user_select_from_list_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var u = dgvUsuarios.CurrentRow.DataBoundItem as BE.Usuario;
+            if (u == null) return;
+
+            bool target = !u.Deshabilitado;
+            string msg = target ? param.GetLocalizable("user_disable_confirm_message")
+                                : param.GetLocalizable("user_enable_confirm_message");
+            string title = param.GetLocalizable("confirm_title");
+
+            if (!ShowConfirm(msg, title)) return;
+
+            try
+            {
+                u.Deshabilitado = target;
+                UsuarioBLL.GetInstance().Update(u);
+                CargarDatos();
+                ReselectAndSync(u.IdUsuario);
+                MessageBox.Show(
+                    target ? param.GetLocalizable("user_disable_success") : param.GetLocalizable("user_enable_success"),
+                    param.GetLocalizable("ok_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    (target ? param.GetLocalizable("user_disable_error_message") : param.GetLocalizable("user_enable_error_message")) + ex.Message,
                     param.GetLocalizable("user_modify_error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -305,16 +365,6 @@ namespace UI
             UpdateModifyButton();
         }
 
-        private void DgvUsuarios_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                var colName = dgvUsuarios.Columns[e.ColumnIndex].Name;
-                if (colName == "colBloqueado" || colName == "colDeshabilitado")
-                    btnModificar.Enabled = true;
-            }
-        }
-
         private void SetBaselineFrom(BE.Usuario u)
         {
             _baseline = new Baseline
@@ -325,9 +375,7 @@ namespace UI
                 Telefono = u.TelefonoContacto ?? "",
                 Direccion = u.DireccionUsuario ?? "",
                 Correo = u.CorreoElectronico ?? "",
-                Documento = u.NumeroDocumento ?? "",
-                Bloqueado = u.Bloqueado,
-                Deshabilitado = u.Deshabilitado
+                Documento = u.NumeroDocumento ?? ""
             };
         }
 
@@ -348,6 +396,68 @@ namespace UI
         private void UpdateModifyButton()
         {
             btnModificar.Enabled = HasChanges();
+        }
+
+        private void UpdateActionButtonsText(BE.Usuario u)
+        {
+            btnBloquear.Text = u.Bloqueado
+                ? param.GetLocalizable("user_unblock_button")
+                : param.GetLocalizable("user_block_button");
+
+            btnDeshabilitar.Text = u.Deshabilitado
+                ? param.GetLocalizable("user_enable_button")
+                : param.GetLocalizable("user_disable_button");
+        }
+
+        private void ReselectAndSync(int id)
+        {
+            foreach (DataGridViewRow r in dgvUsuarios.Rows)
+            {
+                if (r.DataBoundItem is BE.Usuario uRow && uRow.IdUsuario == id)
+                {
+                    r.Selected = true;
+                    dgvUsuarios.CurrentCell = r.Cells[0];
+                    txtId.Text = uRow.IdUsuario.ToString();
+                    txtNombre.Text = uRow.NombreUsuario ?? "";
+                    txtApellido.Text = uRow.ApellidoUsuario ?? "";
+                    txtCorreo.Text = uRow.CorreoElectronico ?? "";
+                    txtTelefono.Text = uRow.TelefonoContacto ?? "";
+                    txtDireccion.Text = uRow.DireccionUsuario ?? "";
+                    txtDocumento.Text = uRow.NumeroDocumento ?? "";
+                    SetBaselineFrom(uRow);
+                    UpdateActionButtonsText(uRow);
+                    break;
+                }
+            }
+            btnModificar.Enabled = false;
+        }
+
+        private bool ShowConfirm(string message, string title)
+        {
+            string okText = param.GetLocalizable("confirm_ok_button");
+            string cancelText = param.GetLocalizable("confirm_cancel_button");
+
+            using (var f = new Form
+            {
+                Width = 420,
+                Height = 180,
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                Text = title
+            })
+            {
+                var lbl = new Label { Left = 15, Top = 20, Width = 380, Height = 60, Text = message };
+                var btnOk = new Button { Text = okText, Left = 220, Width = 85, Top = 90, DialogResult = DialogResult.OK };
+                var btnCancel = new Button { Text = cancelText, Left = 310, Width = 85, Top = 90, DialogResult = DialogResult.Cancel };
+                f.Controls.Add(lbl);
+                f.Controls.Add(btnOk);
+                f.Controls.Add(btnCancel);
+                f.AcceptButton = btnOk;
+                f.CancelButton = btnCancel;
+                return f.ShowDialog(this) == DialogResult.OK;
+            }
         }
     }
 }

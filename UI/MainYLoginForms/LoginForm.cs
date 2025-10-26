@@ -106,6 +106,8 @@ namespace UI
             btnLogin.Enabled = !busy;
             txtUsuario.Enabled = !busy;
             txtContrasena.Enabled = !busy;
+            btnRecuperarContrasena.Enabled = !busy;
+            cmbIdiomaInferior.Enabled = !busy;
 
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
             Application.DoEvents();

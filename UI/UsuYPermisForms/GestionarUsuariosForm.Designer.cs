@@ -36,6 +36,8 @@ namespace UI
             this.lblDocumento = new System.Windows.Forms.Label();
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
+            this.btnBloquear = new System.Windows.Forms.Button();
+            this.btnDeshabilitar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).BeginInit();
             this.SuspendLayout();
             // 
@@ -174,16 +176,36 @@ namespace UI
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(622, 310);
+            this.btnModificar.Location = new System.Drawing.Point(226, 310);
             this.btnModificar.Name = "btnModificar";
             this.btnModificar.Size = new System.Drawing.Size(160, 23);
             this.btnModificar.TabIndex = 16;
             this.btnModificar.Text = "Modificar usuario";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
+            // btnBloquear
+            // 
+            this.btnBloquear.Location = new System.Drawing.Point(429, 310);
+            this.btnBloquear.Name = "btnBloquear";
+            this.btnBloquear.Size = new System.Drawing.Size(160, 23);
+            this.btnBloquear.TabIndex = 17;
+            this.btnBloquear.Text = "Bloquear usuario";
+            this.btnBloquear.Click += new System.EventHandler(this.btnBloquear_Click);
+            // 
+            // btnDeshabilitar
+            // 
+            this.btnDeshabilitar.Location = new System.Drawing.Point(622, 310);
+            this.btnDeshabilitar.Name = "btnDeshabilitar";
+            this.btnDeshabilitar.Size = new System.Drawing.Size(160, 23);
+            this.btnDeshabilitar.TabIndex = 18;
+            this.btnDeshabilitar.Text = "Deshabilitar usuario";
+            this.btnDeshabilitar.Click += new System.EventHandler(this.btnDeshabilitar_Click);
+            // 
             // GestionarUsuariosForm
             // 
             this.ClientSize = new System.Drawing.Size(806, 345);
+            this.Controls.Add(this.btnDeshabilitar);
+            this.Controls.Add(this.btnBloquear);
             this.Controls.Add(this.dgvUsuarios);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);
@@ -218,5 +240,7 @@ namespace UI
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
+        private Button btnBloquear;
+        private Button btnDeshabilitar;
     }
 }

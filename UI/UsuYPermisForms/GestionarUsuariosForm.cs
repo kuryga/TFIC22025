@@ -52,7 +52,9 @@ namespace UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error abriendo formulario de alta: " + ex.Message, "Error",
+                MessageBox.Show(
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_open_create_error_message") + ex.Message,
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_modify_error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -63,15 +65,15 @@ namespace UI
             {
                 if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0)
                 {
-                    MessageBox.Show("Seleccione un usuario de la lista.", "Aviso",
+                    MessageBox.Show(
+                        ParametrizacionBLL.GetInstance().GetLocalizable("user_select_from_list_message"),
+                        ParametrizacionBLL.GetInstance().GetLocalizable("user_select_from_list_title"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
                 if (!int.TryParse(txtId.Text, out int id) || id <= 0)
                 {
-                    MessageBox.Show("Seleccione un usuario válido.", "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -94,7 +96,9 @@ namespace UI
 
                 if (!hayCambios)
                 {
-                    MessageBox.Show("No hay cambios para guardar.", "Información",
+                    MessageBox.Show(
+                        ParametrizacionBLL.GetInstance().GetLocalizable("user_no_changes_message"),
+                        ParametrizacionBLL.GetInstance().GetLocalizable("user_no_changes_title"),
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -146,12 +150,16 @@ namespace UI
                     }
                 }
 
-                MessageBox.Show("Usuario modificado correctamente.", "OK",
+                MessageBox.Show(
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_modified_success"),
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_modified_success_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error modificando usuario: " + ex.Message, "Error",
+                MessageBox.Show(
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_modify_error_message") + ex.Message,
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_modify_error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

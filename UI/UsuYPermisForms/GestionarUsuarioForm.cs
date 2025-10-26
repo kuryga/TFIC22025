@@ -28,6 +28,10 @@ namespace UI
             txtTelefono.Tag = "AR_PHONE";
             txtDocumento.Tag = "NUM_12";
             txtCorreo.Tag = "MAIL_URBANSOFT";
+            txtDireccion.Tag = "SAFE";
+            txtNombre.Tag = "SAFE";
+            txtApellido.Tag = "SAFE";
+ 
             lblNombre.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_firstname_label");
             lblApellido.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_lastname_label");
             lblDocumento.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_document_label");
@@ -64,9 +68,6 @@ namespace UI
 
                 if (faltantes.Count > 0)
                 {
-                    MessageBox.Show("Complete los campos obligatorios: " + string.Join(", ", faltantes), "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                     MessageBox.Show(
                          ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_message") + string.Join(", ", faltantes),
                          ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_title"),

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 using segUtils = DAL.Seguridad.SecurityUtilities;
@@ -37,7 +39,7 @@ namespace DAL.Seguridad
                 null,
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.ConsultaUsuarios,
-                "Listado de usuarios (sin admin)"
+                "Listado de usuarios"
             );
 
             if (list != null)
@@ -101,13 +103,16 @@ WHERE numeroDocumento = @doc;";
             if (countDoc > 0)
                 throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
+            string randomPassword = GenerarContrasenaAleatoria(20);
+            string passwordHash32 = CalcularMd5Hex(randomPassword);
+
             var sql = @"
 INSERT INTO " + userTable + @"
 ( nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-  numeroDocumento, Bloqueado )
+  numeroDocumento, contrasenaHash, Bloqueado )
 VALUES
 ( @nombreUsuario, @apellidoUsuario, @correoElectronico, @telefonoContacto, @direccionUsuario,
-  @numeroDocumento, @Bloqueado );
+  @numeroDocumento, @contrasenaHash, @Bloqueado );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             object newId = db.ExecuteScalarAndLog(
@@ -120,6 +125,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash32 ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;
                 },
                 userTable, userIdCol,
@@ -293,6 +299,35 @@ UPDATE " + userTable + @"
         public void VerifyAndRepairAllTablesAuto()
         {
             db.VerifyAndRepairAllTablesAuto();
+        }
+
+        private static string GenerarContrasenaAleatoria(int length)
+        {
+            const string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var sb = new StringBuilder(length);
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var buffer = new byte[4];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    int val = System.BitConverter.ToInt32(buffer, 0) & int.MaxValue;
+                    sb.Append(pool[val % pool.Length]);
+                }
+            }
+            return sb.ToString();
+        }
+        private static string CalcularMd5Hex(string input)
+        {
+            using (var md5 = MD5.Create())
+            {
+                var bytes = Encoding.UTF8.GetBytes(input ?? string.Empty);
+                var hash = md5.ComputeHash(bytes);
+                var sb = new StringBuilder(hash.Length * 2);
+                for (int i = 0; i < hash.Length; i++)
+                    sb.Append(hash[i].ToString("x2"));
+                return sb.ToString();
+            }
         }
     }
 }

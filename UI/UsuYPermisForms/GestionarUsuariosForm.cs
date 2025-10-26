@@ -112,8 +112,12 @@ namespace UI
 
                 if (faltantes.Any())
                 {
-                    MessageBox.Show("Complete los campos obligatorios: " + string.Join(", ", faltantes), "Aviso",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(
+                         ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_message") + string.Join(", ", faltantes),
+                         ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_title"),
+                         MessageBoxButtons.OK,
+                         MessageBoxIcon.Warning
+                    );
                     return;
                 }
 
@@ -160,8 +164,12 @@ namespace UI
         private void UpdateTexts()
         {
             txtTelefono.Tag = "AR_PHONE";
-            txtCorreo.Tag = "MAIL_URBANSOFT";
             txtDocumento.Tag = "NUM_12";
+            txtCorreo.Tag = "MAIL_URBANSOFT";
+            txtDireccion.Tag = "SAFE";
+            txtNombre.Tag = "SAFE";
+            txtApellido.Tag = "SAFE";
+
             lblId.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_id_label");
             lblNombre.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_firstname_label");
             lblApellido.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_lastname_label");

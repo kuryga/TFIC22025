@@ -8,6 +8,7 @@ namespace UI
     public static class InputSanitizer
     {
         public const string AllowedPattern = @"^[a-zA-Z0-9!@#$^&?_+<>.:]+$";
+        public const string AllowedPatternWithSpaces = @"^[a-zA-Z0-9 !@#$^&?_+<>.:]+$";
 
         public static void ProtectTextBox(TextBox textBox)
         {
@@ -17,8 +18,33 @@ namespace UI
 
         private static void TextBox_KeyPress_Filter(object sender, KeyPressEventArgs e)
         {
-            if (char.IsControl(e.KeyChar)) return;
-            if (!Regex.IsMatch(e.KeyChar.ToString(), AllowedPattern))
+
+            if (char.IsControl(e.KeyChar))
+            {
+                if (e.KeyChar == '\r' || e.KeyChar == '\n')
+                {
+                    e.Handled = true;
+                    System.Media.SystemSounds.Beep.Play();
+                }
+                return;
+            }
+
+            var tb = sender as TextBox;
+            var tag = (tb != null ? tb.Tag as string : null)?.Trim();
+            var isSafe = string.Equals(tag, "SAFE", StringComparison.OrdinalIgnoreCase);
+
+
+            var pattern = isSafe ? AllowedPatternWithSpaces : AllowedPattern;
+
+            if (e.KeyChar == '\r' || e.KeyChar == '\n')
+            {
+                e.Handled = true;
+                System.Media.SystemSounds.Beep.Play();
+                return;
+            }
+
+
+            if (!Regex.IsMatch(e.KeyChar.ToString(), pattern))
             {
                 e.Handled = true;
                 System.Media.SystemSounds.Beep.Play();
@@ -94,6 +120,18 @@ namespace UI
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
             return Regex.IsMatch(input.Trim(), @"^[a-zA-Z0-9._%+-]+@urbansoft\.com$", RegexOptions.IgnoreCase);
+        }
+
+        public static bool IsSafeForSql(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return true;
+
+            if (input.Contains("\n") || input.Contains("\r"))
+                return false;
+
+            string forbiddenPattern = @"['"";\\/*]|--|\b(ALTER|DROP|DELETE|INSERT|UPDATE|EXEC|UNION|SELECT)\b";
+            return !Regex.IsMatch(input, forbiddenPattern, RegexOptions.IgnoreCase);
         }
     }
 }

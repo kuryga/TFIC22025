@@ -58,7 +58,7 @@ namespace UI
             this.txtNombre.Location = new System.Drawing.Point(98, 60);
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(220, 20);
-            this.txtNombre.TabIndex = 18;
+            this.txtNombre.TabIndex = 1;
             // 
             // lblApellido
             // 
@@ -73,7 +73,7 @@ namespace UI
             this.txtApellido.Location = new System.Drawing.Point(98, 90);
             this.txtApellido.Name = "txtApellido";
             this.txtApellido.Size = new System.Drawing.Size(220, 20);
-            this.txtApellido.TabIndex = 20;
+            this.txtApellido.TabIndex = 2;
             // 
             // lblCorreo
             // 
@@ -88,7 +88,7 @@ namespace UI
             this.txtCorreo.Location = new System.Drawing.Point(98, 150);
             this.txtCorreo.Name = "txtCorreo";
             this.txtCorreo.Size = new System.Drawing.Size(220, 20);
-            this.txtCorreo.TabIndex = 22;
+            this.txtCorreo.TabIndex = 4;
             // 
             // lblTelefono
             // 
@@ -103,7 +103,7 @@ namespace UI
             this.txtTelefono.Location = new System.Drawing.Point(98, 180);
             this.txtTelefono.Name = "txtTelefono";
             this.txtTelefono.Size = new System.Drawing.Size(220, 20);
-            this.txtTelefono.TabIndex = 24;
+            this.txtTelefono.TabIndex = 5;
             // 
             // lblDireccion
             // 
@@ -118,7 +118,7 @@ namespace UI
             this.txtDireccion.Location = new System.Drawing.Point(98, 210);
             this.txtDireccion.Name = "txtDireccion";
             this.txtDireccion.Size = new System.Drawing.Size(220, 20);
-            this.txtDireccion.TabIndex = 26;
+            this.txtDireccion.TabIndex = 6;
             // 
             // lblDocumento
             // 
@@ -133,7 +133,7 @@ namespace UI
             this.txtDocumento.Location = new System.Drawing.Point(98, 120);
             this.txtDocumento.Name = "txtDocumento";
             this.txtDocumento.Size = new System.Drawing.Size(220, 20);
-            this.txtDocumento.TabIndex = 28;
+            this.txtDocumento.TabIndex = 3;
             // 
             // lblTitle
             // 
@@ -150,7 +150,7 @@ namespace UI
             this.btnCrear.Location = new System.Drawing.Point(98, 250);
             this.btnCrear.Name = "btnCrear";
             this.btnCrear.Size = new System.Drawing.Size(134, 23);
-            this.btnCrear.TabIndex = 30;
+            this.btnCrear.TabIndex = 7;
             this.btnCrear.Text = "Crear usuario";
             // 
             // GestionarUsuarioForm

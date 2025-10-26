@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
@@ -38,36 +39,48 @@ namespace UI
         {
             foreach (Control c in root.Controls)
             {
-                if (EnableSanitization && c is TextBox tbSan)
-                {
-                    if (!(tbSan.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
-                        InputSanitizer.ProtectTextBox(tbSan);
-                }
-
-                if (EnableArPhoneValidation && c is TextBox tbPhone)
-                {
-                    if (tbPhone.Tag is string tag && tag.Equals("AR_PHONE", StringComparison.OrdinalIgnoreCase))
-                        PhoneValidator.Attach(tbPhone, _sharedErrorProvider);
-                }
-
-                if (c is TextBox tb)
+                var tb = c as TextBox;
+                if (tb != null)
                 {
                     var tag = tb.Tag as string;
+                    var tagUpper = string.IsNullOrWhiteSpace(tag) ? null : tag.Trim().ToUpperInvariant();
 
-                    if (!string.IsNullOrWhiteSpace(tag))
+                    if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
                     {
-                        if (tag.Equals("NUM_12", StringComparison.OrdinalIgnoreCase))
-                            AttachNumeric12Validation(tb);
+                        tb.UseSystemPasswordChar = true;
+                        AttachPasswordValidation(tb);
+                    }
+                    else
+                    {
+                        if (EnableSanitization)
+                        {
+                            if (!(tb.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
+                                InputSanitizer.ProtectTextBox(tb);
+                        }
 
-                        if (tag.Equals("MAIL_URBANSOFT", StringComparison.OrdinalIgnoreCase))
-                            AttachUrbansoftEmailValidation(tb);
+                        if (!string.IsNullOrEmpty(tagUpper))
+                        {
+                            if (EnableArPhoneValidation && string.Equals(tagUpper, "AR_PHONE", StringComparison.Ordinal))
+                                PhoneValidator.Attach(tb, _sharedErrorProvider);
+
+                            if (string.Equals(tagUpper, "NUM_12", StringComparison.Ordinal))
+                                AttachNumeric12Validation(tb);
+
+                            if (string.Equals(tagUpper, "MAIL_URBANSOFT", StringComparison.Ordinal))
+                                AttachUrbansoftEmailValidation(tb);
+
+                            if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
+                                AttachSafeSqlValidation(tb);
+                        }
                     }
                 }
 
-                if (ConfigureCombosAsDropDownList && c is ComboBox cb)
+                var cb = c as ComboBox;
+                if (ConfigureCombosAsDropDownList && cb != null)
                     cb.DropDownStyle = ComboBoxStyle.DropDownList;
 
-                if (LockNumericUpDownTextBox && c is NumericUpDown nud)
+                var nud = c as NumericUpDown;
+                if (LockNumericUpDownTextBox && nud != null)
                 {
                     var innerTb = nud.Controls.OfType<TextBox>().FirstOrDefault();
                     if (innerTb != null)
@@ -93,29 +106,29 @@ namespace UI
 
         private void Numeric12_Validating(object sender, CancelEventArgs e)
         {
-            if (sender is TextBox tb)
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
             {
-                var txt = tb.Text?.Trim() ?? string.Empty;
-                if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
-                {
-                    _sharedErrorProvider.SetError(tb, string.Empty);
-                }
-                else
-                {
-                    _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_doc_validation_message"));
-                    e.Cancel = true;
-                }
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_doc_validation_message"));
+                e.Cancel = true;
             }
         }
 
         private void Numeric12_TextChanged(object sender, EventArgs e)
         {
-            if (sender is TextBox tb)
-            {
-                var txt = tb.Text?.Trim() ?? string.Empty;
-                if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
-                    _sharedErrorProvider.SetError(tb, string.Empty);
-            }
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
         }
 
         private void AttachUrbansoftEmailValidation(TextBox tb)
@@ -129,29 +142,110 @@ namespace UI
 
         private void UrbansoftEmail_Validating(object sender, CancelEventArgs e)
         {
-            if (sender is TextBox tb)
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidUrbansoftEmail(txt))
             {
-                var txt = tb.Text?.Trim() ?? string.Empty;
-                if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidUrbansoftEmail(txt))
-                {
-                    _sharedErrorProvider.SetError(tb, string.Empty);
-                }
-                else
-                {
-                    _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_email_validation_message"));
-                    e.Cancel = true;
-                }
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_email_validation_message"));
+                e.Cancel = true;
             }
         }
 
         private void UrbansoftEmail_TextChanged(object sender, EventArgs e)
         {
-            if (sender is TextBox tb)
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidUrbansoftEmail(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void AttachSafeSqlValidation(TextBox tb)
+        {
+            tb.Validating -= SafeSql_Validating;
+            tb.Validating += SafeSql_Validating;
+
+            tb.TextChanged -= SafeSql_TextChanged;
+            tb.TextChanged += SafeSql_TextChanged;
+        }
+
+        private void SafeSql_Validating(object sender, CancelEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsSafeForSql(txt))
             {
-                var txt = tb.Text?.Trim() ?? string.Empty;
-                if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidUrbansoftEmail(txt))
-                    _sharedErrorProvider.SetError(tb, string.Empty);
+                _sharedErrorProvider.SetError(tb, string.Empty);
             }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_safe_sql_validation_message"));
+                e.Cancel = true;
+            }
+        }
+
+        private void SafeSql_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsSafeForSql(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void AttachPasswordValidation(TextBox tb)
+        {
+            tb.Validating -= Password_Validating;
+            tb.Validating += Password_Validating;
+
+            tb.TextChanged -= Password_TextChanged;
+            tb.TextChanged += Password_TextChanged;
+        }
+
+        private void Password_Validating(object sender, CancelEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text ?? string.Empty;
+
+            if (string.IsNullOrEmpty(txt) || IsStrongPassword(txt))
+            {
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_password_validation_message"));
+                e.Cancel = true;
+            }
+        }
+
+        private void Password_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || IsStrongPassword(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private static bool IsStrongPassword(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            var rx = new Regex(@"^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$");
+            return rx.IsMatch(input);
         }
     }
 }

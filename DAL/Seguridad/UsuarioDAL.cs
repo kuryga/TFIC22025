@@ -25,7 +25,7 @@ namespace DAL.Seguridad
         private const string userIdCol = "idUsuario";
         private const string userPublicCols =
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
-            "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado";
+            "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado, Deshabilitado";
 
         private const int AdminUserId = 999;
 
@@ -109,10 +109,10 @@ WHERE numeroDocumento = @doc;";
             var sql = @"
 INSERT INTO " + userTable + @"
 ( nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-  numeroDocumento, contrasenaHash, Bloqueado )
+  numeroDocumento, contrasenaHash, Bloqueado, Deshabilitado )
 VALUES
 ( @nombreUsuario, @apellidoUsuario, @correoElectronico, @telefonoContacto, @direccionUsuario,
-  @numeroDocumento, @contrasenaHash, @Bloqueado );
+  @numeroDocumento, @contrasenaHash, @Bloqueado, @Deshabilitado );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             object newId = db.ExecuteScalarAndLog(
@@ -126,7 +126,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash32 ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;
+                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;       // se crea bloqueado
+                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = 0;   // por defecto habilitado
                 },
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.CreacionUsuario,
@@ -151,7 +152,8 @@ UPDATE " + userTable + @" SET
     telefonoContacto  = @telefonoContacto,
     direccionUsuario  = @direccionUsuario,
     numeroDocumento   = @numeroDocumento,
-    Bloqueado         = @Bloqueado
+    Bloqueado         = @Bloqueado,
+    Deshabilitado     = @Deshabilitado
 WHERE " + userIdCol + @" = @idUsuario;";
 
             db.ExecuteNonQueryAndLog(
@@ -169,6 +171,7 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
+                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = obj.Deshabilitado;
                 },
                 userTable, userIdCol, obj.IdUsuario,
                 BE.Audit.AuditEvents.ModificacionUsuario,
@@ -186,6 +189,7 @@ WHERE " + userIdCol + @" = @idUsuario;";
             public string contrasenaHash { get; set; }
             public int? contadorIntentosFallidos { get; set; }
             public bool Bloqueado { get; set; }
+            public bool Deshabilitado { get; set; }
         }
 
         public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
@@ -200,7 +204,8 @@ SELECT TOP 1
     apellidoUsuario,
     contrasenaHash,
     contadorIntentosFallidos,
-    Bloqueado
+    Bloqueado,
+    Deshabilitado
 FROM dbo.Usuario
 WHERE correoElectronico = @mail;";
 
@@ -317,6 +322,7 @@ UPDATE " + userTable + @"
             }
             return sb.ToString();
         }
+
         private static string CalcularMd5Hex(string input)
         {
             using (var md5 = MD5.Create())

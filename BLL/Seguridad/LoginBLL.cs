@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
+using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
 using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
 using System.Collections.Generic;
@@ -30,6 +31,12 @@ namespace BLL.Seguridad
             {
                 SleepRandomMs(3000, 7000);
                 throw new CredencialesException(0);
+            }
+
+            if (row.Deshabilitado)
+            {
+                SleepRandomMs(3000, 7000);
+                throw new DeshabilitadoException();
             }
 
             if (row.Bloqueado)
@@ -70,7 +77,6 @@ namespace BLL.Seguridad
             }
             catch
             {
-
                 SessionContext.Current.SetPatentes(null);
             }
 
@@ -101,7 +107,6 @@ namespace BLL.Seguridad
 
             int range = maxInclusive - minInclusive + 1;
             int delayMs;
-            // Random
             using (var rng = RandomNumberGenerator.Create())
             {
                 var b = new byte[4];

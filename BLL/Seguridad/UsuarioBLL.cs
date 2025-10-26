@@ -39,7 +39,7 @@ namespace BLL.Seguridad
         }
 
 
-        public bool Delete(BE.Usuario objUdp)
+        public bool Disable(BE.Usuario objUdp)
         {
             //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
             //catch (Exception) { throw; }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using BLL.Seguridad;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
+using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using Idioma = BE.Idioma;
 
@@ -72,6 +73,11 @@ namespace UI
                     MostrarLoginError();
                 }
             }
+            catch (DeshabilitadoException)
+            {
+                SetBusy(false);
+                MostrarDeshabilitadoError();
+            }
             catch (BloqueadoException)
             {
                 SetBusy(false);
@@ -131,6 +137,19 @@ namespace UI
             MessageBox.Show(
                 ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_message"),
                 ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_title"),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+
+            txtContrasena.Clear();
+            txtContrasena.Focus();
+        }
+
+        private void MostrarDeshabilitadoError()
+        {
+            MessageBox.Show(
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );

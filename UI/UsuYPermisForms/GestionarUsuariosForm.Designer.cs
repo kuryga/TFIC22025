@@ -7,7 +7,7 @@ namespace UI
         private DataGridView dgvUsuarios;
         private TextBox txtId, txtNombre, txtApellido, txtCorreo, txtTelefono, txtDireccion, txtDocumento;
         private Label lblId, lblNombre, lblApellido, lblCorreo, lblTelefono, lblDireccion, lblDocumento;
-        private Button btnCrear, btnModificar, btnBorrar;
+        private Button btnCrear, btnModificar;
 
         private System.ComponentModel.IContainer components = null;
 
@@ -36,7 +36,6 @@ namespace UI
             this.lblDocumento = new System.Windows.Forms.Label();
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
-            this.btnBorrar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).BeginInit();
             this.SuspendLayout();
             // 
@@ -168,28 +167,19 @@ namespace UI
             // 
             this.btnCrear.Location = new System.Drawing.Point(20, 310);
             this.btnCrear.Name = "btnCrear";
-            this.btnCrear.Size = new System.Drawing.Size(75, 23);
+            this.btnCrear.Size = new System.Drawing.Size(169, 23);
             this.btnCrear.TabIndex = 15;
             this.btnCrear.Text = "Crear usuario";
             this.btnCrear.Click += new System.EventHandler(this.btnCrear_Click);
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(365, 310);
+            this.btnModificar.Location = new System.Drawing.Point(622, 310);
             this.btnModificar.Name = "btnModificar";
-            this.btnModificar.Size = new System.Drawing.Size(75, 23);
+            this.btnModificar.Size = new System.Drawing.Size(160, 23);
             this.btnModificar.TabIndex = 16;
             this.btnModificar.Text = "Modificar usuario";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
-            // 
-            // btnBorrar
-            // 
-            this.btnBorrar.Location = new System.Drawing.Point(707, 310);
-            this.btnBorrar.Name = "btnBorrar";
-            this.btnBorrar.Size = new System.Drawing.Size(75, 23);
-            this.btnBorrar.TabIndex = 17;
-            this.btnBorrar.Text = "Borrar usuario";
-            this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
             // 
             // GestionarUsuariosForm
             // 
@@ -211,7 +201,6 @@ namespace UI
             this.Controls.Add(this.txtDocumento);
             this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnModificar);
-            this.Controls.Add(this.btnBorrar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GestionarUsuariosForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

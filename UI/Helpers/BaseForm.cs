@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
@@ -101,7 +102,7 @@ namespace UI
                 }
                 else
                 {
-                    _sharedErrorProvider.SetError(tb, "Solo números, máximo 12 caracteres");
+                    _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_doc_validation_message"));
                     e.Cancel = true;
                 }
             }
@@ -137,7 +138,7 @@ namespace UI
                 }
                 else
                 {
-                    _sharedErrorProvider.SetError(tb, "Correo inválido. Debe terminar en @urbansoft.com");
+                    _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_email_validation_message"));
                     e.Cancel = true;
                 }
             }

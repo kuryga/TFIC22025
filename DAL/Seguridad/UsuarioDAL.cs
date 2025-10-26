@@ -29,7 +29,6 @@ namespace DAL.Seguridad
 
         public List<BE.Usuario> GetAll()
         {
-            // Excluir el usuario admin del listado
             var sql = "SELECT " + userPublicCols + " FROM " + userTable +
                       " WHERE " + userIdCol + " <> " + AdminUserId + ";";
 
@@ -62,6 +61,46 @@ namespace DAL.Seguridad
 
         public void Create(BE.Usuario obj)
         {
+            if (obj == null)
+                throw new System.ArgumentNullException(nameof(obj));
+
+            string mailEnc = segUtils.EncriptarReversible((obj.CorreoElectronico ?? string.Empty).Trim());
+            string documento = (obj.NumeroDocumento ?? string.Empty).Trim();
+
+            string sqlCheckMail = @"
+SELECT COUNT(1)
+FROM " + userTable + @"
+WHERE correoElectronico = @mail;";
+
+            object oCountMail = db.ExecuteScalarAndLog(
+                sqlCheckMail,
+                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value = mailEnc,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
+                "Verificación de email duplicado: " + (obj.CorreoElectronico ?? string.Empty),
+                shouldCalculate: false
+            );
+            int countMail = System.Convert.ToInt32(oCountMail ?? 0);
+            if (countMail > 0)
+                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_email_exists"));
+
+            string sqlCheckDoc = @"
+SELECT COUNT(1)
+FROM " + userTable + @"
+WHERE numeroDocumento = @doc;";
+
+            object oCountDoc = db.ExecuteScalarAndLog(
+                sqlCheckDoc,
+                c => c.Parameters.Add("@doc", SqlDbType.VarChar, 20).Value = documento,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarios,
+                "Verificación de documento duplicado: " + documento,
+                shouldCalculate: false
+            );
+            int countDoc = System.Convert.ToInt32(oCountDoc ?? 0);
+            if (countDoc > 0)
+                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
+
             var sql = @"
 INSERT INTO " + userTable + @"
 ( nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
@@ -77,18 +116,16 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 {
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
-
-                    string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
-
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)mailEnc ?? System.DBNull.Value;
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
+                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;
                 },
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.CreacionUsuario,
-                "Alta de usuario: " + (obj.CorreoElectronico ?? string.Empty)
+                "Alta de usuario: " + (obj.CorreoElectronico ?? string.Empty),
+                shouldCalculate: false
             );
 
             if (newId != null && newId != System.DBNull.Value)

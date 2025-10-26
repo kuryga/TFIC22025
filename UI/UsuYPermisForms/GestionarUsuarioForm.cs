@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Collections.Generic;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 using Usuario = BE.Usuario;
 
 namespace UI
@@ -65,6 +66,13 @@ namespace UI
                 {
                     MessageBox.Show("Complete los campos obligatorios: " + string.Join(", ", faltantes), "Aviso",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    MessageBox.Show(
+                         ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_message") + string.Join(", ", faltantes),
+                         ParametrizacionBLL.GetInstance().GetLocalizable("user_required_fields_title"),
+                         MessageBoxButtons.OK,
+                         MessageBoxIcon.Warning
+                    );
                     return;
                 }
 
@@ -79,15 +87,13 @@ namespace UI
                     NumeroDocumento = documento
                 };
 
+                UsuarioBLL.GetInstance().Create(nuevo);
+
                 MessageBox.Show(
-                    "Se enviaría a BLL para crear el usuario:\n" +
-                    $"Nombre: {nuevo.NombreUsuario}\n" +
-                    $"Apellido: {nuevo.ApellidoUsuario}\n" +
-                    $"Correo: {nuevo.CorreoElectronico}\n" +
-                    $"Teléfono: {nuevo.TelefonoContacto}\n" +
-                    $"Dirección: {nuevo.DireccionUsuario}\n" +
-                    $"Documento: {nuevo.NumeroDocumento}",
-                    "Previsualización", MessageBoxButtons.OK, MessageBoxIcon.Information
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_created_success"),
+                    "OK",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
                 );
 
                 this.DialogResult = DialogResult.OK;
@@ -95,8 +101,16 @@ namespace UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error en alta de usuario: " + ex.Message, "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var msg = ex.Message;
+                if (ex.InnerException != null && !string.IsNullOrWhiteSpace(ex.InnerException.Message))
+                    msg += Environment.NewLine + ex.InnerException.Message;
+
+                MessageBox.Show(
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_create_error_message") + msg,
+                    ParametrizacionBLL.GetInstance().GetLocalizable("user_create_error_title"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
     }

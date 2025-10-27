@@ -501,7 +501,7 @@ END CATCH;";
                     "dbo.FamiliaPatente", "idFamilia",
                     BE.Audit.AuditEvents.AsignarPatentesAFamilia,
                     "Asignación inicial de patentes a familia Id=" + idNueva,
-                    shouldCalculate: false
+                    shouldCalculate: true
                 );
             }
 
@@ -561,7 +561,7 @@ INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
 BEGIN TRY
     BEGIN TRAN;
 
-    -- Chequeo de duplicado mixto: en claro normalizado o encriptado, excluyendo la actual
+    -- Chequeo de duplicado mixto. en claro normalizado o encriptado, excluyendo la actual
     IF EXISTS (
         SELECT 1
         FROM dbo.Familia
@@ -607,10 +607,11 @@ END CATCH;";
                     binder(c);
                     c.Parameters.Add("@nPlain", SqlDbType.VarChar, 100).Value = (object)nPlain ?? DBNull.Value;
                 },
-                "dbo.Familia", "idFamilia",
+                "dbo.FamiliaPatente", // antes "dbo.Familia"
+                "idFamilia",
                 BE.Audit.AuditEvents.ModificacionFamilia,
                 "Modificación de familia Id=" + familia.IdFamilia,
-                shouldCalculate: false
+                shouldCalculate: true
             );
 
             familia.NombreFamilia = nPlain;

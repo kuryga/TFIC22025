@@ -27,7 +27,7 @@ public sealed class DalToolkit
     {
         int rows = ExecuteNonQuery(sql, bindParams, "NONQUERY", tableName);
         if (shouldCalculate)
-            RecalculateTableDvsFromSelectAll(tableName, pkName); 
+            RecalculateTableDvsFromSelectAll(tableName, pkName);
 
         BitacoraDAL.GetInstance().Log(accion, mensaje);
         return rows;
@@ -308,6 +308,17 @@ public sealed class DalToolkit
         }
     }
 
+    private static string NormalizeKey(string tableName)
+    {
+        if (string.IsNullOrWhiteSpace(tableName)) return string.Empty;
+        var t = tableName.Trim().Replace("[", "").Replace("]", "");
+        var parts = t.Split('.');
+        var name = parts.Length >= 2 ? parts[parts.Length - 1] : parts[0];
+        return name.ToLowerInvariant();
+    }
+
+    private static string DvvKey(string tableName) => NormalizeKey(tableName);
+
     private void UpsertDvvWithDvh(string tableName, string dvv)
     {
         var key = DvvKey(tableName);
@@ -364,14 +375,6 @@ UPDATE " + dvvTable + @"
             object o = cmd.ExecuteScalar();
             return (o == null || o == DBNull.Value) ? null : Convert.ToString(o);
         }
-    }
-
-    private static string DvvKey(string tableName)
-    {
-        if (string.IsNullOrEmpty(tableName)) return string.Empty;
-        int dot = tableName.LastIndexOf('.');
-        var name = dot >= 0 ? tableName.Substring(dot + 1) : tableName;
-        return name.ToLowerInvariant();
     }
 
     private static string ComputeDvv(List<string> dvhs)
@@ -450,7 +453,6 @@ ORDER BY b.TABLE_SCHEMA, b.TABLE_NAME, p.ORDINAL_POSITION;";
             conn.Open();
             using (var rdr = cmd.ExecuteReader())
             {
-             
                 var map = new Dictionary<string, List<(int Ord, string Col)>>(StringComparer.OrdinalIgnoreCase);
 
                 while (rdr.Read())
@@ -492,14 +494,12 @@ ORDER BY b.TABLE_SCHEMA, b.TABLE_NAME, p.ORDINAL_POSITION;";
         return result;
     }
 
-
     private (string schema, string name) ParseSchemaAndName(string tableFullName)
     {
         var t = (tableFullName ?? "").Trim();
         t = t.Replace("[", "").Replace("]", "");
         var parts = t.Split('.');
         if (parts.Length == 2) return (parts[0], parts[1]);
-        // fallback: dbo
         return ("dbo", t);
     }
 
@@ -534,10 +534,7 @@ ORDER BY kcu.ORDINAL_POSITION;";
     private void RecalculateTableDvsFromSelectAllComposite(string tableFullName, bool suppressDvErrorLog)
     {
         var pkColumns = GetPkColumnsFromDb(tableFullName);
-        if (pkColumns.Count == 0)
-        {
-            return;
-        }
+        if (pkColumns.Count == 0) return;
 
         var dvhs = new List<string>();
         var rowKeys = new List<Dictionary<string, object>>();
@@ -626,14 +623,11 @@ ORDER BY kcu.ORDINAL_POSITION;";
 
                     conn.Close();
 
-                    if (!suppressDvErrorLog)
+                    if (!suppressDvErrorLog && mismatchesDvh > 0)
                     {
-                        if (mismatchesDvh > 0)
-                        {
-                            string msgH = "Error en dígito verificador horizontal en: " + tableFullName + ". Reparación realizada.";
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
-                            BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
-                        }
+                        string msgH = "Error en dígito verificador horizontal en: " + tableFullName + ". Reparación realizada.";
+                        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.FalloVerificacionIntegridad, msgH);
+                        BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.ReparacionIntegridadDatos, msgH);
                     }
                 }
             }

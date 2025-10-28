@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using BLL.Seguridad;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
@@ -11,12 +12,14 @@ namespace UI
     {
         private int _usuarioSeleccionadoId = 0;
         private HashSet<int> _patentesAsignadasOriginal = new HashSet<int>();
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public GestionarPatentesForm()
         {
             InitializeComponent();
             ConfigurarGrids();
             CargarUsuarios();
+            UpdateTexts();
         }
 
         private void ConfigurarGrids()
@@ -33,48 +36,46 @@ namespace UI
             dgvAsignadas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvAsignadas.AllowUserToAddRows = false;
 
-            // Usuarios
             dgvUsuarios.AutoGenerateColumns = false;
             dgvUsuarios.Columns.Clear();
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdUsuario",
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Nombre completo",
+                HeaderText = param.GetLocalizable("full_name_label"),
                 Name = "NombreCompleto",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Email",
+                HeaderText = param.GetLocalizable("user_email_label"),
                 Name = "CorreoElectronico",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
-            // Patentes disponibles
             dgvDisponibles.AutoGenerateColumns = false;
             dgvDisponibles.Columns.Clear();
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdPatente",
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Patente",
+                HeaderText = param.GetLocalizable("patente_label"),
                 Name = "NombrePatente",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Descripción",
+                HeaderText = param.GetLocalizable("descripcion_label"),
                 Name = "Descripcion",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
@@ -83,20 +84,20 @@ namespace UI
             dgvAsignadas.Columns.Clear();
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdPatente",
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Patente",
+                HeaderText = param.GetLocalizable("patente_label"),
                 Name = "NombrePatente",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Descripción",
+                HeaderText = param.GetLocalizable("descripcion_label"),
                 Name = "Descripcion",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
@@ -117,9 +118,7 @@ namespace UI
             }
 
             if (dgvUsuarios.Rows.Count > 0)
-            {
                 dgvUsuarios.ClearSelection();
-            }
         }
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)
@@ -137,7 +136,10 @@ namespace UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando patentes: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    param.GetLocalizable("patentes_load_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -192,7 +194,10 @@ namespace UI
         {
             if (_usuarioSeleccionadoId <= 0)
             {
-                MessageBox.Show("Seleccione un usuario.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    param.GetLocalizable("select_user_simple_message"),
+                    param.GetLocalizable("notice_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -205,10 +210,12 @@ namespace UI
             }
 
             var hayCambios = !_patentesAsignadasOriginal.SetEquals(asignadasAhora);
-
             if (!hayCambios)
             {
-                MessageBox.Show("No hay cambios para guardar.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    param.GetLocalizable("user_no_changes_message"),
+                    param.GetLocalizable("info_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -216,12 +223,27 @@ namespace UI
             {
                 PermisosBLL.GetInstance().SetPatentesForUsuario(_usuarioSeleccionadoId, asignadasAhora);
                 _patentesAsignadasOriginal = new HashSet<int>(asignadasAhora);
-                MessageBox.Show("Patentes asignadas guardadas correctamente.", "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(
+                    param.GetLocalizable("patentes_assigned_saved_success"),
+                    param.GetLocalizable("ok_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    param.GetLocalizable("save_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void UpdateTexts()
+        {
+            lblUsuarios.Text = param.GetLocalizable("users_label");
+            lblDisponibles.Text = param.GetLocalizable("patentes_unassigned_label");
+            lblDisponibles.Text = param.GetLocalizable("patentes_assigned_label");
+
+            brnGuardar.Text = param.GetLocalizable("save_button");
         }
     }
 }

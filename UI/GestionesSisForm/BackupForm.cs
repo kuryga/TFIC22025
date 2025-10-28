@@ -21,6 +21,7 @@ namespace UI
             this.Load += BackupForm_Load;
             btnCarpeta.Click += BtnCarpeta_Click;
             btnBackup.Click += BtnBackup_Click;
+            cboDestino.SelectedIndexChanged += CboDestino_SelectedIndexChanged;
 
             // Bloquear tipeo manual en NumericUpDown
             var tb = nudPartes.Controls[1] as TextBox;
@@ -43,6 +44,7 @@ namespace UI
         private void BackupForm_Load(object sender, EventArgs e)
         {
             CargarUnidades();
+            btnBackup.Enabled = false; // Deshabilitado hasta que el usuario elija una carpeta
         }
 
         private void CargarUnidades()
@@ -59,8 +61,6 @@ namespace UI
             foreach (var d in drives) cboDestino.Items.Add(d);
 
             cboDestino.Items.Add(param.GetLocalizable("backup_choose_custom_folder_option"));
-
-            cboDestino.SelectedIndex = 0;
         }
 
         private void BtnCarpeta_Click(object sender, EventArgs e)
@@ -83,15 +83,21 @@ namespace UI
             {
                 var selected = cboDestino.SelectedItem?.ToString();
 
-                // Si el usuario no seleccionó destino, usar el escritorio
                 if (string.IsNullOrWhiteSpace(selected))
                 {
-                    selected = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                    MessageBox.Show(
+                        param.GetLocalizable("backup_no_destination_selected"),
+                        param.GetLocalizable("backup_title"),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
                 }
-                else if (selected == param.GetLocalizable("backup_choose_custom_folder_option"))
+
+                if (selected == param.GetLocalizable("backup_choose_custom_folder_option"))
                 {
                     BtnCarpeta_Click(sender, e);
-                    selected = (cboDestino.SelectedItem ?? Environment.GetFolderPath(Environment.SpecialFolder.Desktop)).ToString();
+                    selected = cboDestino.SelectedItem?.ToString();
                 }
 
                 var destino = selected;
@@ -130,9 +136,16 @@ namespace UI
             }
         }
 
+        private void CboDestino_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selected = cboDestino.SelectedItem?.ToString();
+            btnBackup.Enabled = !string.IsNullOrWhiteSpace(selected) &&
+                                selected != param.GetLocalizable("backup_choose_custom_folder_option");
+        }
+
         private void ToggleBusy(bool busy)
         {
-            btnBackup.Enabled = !busy;
+            btnBackup.Enabled = !busy && !string.IsNullOrWhiteSpace(cboDestino.SelectedItem?.ToString());
             btnCarpeta.Enabled = !busy;
             cboDestino.Enabled = !busy;
             nudPartes.Enabled = !busy;

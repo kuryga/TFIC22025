@@ -44,33 +44,29 @@ namespace UI
                 {
                     var tag = tb.Tag as string;
                     var tagUpper = string.IsNullOrWhiteSpace(tag) ? null : tag.Trim().ToUpperInvariant();
-
-                    if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
+                    if (EnableSanitization)
                     {
-                        tb.UseSystemPasswordChar = true;
-                        AttachPasswordValidation(tb);
+                        if (!(tb.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
+                            InputSanitizer.ProtectTextBox(tb);
                     }
-                    else
+
+                    if (!string.IsNullOrEmpty(tagUpper))
                     {
-                        if (EnableSanitization)
+                        if (EnableArPhoneValidation && string.Equals(tagUpper, "AR_PHONE", StringComparison.Ordinal))
+                            PhoneValidator.Attach(tb, _sharedErrorProvider);
+
+                        if (string.Equals(tagUpper, "NUM_12", StringComparison.Ordinal))
+                            AttachNumeric12Validation(tb);
+
+                        if (string.Equals(tagUpper, "MAIL_URBANSOFT", StringComparison.Ordinal))
+                            AttachUrbansoftEmailValidation(tb);
+
+                        if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
+                            AttachSafeSqlValidation(tb);
+                        if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
                         {
-                            if (!(tb.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
-                                InputSanitizer.ProtectTextBox(tb);
-                        }
-
-                        if (!string.IsNullOrEmpty(tagUpper))
-                        {
-                            if (EnableArPhoneValidation && string.Equals(tagUpper, "AR_PHONE", StringComparison.Ordinal))
-                                PhoneValidator.Attach(tb, _sharedErrorProvider);
-
-                            if (string.Equals(tagUpper, "NUM_12", StringComparison.Ordinal))
-                                AttachNumeric12Validation(tb);
-
-                            if (string.Equals(tagUpper, "MAIL_URBANSOFT", StringComparison.Ordinal))
-                                AttachUrbansoftEmailValidation(tb);
-
-                            if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
-                                AttachSafeSqlValidation(tb);
+                            tb.UseSystemPasswordChar = true;
+                            AttachSafeSqlValidation(tb);
                         }
                     }
                 }
@@ -202,50 +198,6 @@ namespace UI
             var txt = tb.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrEmpty(txt) || InputSanitizer.IsSafeForSql(txt))
                 _sharedErrorProvider.SetError(tb, string.Empty);
-        }
-
-        private void AttachPasswordValidation(TextBox tb)
-        {
-            tb.Validating -= Password_Validating;
-            tb.Validating += Password_Validating;
-
-            tb.TextChanged -= Password_TextChanged;
-            tb.TextChanged += Password_TextChanged;
-        }
-
-        private void Password_Validating(object sender, CancelEventArgs e)
-        {
-            var tb = sender as TextBox;
-            if (tb == null) return;
-
-            var txt = tb.Text ?? string.Empty;
-
-            if (string.IsNullOrEmpty(txt) || IsStrongPassword(txt))
-            {
-                _sharedErrorProvider.SetError(tb, string.Empty);
-            }
-            else
-            {
-                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_password_validation_message"));
-                e.Cancel = true;
-            }
-        }
-
-        private void Password_TextChanged(object sender, EventArgs e)
-        {
-            var tb = sender as TextBox;
-            if (tb == null) return;
-
-            var txt = tb.Text ?? string.Empty;
-            if (string.IsNullOrEmpty(txt) || IsStrongPassword(txt))
-                _sharedErrorProvider.SetError(tb, string.Empty);
-        }
-
-        private static bool IsStrongPassword(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input)) return false;
-            var rx = new Regex(@"^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$");
-            return rx.IsMatch(input);
         }
     }
 }

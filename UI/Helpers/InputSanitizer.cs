@@ -119,7 +119,7 @@ namespace UI
         public static bool IsValidUrbansoftEmail(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
-            return Regex.IsMatch(input.Trim(), @"^[a-zA-Z0-9._%+-]+@urbansoft\.com$", RegexOptions.IgnoreCase);
+            return Regex.IsMatch(input.Trim(), @"^[a-z0-9._%+-]+@urbansoft\.com$", RegexOptions.IgnoreCase);
         }
 
         public static bool IsSafeForSql(string input)

@@ -4,6 +4,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
+using segUtils = DAL.Seguridad.SecurityUtilities;
+
 namespace DAL.Seguridad
 {
     public sealed class PermisosDAL
@@ -19,18 +21,49 @@ namespace DAL.Seguridad
 
         private static readonly DalToolkit db = new DalToolkit();
 
+        private static string EncName(string s)
+        {
+            var t = (s ?? string.Empty).Trim();
+            return string.IsNullOrEmpty(t) ? null : segUtils.EncriptarReversible(t);
+        }
+
+        private static string DecName(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            try
+            {
+                var d = segUtils.DesencriptarReversible(s);
+                return string.IsNullOrEmpty(d) ? null : d;
+            }
+            catch
+            {
+                // nada
+                return s;
+            }
+        }
+
         public List<BE.Familia> GetAllFamilias()
         {
             string sql = "SELECT idFamilia AS IdFamilia, nombreFamilia AS NombreFamilia, descripcion AS Descripcion FROM dbo.Familia ORDER BY nombreFamilia;";
-            return db.QueryListAndLog<BE.Familia>(sql, null, "dbo.Familia", "idFamilia",
+            var list = db.QueryListAndLog<BE.Familia>(sql, null, "dbo.Familia", "idFamilia",
                 BE.Audit.AuditEvents.ConsultaFamilias, "Listado de familias");
+
+            foreach (var f in list ?? Enumerable.Empty<BE.Familia>())
+                f.NombreFamilia = DecName(f.NombreFamilia);
+
+            return list;
         }
 
         public List<BE.Patente> GetAllPatentes()
         {
             string sql = "SELECT idPatente AS IdPatente, nombrePatente AS NombrePatente, descripcion AS Descripcion FROM dbo.Patente ORDER BY nombrePatente;";
-            return db.QueryListAndLog<BE.Patente>(sql, null, "dbo.Patente", "idPatente",
+            var list = db.QueryListAndLog<BE.Patente>(sql, null, "dbo.Patente", "idPatente",
                 BE.Audit.AuditEvents.ConsultaPatentes, "Listado de patentes");
+
+            foreach (var p in list ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return list;
         }
 
         public List<BE.Familia> GetFamiliasByUsuario(int idUsuario)
@@ -43,47 +76,55 @@ SELECT DISTINCT
 FROM dbo.UsuarioFamilia uf
 JOIN dbo.Familia f ON f.idFamilia = uf.idFamilia
 WHERE uf.idUsuario = @idUsuario;";
-
-            return db.QueryListAndLog<BE.Familia>(
+            var list = db.QueryListAndLog<BE.Familia>(
                 sql,
                 cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
                 "dbo.Familia", "idFamilia",
                 BE.Audit.AuditEvents.ConsultaFamiliasPorUsuario,
                 "Familias por usuario Id=" + idUsuario
             );
+
+            foreach (var f in list ?? Enumerable.Empty<BE.Familia>())
+                f.NombreFamilia = DecName(f.NombreFamilia);
+
+            return list;
         }
 
         public List<BE.Patente> GetPatentesByUsuario(int idUsuario)
         {
             string sql = @"
 SELECT DISTINCT
-    p.idPatente      AS IdPatente,
-    p.nombrePatente  AS NombrePatente,
-    p.descripcion    AS Descripcion
-FROM dbo.Patente p
-WHERE
-    EXISTS (
-        SELECT 1
-        FROM dbo.UsuarioPatente up
-        WHERE up.idUsuario = @idUsuario
-          AND up.idPatente = p.idPatente
-    )
-    OR EXISTS (
-        SELECT 1
-        FROM dbo.UsuarioFamilia uf
-        JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
-        WHERE uf.idUsuario = @idUsuario
-          AND fp.idPatente = p.idPatente
-    )
-ORDER BY p.nombrePatente;";
+    p.idPatente     AS IdPatente,
+    p.nombrePatente AS NombrePatente,
+    p.descripcion   AS Descripcion
+FROM dbo.UsuarioPatente up
+JOIN dbo.Patente p ON p.idPatente = up.idPatente
+WHERE up.idUsuario = @idUsuario
 
-            return db.QueryListAndLog<BE.Patente>(
+UNION
+
+SELECT DISTINCT
+    p.idPatente     AS IdPatente,
+    p.nombrePatente AS NombrePatente,
+    p.descripcion   AS Descripcion
+FROM dbo.UsuarioFamilia uf
+JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
+JOIN dbo.Patente p ON p.idPatente = fp.idPatente
+WHERE uf.idUsuario = @idUsuario
+
+ORDER BY NombrePatente;";
+            var list = db.QueryListAndLog<BE.Patente>(
                 sql,
                 cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
                 "dbo.Patente", "idPatente",
                 BE.Audit.AuditEvents.ConsultaPatentesPorUsuario,
-                "Patentes (directas y por familia) del usuario Id=" + idUsuario
+                "Patentes directas y por familia del usuario Id=" + idUsuario
             );
+
+            foreach (var p in list ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return list;
         }
 
         public List<BE.Patente> GetPatentesByFamilia(int idFamilia)
@@ -96,14 +137,18 @@ SELECT DISTINCT
 FROM dbo.FamiliaPatente fp
 JOIN dbo.Patente p ON p.idPatente = fp.idPatente
 WHERE fp.idFamilia = @idFamilia;";
-
-            return db.QueryListAndLog<BE.Patente>(
+            var list = db.QueryListAndLog<BE.Patente>(
                 sql,
                 cmd => cmd.Parameters.Add("@idFamilia", SqlDbType.Int).Value = idFamilia,
                 "dbo.Patente", "idPatente",
                 BE.Audit.AuditEvents.ConsultaPatentesPorFamilia,
                 "Patentes por familia Id=" + idFamilia
             );
+
+            foreach (var p in list ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return list;
         }
 
         public List<int> GetUsuariosConPatente(int idPatente)
@@ -111,14 +156,19 @@ WHERE fp.idFamilia = @idFamilia;";
             string sql = @"
 SELECT DISTINCT u.idUsuario
 FROM dbo.Usuario u
-LEFT JOIN dbo.UsuarioPatente up
-       ON up.idUsuario = u.idUsuario AND up.idPatente = @p
-LEFT JOIN dbo.UsuarioFamilia uf
-       ON uf.idUsuario = u.idUsuario
-LEFT JOIN dbo.FamiliaPatente fp
-       ON fp.idFamilia = uf.idFamilia AND fp.idPatente = @p
-WHERE up.idPatente IS NOT NULL OR fp.idPatente IS NOT NULL;";
-
+WHERE EXISTS (
+    SELECT 1
+    FROM dbo.UsuarioPatente up
+    WHERE up.idUsuario = u.idUsuario
+      AND up.idPatente = @p
+)
+OR EXISTS (
+    SELECT 1
+    FROM dbo.UsuarioFamilia uf
+    JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
+    WHERE uf.idUsuario = u.idUsuario
+      AND fp.idPatente = @p
+);";
             return db.QueryListAndLog<int>(
                 sql,
                 c => c.Parameters.Add("@p", SqlDbType.Int).Value = idPatente,
@@ -138,13 +188,18 @@ SELECT DISTINCT
 FROM dbo.UsuarioPatente up
 JOIN dbo.Patente p ON p.idPatente = up.idPatente
 WHERE up.idUsuario = @u;";
-            return db.QueryListAndLog<BE.Patente>(
+            var list = db.QueryListAndLog<BE.Patente>(
                 sql,
                 c => c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario,
                 "dbo.Patente", "idPatente",
                 BE.Audit.AuditEvents.ConsultaPatentesPorUsuario,
                 "Patentes directas por usuario Id=" + idUsuario
             );
+
+            foreach (var p in list ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return list;
         }
 
         public List<BE.Patente> GetPatentesPorFamilias(IEnumerable<int> idsFamilia)
@@ -161,8 +216,7 @@ SELECT DISTINCT
 FROM dbo.FamiliaPatente fp
 JOIN dbo.Patente p ON p.idPatente = fp.idPatente
 WHERE fp.idFamilia IN ({placeholders});";
-
-            return db.QueryListAndLog<BE.Patente>(
+            var res = db.QueryListAndLog<BE.Patente>(
                 sql,
                 c =>
                 {
@@ -173,8 +227,12 @@ WHERE fp.idFamilia IN ({placeholders});";
                 BE.Audit.AuditEvents.ConsultaPatentesPorFamilia,
                 "Patentes por lista de familias"
             );
-        }
 
+            foreach (var p in res ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return res;
+        }
 
         public void SetFamiliasForUsuario(int idUsuario, IEnumerable<int> idsFamilia)
         {
@@ -257,7 +315,6 @@ BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
     THROW;
 END CATCH;";
-
             db.ExecuteNonQueryAndLog(
                 sql,
                 binder,
@@ -268,64 +325,26 @@ END CATCH;";
             );
         }
 
-
         private sealed class _FamPatRow
         {
             public int idFamilia { get; set; }
             public int idPatente { get; set; }
         }
+
         public void SetPatentesForUsuario(int idUsuario, IEnumerable<int> idsPatente)
         {
             var nuevasPatentes = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
             var patentesOld = new HashSet<int>(GetPatentesByUsuario(idUsuario).Select(p => p.IdPatente));
 
-
             var familiasActuales = GetFamiliasByUsuario(idUsuario) ?? new List<BE.Familia>();
             var idsFamiliasActuales = familiasActuales.Select(f => f.IdFamilia).Distinct().ToList();
 
-            var familiasAEliminar = new List<int>();
-            if (idsFamiliasActuales.Count > 0)
-            {
-                var placeholdersF = string.Join(", ", idsFamiliasActuales.Select((_, i) => $"@ff{i}"));
-                string sqlFamPat = $@"
-SELECT fp.idFamilia, fp.idPatente
-FROM dbo.FamiliaPatente fp
-WHERE fp.idFamilia IN ({placeholdersF});";
-
-                var rows = db.QueryListAndLog<_FamPatRow>(
-                    sqlFamPat,
-                    c =>
-                    {
-                        for (int i = 0; i < idsFamiliasActuales.Count; i++)
-                            c.Parameters.Add($"@ff{i}", SqlDbType.Int).Value = idsFamiliasActuales[i];
-                    },
-                    "dbo.FamiliaPatente", "idFamilia",
-                    BE.Audit.AuditEvents.ConsultaPatentesPorFamilia,
-                    $"Mapeo familia→patentes para usuario Id={idUsuario}"
-                );
-
-
-                var setNuevas = new HashSet<int>(nuevasPatentes);
-                var famToPat = rows.GroupBy(r => r.idFamilia)
-                                   .ToDictionary(g => g.Key, g => g.Select(x => x.idPatente).ToList());
-
-                foreach (var kvp in famToPat)
-                {
-                    int idFam = kvp.Key;
-                    var patsFam = kvp.Value;
-                    bool familiaReponeAlgunaQuitada = patsFam.Any(p => !setNuevas.Contains(p));
-                    if (familiaReponeAlgunaQuitada)
-                        familiasAEliminar.Add(idFam);
-                }
-            }
-
-            var familiasQueQuedan = idsFamiliasActuales.Except(familiasAEliminar).ToList();
-            var patPorFamiliasQueQuedan = familiasQueQuedan.Count == 0
+            var patPorFamiliasActuales = idsFamiliasActuales.Count == 0
                 ? new List<BE.Patente>()
-                : (GetPatentesPorFamilias(familiasQueQuedan) ?? new List<BE.Patente>());
+                : (GetPatentesPorFamilias(idsFamiliasActuales) ?? new List<BE.Patente>());
 
             var patentesNew = new HashSet<int>(
-                nuevasPatentes.Concat(patPorFamiliasQueQuedan.Select(p => p.IdPatente))
+                nuevasPatentes.Concat(patPorFamiliasActuales.Select(p => p.IdPatente))
             );
 
             var patentesPerdidas = patentesOld.Except(patentesNew).ToList();
@@ -345,37 +364,26 @@ WHERE fp.idFamilia IN ({placeholdersF});";
                 }
             }
 
-            string delFamiliasSql = string.Empty;
+            string core;
             Action<SqlCommand> binder;
 
-            if (familiasAEliminar.Count > 0)
-            {
-                var inFam = string.Join(", ", familiasAEliminar.Select((_, i) => $"@rf{i}"));
-                delFamiliasSql = $"DELETE FROM dbo.UsuarioFamilia WHERE idUsuario = @u AND idFamilia IN ({inFam});";
-            }
-
-            string core;
             if (nuevasPatentes.Count == 0)
             {
-                core = (delFamiliasSql + " DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u;").Trim();
+                core = "DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u;";
                 binder = c =>
                 {
                     c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
-                    for (int i = 0; i < familiasAEliminar.Count; i++)
-                        c.Parameters.Add($"@rf{i}", SqlDbType.Int).Value = familiasAEliminar[i];
                 };
             }
             else
             {
                 var values = string.Join(", ", nuevasPatentes.Select((_, i) => $"(@u, @p{i})"));
-                core = (delFamiliasSql + " DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u; " +
-                       $"INSERT INTO dbo.UsuarioPatente (idUsuario, idPatente) VALUES {values};").Trim();
+                core = "DELETE FROM dbo.UsuarioPatente WHERE idUsuario = @u; " +
+                       $"INSERT INTO dbo.UsuarioPatente (idUsuario, idPatente) VALUES {values};";
 
                 binder = c =>
                 {
                     c.Parameters.Add("@u", SqlDbType.Int).Value = idUsuario;
-                    for (int i = 0; i < familiasAEliminar.Count; i++)
-                        c.Parameters.Add($"@rf{i}", SqlDbType.Int).Value = familiasAEliminar[i];
                     for (int i = 0; i < nuevasPatentes.Count; i++)
                         c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = nuevasPatentes[i];
                 };
@@ -409,7 +417,6 @@ BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
     THROW;
 END CATCH;";
-
             db.ExecuteNonQueryAndLog(
                 sql,
                 binder,
@@ -424,21 +431,47 @@ END CATCH;";
         {
             if (familia == null) throw new ArgumentNullException(nameof(familia));
 
+            var nPlain = (familia.NombreFamilia ?? string.Empty).Trim();
+            var nEnc = EncName(nPlain) ?? string.Empty;
+
             var sqlInsert = @"
-INSERT INTO dbo.Familia (nombreFamilia, descripcion)
-VALUES (@n, @d);
-SELECT CAST(SCOPE_IDENTITY() AS int);";
+BEGIN TRY
+    BEGIN TRAN;
+
+    -- Chequeo de duplicado contra nombre en CLARO normalizado o encriptado
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Familia
+        WHERE UPPER(LTRIM(RTRIM(nombreFamilia))) = UPPER(LTRIM(RTRIM(@nPlain)))
+           OR nombreFamilia = @nEnc
+    )
+    BEGIN
+        ROLLBACK TRAN;
+        THROW 51010, 'Ya existe una familia con ese nombre.', 1;
+    END
+
+    INSERT INTO dbo.Familia (nombreFamilia, descripcion)
+    VALUES (@nEnc, @d);
+    SELECT CAST(SCOPE_IDENTITY() AS int);
+
+    COMMIT TRAN;
+END TRY
+BEGIN CATCH
+    IF (XACT_STATE() <> 0) ROLLBACK TRAN;
+    THROW;
+END CATCH;";
 
             object newId = db.ExecuteScalarAndLog(
                 sqlInsert,
                 c =>
                 {
-                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@nPlain", SqlDbType.VarChar, 100).Value = (object)nPlain ?? DBNull.Value;
+                    c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
                     c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                 },
                 "dbo.Familia", "idFamilia",
                 BE.Audit.AuditEvents.AltaFamilia,
-                "Alta de familia: " + (familia.NombreFamilia ?? string.Empty),
+                "Alta de familia: " + nPlain,
                 shouldCalculate: false
             );
 
@@ -446,6 +479,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             if (idNueva > 0)
             {
                 familia.IdFamilia = idNueva;
+                familia.NombreFamilia = nPlain;
+
                 db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", idNueva, false);
             }
 
@@ -466,13 +501,12 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     "dbo.FamiliaPatente", "idFamilia",
                     BE.Audit.AuditEvents.AsignarPatentesAFamilia,
                     "Asignación inicial de patentes a familia Id=" + idNueva,
-                    shouldCalculate: false
+                    shouldCalculate: true
                 );
             }
 
             return idNueva;
         }
-
 
         public void UpdateFamilia(BE.Familia familia, IEnumerable<int> idsPatente)
         {
@@ -481,6 +515,9 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             var nuevasPatentes = (idsPatente ?? Enumerable.Empty<int>()).Distinct().ToList();
 
+            var nPlain = (familia.NombreFamilia ?? string.Empty).Trim();
+            var nEnc = EncName(nPlain) ?? string.Empty;
+
             string core;
             Action<SqlCommand> binder;
 
@@ -488,14 +525,14 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             {
                 core = @"
 UPDATE dbo.Familia
-   SET nombreFamilia = @n, descripcion = @d
+   SET nombreFamilia = @nEnc, descripcion = @d
  WHERE idFamilia = @f;
 
 DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;";
                 binder = c =>
                 {
                     c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
-                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
                     c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                 };
             }
@@ -504,7 +541,7 @@ DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;";
                 var values = string.Join(", ", nuevasPatentes.Select((_, i) => $"(@f, @p{i})"));
                 core = $@"
 UPDATE dbo.Familia
-   SET nombreFamilia = @n, descripcion = @d
+   SET nombreFamilia = @nEnc, descripcion = @d
  WHERE idFamilia = @f;
 
 DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;
@@ -513,17 +550,29 @@ INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
                 binder = c =>
                 {
                     c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
-                    c.Parameters.Add("@n", SqlDbType.VarChar, 100).Value = (object)(familia.NombreFamilia ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
                     c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                     for (int i = 0; i < nuevasPatentes.Count; i++)
                         c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = nuevasPatentes[i];
                 };
             }
 
-
             var sql = @"
 BEGIN TRY
     BEGIN TRAN;
+
+    -- Chequeo de duplicado mixto. en claro normalizado o encriptado, excluyendo la actual
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.Familia
+        WHERE (UPPER(LTRIM(RTRIM(nombreFamilia))) = UPPER(LTRIM(RTRIM(@nPlain)))
+               OR nombreFamilia = @nEnc)
+          AND idFamilia <> @f
+    )
+    BEGIN
+        ROLLBACK TRAN;
+        THROW 51011, 'Ya existe una familia con ese nombre.', 1;
+    END
 
     " + core + @"
 
@@ -547,22 +596,25 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
-
-    -- Bitácora del fallo, más legible que el [NONQUERY] del toolkit
     DECLARE @msg NVARCHAR(4000) = ERROR_MESSAGE();
-    -- opcional: podríamos loguearlo vía una SP; por ahora dejamos el THROW para que lo capture la capa .NET
     THROW;
 END CATCH;";
 
             db.ExecuteNonQueryAndLog(
                 sql,
-                binder,
-                "dbo.Familia", "idFamilia",
+                c =>
+                {
+                    binder(c);
+                    c.Parameters.Add("@nPlain", SqlDbType.VarChar, 100).Value = (object)nPlain ?? DBNull.Value;
+                },
+                "dbo.FamiliaPatente", // antes "dbo.Familia"
+                "idFamilia",
                 BE.Audit.AuditEvents.ModificacionFamilia,
                 "Modificación de familia Id=" + familia.IdFamilia,
-                shouldCalculate: false
+                shouldCalculate: true
             );
 
+            familia.NombreFamilia = nPlain;
             db.RefreshRowDvAndTableDvv("dbo.Familia", "idFamilia", familia.IdFamilia, false);
         }
     }

@@ -5,7 +5,7 @@ using TipoEdificacionBLL = BLL.Genericos.TipoEdificacionBLL;
 
 namespace UI
 {
-    public partial class GestionarTipoEdificacionForm : Form
+    public partial class GestionarTipoEdificacionForm : BaseForm
     {
         public GestionarTipoEdificacionForm()
         {

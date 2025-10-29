@@ -123,6 +123,7 @@ namespace UI
             // cmbCriticidad
             // 
             this.cmbCriticidad.FormattingEnabled = true;
+            this.cmbCriticidad.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.cmbCriticidad.Location = new System.Drawing.Point(695, 17);
             this.cmbCriticidad.Name = "cmbCriticidad";
             this.cmbCriticidad.Size = new System.Drawing.Size(121, 21);

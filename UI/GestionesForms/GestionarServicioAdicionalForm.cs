@@ -5,7 +5,7 @@ using ServicioAdicionalBLL = BLL.Genericos.ServicioAdicionalBLL;
 
 namespace UI
 {
-    public partial class GestionarServicioAdicionalForm : Form
+    public partial class GestionarServicioAdicionalForm : BaseForm
     {
         public GestionarServicioAdicionalForm()
         {

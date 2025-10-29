@@ -5,29 +5,32 @@ using System.Collections.Generic;
 using BLL.Seguridad;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
-using Parametrizacion = BE.Params.Parametrizacion;
+using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using Idioma = BE.Idioma;
 
 namespace UI
 {
-    public partial class LoginForm : Form
+    public partial class LoginForm : BaseForm
     {
         public event Action LoginSucceeded;
-        
+
         public LoginForm()
         {
             InitializeComponent();
 
-            Parametrizacion param = ParametrizacionBLL.GetInstance().GetParametrizacion();
+            ParametrizacionBLL.GetInstance().LoadParametrizacion();
 
-            this.Text = $"Inicio de sesion - {param.NombreEmpresa}";
-
+            this.UpdateTexts();
             List<Idioma> idiomas = ParametrizacionBLL.GetInstance().GetIdiomas();
+            int idiomaSeleccionado = ParametrizacionBLL.GetInstance().GetIdIdioma();
+
             cmbIdiomaInferior.DataSource = idiomas;
-            cmbIdiomaInferior.DisplayMember = "nombre";  
-            cmbIdiomaInferior.ValueMember = "nombre"; 
-            cmbIdiomaInferior.SelectedValue = idiomas.Find(r => r.IdIdioma == param.IdIdioma).Nombre;
+            cmbIdiomaInferior.DisplayMember = "nombre";
+            cmbIdiomaInferior.ValueMember = "nombre";
+            cmbIdiomaInferior.SelectedValue = idiomas.Find(r => r.IdIdioma == idiomaSeleccionado).Nombre;
+
+            cmbIdiomaInferior.SelectedValueChanged += CmbIdiomaInferior_SelectedValueChanged;
 
             this.AcceptButton = btnLogin;
 
@@ -35,6 +38,15 @@ namespace UI
                 txtContrasena.UseSystemPasswordChar = true;
 
             txtUsuario?.Focus();
+        }
+
+        private void CmbIdiomaInferior_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (cmbIdiomaInferior.SelectedItem is BE.Idioma idioma)
+            {
+                ParametrizacionBLL.GetInstance().LoadLocalizablesForIdioma(idioma.IdIdioma);
+                this.UpdateTexts();
+            }
         }
 
         private async void btnLogin_Click(object sender, EventArgs e)
@@ -61,10 +73,15 @@ namespace UI
                     MostrarLoginError();
                 }
             }
+            catch (DeshabilitadoException)
+            {
+                SetBusy(false);
+                MostrarDeshabilitadoError();
+            }
             catch (BloqueadoException)
             {
                 SetBusy(false);
-                MostrarLoginError();
+                MostrarBloqueadoError();
             }
             catch (CredencialesException)
             {
@@ -75,8 +92,8 @@ namespace UI
             {
                 SetBusy(false);
                 MessageBox.Show(
-                    "Ocurrió un error al intentar iniciar sesión.",
-                    "Error",
+                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_message"),
+                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_title"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -85,10 +102,12 @@ namespace UI
 
         private void SetBusy(bool busy)
         {
-            this.UseWaitCursor = busy;        
+            this.UseWaitCursor = busy;
             btnLogin.Enabled = !busy;
             txtUsuario.Enabled = !busy;
             txtContrasena.Enabled = !busy;
+            btnRecuperarContrasena.Enabled = !busy;
+            cmbIdiomaInferior.Enabled = !busy;
 
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
             Application.DoEvents();
@@ -105,14 +124,55 @@ namespace UI
         private void MostrarLoginError()
         {
             MessageBox.Show(
-                "Usuario o contraseña incorrectos.",
-                "Error de autenticación",
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
 
             txtContrasena.Clear();
             txtContrasena.Focus();
+        }
+
+        private void MostrarBloqueadoError()
+        {
+            MessageBox.Show(
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_title"),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+
+            txtContrasena.Clear();
+            txtContrasena.Focus();
+        }
+
+        private void MostrarDeshabilitadoError()
+        {
+            MessageBox.Show(
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_message"),
+                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_title"),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning
+            );
+
+            txtContrasena.Clear();
+            txtContrasena.Focus();
+        }
+
+        private void UpdateTexts()
+        {
+            txtUsuario.Tag = "MAIL_URBANSOFT";
+            txtContrasena.Tag = "PASSWORD";
+            lblUsuario.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_username_label");
+            lblContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_password_label");
+            lblIdiomaInferior.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_language_label");
+            btnLogin.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_button");
+            btnRecuperarContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_forgot_password");
+            string titleText = ParametrizacionBLL.GetInstance().GetLocalizable("login_title");
+            string NombreEmpresa = ParametrizacionBLL.GetInstance().GetNombreEmpresa();
+
+            this.Text = $"{titleText} - {NombreEmpresa}";
         }
     }
 }

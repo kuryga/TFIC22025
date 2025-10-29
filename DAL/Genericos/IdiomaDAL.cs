@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
-using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Idioma>;
-
 namespace DAL.Genericos
 {
-    public class IdiomaDAL : DaoInterface
+    public class IdiomaDAL
     {
         private static IdiomaDAL instance;
         private IdiomaDAL() { }
@@ -29,63 +28,58 @@ namespace DAL.Genericos
                 "Listado de idiomas",
                 false
             );
+        }   
+
+        public Dictionary<string, string> LoadDiccionarioTraducciones(int idIdioma)
+        {
+            const string sql = @"
+SELECT  t.codigo, it.texto
+FROM    dbo.Traduccion         AS t
+JOIN    dbo.IdiomaTraduccion   AS it ON it.idTraduccion = t.idTraduccion
+WHERE   it.idIdioma = @idIdioma;";
+
+            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            using (var cn = new SqlConnection(DalToolkit.connectionString))
+            using (var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text })
+            {
+                cmd.Parameters.Add("@idIdioma", SqlDbType.Int).Value = idIdioma;
+                cn.Open();
+                using (var rd = cmd.ExecuteReader(CommandBehavior.SequentialAccess))
+                {
+                    while (rd.Read())
+                    {
+                        var codigo = rd.GetString(0);
+                        var texto = rd.GetString(1);
+                        dict[codigo] = texto;
+                    }
+                }
+            }
+
+            return dict;
         }
 
-        public void Create(BE.Idioma obj)
+        public Dictionary<string, string> GetDiccionarioTraduccionesPorIso(string codigoIso)
         {
-            var sql = @"
-INSERT INTO " + table + @" (nombre, codigoISO)
-VALUES (@nombre, @codigoISO);
-SELECT CAST(SCOPE_IDENTITY() AS int);";
+            if (string.IsNullOrWhiteSpace(codigoIso))
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            object newId = db.ExecuteScalarAndLog(
-                sql,
-                cmd =>
-                {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+            const string sqlId = "SELECT " + idCol + " FROM " + table + " WHERE codigoISO = @iso;";
 
-                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value =
-                        (object)obj.CodigoISO ?? System.DBNull.Value;
-                },
-                table, idCol,
-                BE.Audit.AuditEvents.CreacionIdioma,
-                "Alta de idioma: " + (obj.Nombre ?? string.Empty),
-                false
-            );
+            int? idIdioma = null;
+            using (var cn = new SqlConnection(DalToolkit.connectionString))
+            using (var cmd = new SqlCommand(sqlId, cn) { CommandType = CommandType.Text })
+            {
+                cmd.Parameters.Add("@iso", SqlDbType.VarChar, 10).Value = codigoIso;
+                cn.Open();
+                object o = cmd.ExecuteScalar();
+                if (o != null && o != DBNull.Value)
+                    idIdioma = Convert.ToInt32(o);
+            }
 
-            if (newId != null && newId != System.DBNull.Value)
-                obj.IdIdioma = System.Convert.ToInt32(newId);
-
-            if (obj.IdIdioma > 0)
-                db.RefreshRowDvAndTableDvv(table, idCol, obj.IdIdioma, false);
-        }
-
-        public void Update(BE.Idioma obj)
-        {
-            var sql = @"
-UPDATE " + table + @"
-   SET nombre    = @nombre,
-       codigoISO = @codigoISO
- WHERE " + idCol + @" = @id;";
-
-            db.ExecuteNonQueryAndLog(
-                sql,
-                cmd =>
-                {
-                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdIdioma;
-
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
-
-                    cmd.Parameters.Add("@codigoISO", SqlDbType.VarChar, 10).Value =
-                        (object)obj.CodigoISO ?? System.DBNull.Value;
-                },
-                table, idCol, obj.IdIdioma,
-                BE.Audit.AuditEvents.ModificacionIdioma,
-                "Modificación de idioma Id=" + obj.IdIdioma,
-                true
-            );
+            return idIdioma.HasValue
+                ? LoadDiccionarioTraducciones(idIdioma.Value)
+                : new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
     }
 }

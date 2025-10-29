@@ -13,6 +13,8 @@ namespace DAL.Seguridad
         public string UsuarioEmail { get; set; }
         public string NombreCompleto { get; set; }
 
+        public BE.Params.Parametrizacion parametrizacion { get; set; }
+
         public HashSet<string> Patentes { get; private set; }
 
         private SessionContext()
@@ -27,6 +29,7 @@ namespace DAL.Seguridad
             NombreCompleto = "Usuario deslogeado";
             Patentes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
+
 
         public void SetPatentes(IEnumerable<BE.Patente> patentes)
         {

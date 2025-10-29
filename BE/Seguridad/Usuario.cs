@@ -19,6 +19,7 @@ namespace BE
         private string TokenRecuperoSesionHash { get; set; }
         private DateTime TiempoExpiracionToken { get; set; }
         private int ContadorIntentosFallidos { get; set; }
-        public bool Bloqueado { get; set; }
+        public bool Bloqueado { get; set; } 
+        public bool Deshabilitado { get; set; }
     }
 }

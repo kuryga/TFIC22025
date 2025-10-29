@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 
 using SessionContext = DAL.Seguridad.SessionContext;
+using segUtils = DAL.Seguridad.SecurityUtilities;
 
 namespace DAL.Audit
 {
@@ -25,13 +26,20 @@ namespace DAL.Audit
 
         private static bool _isListingBitacora;
 
+        private static string TryDecryptOrNull(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            try { return segUtils.DesencriptarReversible(s); }
+            catch { return s; }
+        }
+
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize)
         {
             return GetBitacoraList(desde, hasta, page, pageSize, null);
         }
 
         public List<BE.Audit.Bitacora> GetBitacoraList(
-    DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
+            DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 30;
@@ -113,7 +121,7 @@ ORDER BY rn;";
                             Fecha = rdr.GetDateTime(oFecha),
                             Criticidad = crit,
                             Accion = rdr.IsDBNull(oAcc) ? null : rdr.GetString(oAcc),
-                            Mensaje = rdr.IsDBNull(oMsg) ? null : rdr.GetString(oMsg),
+                            Mensaje = rdr.IsDBNull(oMsg) ? null : TryDecryptOrNull(rdr.GetString(oMsg)),
                             IdEjecutor = rdr.IsDBNull(oIdExec) ? (int?)null : rdr.GetInt32(oIdExec),
                             UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : rdr.GetString(oUsr),
                         });
@@ -152,6 +160,8 @@ ORDER BY rn;";
             if (mensaje == null) mensaje = string.Empty;
             if (criticidad == null) criticidad = string.Empty;
 
+            var encMensaje = segUtils.EncriptarReversible(mensaje.Trim());
+
             var ctx = SessionContext.Current;
             int? uid = (ctx != null) ? ctx.UsuarioId : (int?)null;
             string uname = (ctx != null && !string.IsNullOrEmpty(ctx.UsuarioEmail))
@@ -171,8 +181,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             {
                 cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.Now;
                 cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
-                cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion;
-                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = mensaje;
+                cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion ?? string.Empty;
+                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = encMensaje ?? string.Empty;
 
                 var idValue = uid.HasValue ? (object)uid.Value : DBNull.Value;
                 var userValue = string.IsNullOrWhiteSpace(uname) ? (object)DBNull.Value : uname;

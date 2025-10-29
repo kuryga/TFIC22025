@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BLL.Seguridad.Mantenimiento;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
-    public partial class RestoreForm : Form
+    public partial class RestoreForm : BaseForm
     {
         private OpenFileDialog ofd;
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public RestoreForm()
         {
@@ -18,21 +20,43 @@ namespace UI
 
             ofd = new OpenFileDialog
             {
-                Filter = "Backups (*.bak)|*.bak|Todos (*.*)|*.*",
-                Title = "Seleccionar archivos de backup",
+                Filter = param.GetLocalizable("restore_ofd_filter"),
+                Title = param.GetLocalizable("restore_ofd_title"),
                 Multiselect = true
             };
 
+            this.Load += RestoreForm_Load;
             btnSeleccionar.Click += BtnSeleccionar_Click;
             btnRestaurar.Click += BtnRestaurar_Click;
+
+            UpdateTexts();
+        }
+
+        private void RestoreForm_Load(object sender, EventArgs e)
+        {
+            // Si el título se quiere forzar siempre desde traducciones
+            this.Text = param.GetLocalizable("restore_title");
+        }
+
+        private void UpdateTexts()
+        {
+            if (this.Controls.ContainsKey("lblArchivos"))
+                this.Controls["lblArchivos"].Text = param.GetLocalizable("restore_files_label");
+
+            btnSeleccionar.Text = param.GetLocalizable("restore_browse_button");
+            btnRestaurar.Text = param.GetLocalizable("restore_execute_button");
+
+            chkVerify.Text = param.GetLocalizable("restore_verify_checkbox");
         }
 
         private void BtnSeleccionar_Click(object sender, EventArgs e)
         {
+            // Sincronizar por si el idioma cambió en runtime
+            ofd.Filter = param.GetLocalizable("restore_ofd_filter");
+            ofd.Title = param.GetLocalizable("restore_ofd_title");
+
             if (ofd.ShowDialog(this) == DialogResult.OK)
-            {
                 txtArchivos.Text = string.Join(" | ", ofd.FileNames);
-            }
         }
 
         private async void BtnRestaurar_Click(object sender, EventArgs e)
@@ -40,7 +64,10 @@ namespace UI
             var pathsStr = txtArchivos.Text?.Trim();
             if (string.IsNullOrWhiteSpace(pathsStr))
             {
-                MessageBox.Show("Seleccione al menos un archivo .bak.", "Restore", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    param.GetLocalizable("restore_select_bak_message"),
+                    param.GetLocalizable("restore_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -53,15 +80,20 @@ namespace UI
 
             if (files.Count == 0)
             {
-                MessageBox.Show("No se detectaron archivos válidos.", "Restore", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(
+                    param.GetLocalizable("restore_no_valid_files_message"),
+                    param.GetLocalizable("restore_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             var inexistentes = files.Where(f => !File.Exists(f)).ToList();
             if (inexistentes.Any())
             {
-                MessageBox.Show("Los siguientes archivos no existen:\r\n" + string.Join("\r\n", inexistentes),
-                    "Restore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    param.GetLocalizable("restore_missing_files_prefix") + Environment.NewLine + string.Join(Environment.NewLine, inexistentes),
+                    param.GetLocalizable("restore_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -69,56 +101,71 @@ namespace UI
             if (noBak.Any())
             {
                 var seguir = MessageBox.Show(
-                    "Se detectaron archivos sin extensión .bak.\r\n¿Desea continuar de todos modos?",
-                    "Advertencia", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    param.GetLocalizable("restore_non_bak_warning_message"),
+                    param.GetLocalizable("warning_title"),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (seguir != DialogResult.Yes) return;
             }
 
             files = OrdenarPartes(files);
-
             var doVerify = chkVerify.Checked;
-            var doReplace = chkReplace.Checked;
 
-            if (doReplace)
-            {
-                var resp = MessageBox.Show(
-                    "Se restaurará la base de datos con la opción REPLACE.\r\n" +
-                    "Esto sobrescribirá el estado actual.\r\n¿Desea continuar?",
-                    "Confirmar restore", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                if (resp != DialogResult.OK) return;
-            }
+            var resp = MessageBox.Show(
+                param.GetLocalizable("restore_confirm_message"),
+                param.GetLocalizable("restore_confirm_title"),
+                MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if (resp != DialogResult.OK) return;
 
-            btnRestaurar.Enabled = false;
-            btnSeleccionar.Enabled = false;
-            UseWaitCursor = true;
+            ToggleBusy(true);
             txtLog.Clear();
 
             try
             {
-                txtLog.AppendText("Iniciando restore..." + Environment.NewLine);
-                txtLog.AppendText("Archivos seleccionados:" + Environment.NewLine);
-                foreach (var f in files) txtLog.AppendText(" - " + f + Environment.NewLine);
-                txtLog.AppendText("Opciones: VERIFY=" + (doVerify ? "SI" : "NO") + " REPLACE=" + (doReplace ? "SI" : "NO") + Environment.NewLine);
+                txtLog.AppendText(param.GetLocalizable("restore_starting_message") + Environment.NewLine);
+                txtLog.AppendText(param.GetLocalizable("restore_selected_files_header") + Environment.NewLine);
+                foreach (var f in files)
+                    txtLog.AppendText(" - " + f + Environment.NewLine);
+
+                var verifyYesNo = doVerify ? param.GetLocalizable("yes_label") : param.GetLocalizable("no_label");
+                var replaceYesNo = param.GetLocalizable("yes_label"); // siempre con REPLACE
+                txtLog.AppendText(
+                    param.GetLocalizable("restore_options_prefix")
+                    + " VERIFY=" + verifyYesNo
+                    + " REPLACE=" + replaceYesNo + Environment.NewLine);
 
                 await Task.Run(() =>
-                {
-                    BackupBLL.GetInstance().RestoreFull(files, withReplace: doReplace, verifyBefore: doVerify);
-                });
+                    BackupBLL.GetInstance().RestoreFull(files, withReplace: true, verifyBefore: doVerify)
+                );
 
-                txtLog.AppendText("Restore finalizado correctamente." + Environment.NewLine);
-                MessageBox.Show("Restore realizado con éxito.", "Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtLog.AppendText(param.GetLocalizable("restore_finished_message") + Environment.NewLine);
+
+                MessageBox.Show(
+                    param.GetLocalizable("restore_success_message"),
+                    param.GetLocalizable("restore_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                txtLog.AppendText("Error: " + ex.Message + Environment.NewLine);
-                MessageBox.Show("Error en el restore:" + Environment.NewLine + ex.Message, "Restore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtLog.AppendText(param.GetLocalizable("restore_error_prefix_message") + " " + ex.Message + Environment.NewLine);
+
+                MessageBox.Show(
+                    param.GetLocalizable("restore_error_prefix_message") + Environment.NewLine + ex.Message,
+                    param.GetLocalizable("restore_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                UseWaitCursor = false;
-                btnRestaurar.Enabled = true;
-                btnSeleccionar.Enabled = true;
+                ToggleBusy(false);
             }
+        }
+
+        private void ToggleBusy(bool busy)
+        {
+            btnRestaurar.Enabled = !busy;
+            btnSeleccionar.Enabled = !busy;
+            UseWaitCursor = busy;
+            Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
+            Application.DoEvents();
         }
 
         private List<string> OrdenarPartes(List<string> files)
@@ -148,17 +195,16 @@ namespace UI
             if (bases.Count > 1)
             {
                 var seguir = MessageBox.Show(
-                    "Se detectaron archivos de diferentes respaldos. Verifique que todas las partes pertenezcan al mismo backup.\r\n¿Continuar de todos modos?",
-                    "Advertencia", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    param.GetLocalizable("restore_mixed_sets_warning_message"),
+                    param.GetLocalizable("warning_title"),
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (seguir != DialogResult.Yes) return files;
             }
 
-            var ordered = parsed
+            return parsed
                 .OrderBy(p => p.Part < 0 ? int.MaxValue : p.Part)
                 .Select(p => p.File)
                 .ToList();
-
-            return ordered;
         }
     }
 }

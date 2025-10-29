@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace UI
 {
-    public partial class NuevaCotizacionForm : Form
+    public partial class NuevaCotizacionForm : BaseForm
     {
         public NuevaCotizacionForm()
         {

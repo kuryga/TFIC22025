@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace BE.Seguridad
 {
     public class LoginException : Exception
@@ -13,9 +12,16 @@ namespace BE.Seguridad
         public UsuarioNoEncontradoException() : base("El usuario no existe.") { }
     }
 
+    public class UsuarioDeshabilitadoException : LoginException
+    {
+        public UsuarioDeshabilitadoException()
+            : base("El usuario está deshabilitado y no puede iniciar sesión.") { }
+    }
+
     public class UsuarioBloqueadoException : LoginException
     {
-        public UsuarioBloqueadoException() : base("El usuario está bloqueado.") { }
+        public UsuarioBloqueadoException()
+            : base("El usuario está bloqueado. Por motivos de seguridad debe recuperar su contraseña o contactar con un administrador.") { }
     }
 
     public class CredencialesInvalidasException : LoginException

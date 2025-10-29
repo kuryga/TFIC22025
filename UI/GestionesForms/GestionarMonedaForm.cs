@@ -5,7 +5,7 @@ using MonedaBLL = BLL.Genericos.MonedaBLL;
 
 namespace UI
 {
-    public partial class GestionarMonedaForm : Form
+    public partial class GestionarMonedaForm : BaseForm
     {
         public GestionarMonedaForm()
         {

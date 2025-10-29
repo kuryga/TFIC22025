@@ -6,7 +6,7 @@ using SessionContext = DAL.Seguridad.SessionContext;
 
 namespace BLL.Seguridad
 {
-    public class UsuarioBLL : BE.ICrud<BE.Usuario>
+    public class UsuarioBLL
     {
         private UsuarioBLL() { }
         private static UsuarioBLL instance;
@@ -17,12 +17,10 @@ namespace BLL.Seguridad
         }
 
 
-        public bool Create(BE.Usuario objAdd)
+        public void Create(BE.Usuario objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try { UsuarioDAL.GetInstance().Create(objAdd); }
+            catch (Exception) { throw; }
         }
 
 
@@ -38,15 +36,6 @@ namespace BLL.Seguridad
                 return true;
                 }
             catch (Exception) { throw; }
-        }
-
-
-        public bool Delete(BE.Usuario objUdp)
-        {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
         }
 
         public string GetSesionActivaNombreCompleto()

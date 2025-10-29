@@ -60,10 +60,6 @@ namespace BE.Audit
         public const string AsociacionPatenteUsuario = "Usuario.AsociarPatente";
         public const string ForzarCierreSesion = "Autenticacion.ForzarCierreSesion";
 
-        // TODO: creo que tengo que eliminar esto, revisar anotaciones
-        public const string CreacionIdioma = "Idioma.Creacion";
-        public const string ModificacionIdioma = "Idioma.Modificacion";
-
         // ==== C3 (modificaciones / cambios de negocio) ====
         public const string CambioTiempoEstimadoCotizacion = "Cotizacion.CambioTiempoEstimado";
         public const string ModificacionValorMoneda = "Moneda.ModificacionValor";
@@ -154,8 +150,6 @@ namespace BE.Audit
                 case CreacionServicioAdicional:
                 case AsociacionPatenteUsuario:
                 case ForzarCierreSesion:
-                case CreacionIdioma:
-                case ModificacionIdioma:
                     return Criticidad.C4;
             }
 

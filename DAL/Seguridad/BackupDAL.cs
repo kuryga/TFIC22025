@@ -21,6 +21,14 @@ namespace DAL.Mantenimiento
 
         private static string ConnStr => DalToolkit.connectionString;
 
+        // Construye una connection string cambiando el catálogo.
+        private static string GetConnStrFor(string catalog)
+        {
+            var csb = new SqlConnectionStringBuilder(ConnStr);
+            csb.InitialCatalog = catalog;
+            return csb.ToString();
+        }
+
         private static string CurrentDbName
         {
             get
@@ -86,10 +94,10 @@ namespace DAL.Mantenimiento
 
             var toClauses = string.Join(", ", files.ConvertAll(f => $"DISK = N'{f.Replace("'", "''")}'"));
             var sql = $"BACKUP DATABASE [{dbName}] TO {toClauses} WITH COMPRESSION, STATS = 5, SKIP;";
-            ExecNonQuery(sql);
+            ExecNonQuery(sql, overrideCatalog: dbName); // backup puede ejecutarse desde la misma BD
 
             var verifyAll = $"RESTORE VERIFYONLY FROM {toClauses};";
-            ExecNonQuery(verifyAll);
+            ExecNonQuery(verifyAll, overrideCatalog: "master"); // verify desde master para no bloquear
 
             BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.RespaldoBaseDatos,
                 $"Backup total de {dbName}. Partes {parts}. Carpeta {backupFolder}.");
@@ -103,28 +111,72 @@ namespace DAL.Mantenimiento
                 throw new ArgumentException("Debe indicar al menos un archivo de origen.", nameof(sourceFiles));
 
             var dbName = CurrentDbName;
-
             var fromClauses = string.Join(", ", sourceFiles.ConvertAll(f => $"DISK = N'{f.Replace("'", "''")}'"));
+
+            // Siempre trabajar contra master durante el restore
+            var catalog = "master";
 
             if (verifyBefore)
             {
                 var verifyAll = $"RESTORE VERIFYONLY FROM {fromClauses};";
-                ExecNonQuery(verifyAll);
+                ExecNonQuery(verifyAll, overrideCatalog: catalog);
             }
 
-            var replace = withReplace ? ", REPLACE" : "";
-            var sql = $"RESTORE DATABASE [{dbName}] FROM {fromClauses} WITH RECOVERY{replace}, STATS = 5;";
-            ExecNonQuery(sql);
+            // Matar sesiones activas y forzar SINGLE_USER con reintento
+            var dbNameEscaped = dbName.Replace("'", "''");
+            string killSql = $@"
+DECLARE @db sysname = N'{dbNameEscaped}';
+DECLARE @kill nvarchar(max) = N'';
+
+-- Construir lista de KILL para todas las sesiones excepto la actual
+SELECT @kill = COALESCE(@kill, N'') + N'KILL ' + CONVERT(varchar(10), s.session_id) + N';'
+FROM sys.dm_exec_sessions AS s
+WHERE s.database_id = DB_ID(@db) AND s.session_id <> @@SPID;
+
+-- Ejecutar los KILL (si hay)
+IF (LEN(@kill) > 0) EXEC(@kill);
+
+-- Intento 1: SINGLE_USER
+BEGIN TRY
+    EXEC(N'ALTER DATABASE [' + @db + N'] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;');
+END TRY
+BEGIN CATCH
+    -- Pequeño delay y reintento: matar sesiones de nuevo
+    WAITFOR DELAY '00:00:01';
+    SET @kill = N'';
+    SELECT @kill = COALESCE(@kill, N'') + N'KILL ' + CONVERT(varchar(10), s.session_id) + N';'
+    FROM sys.dm_exec_sessions AS s
+    WHERE s.database_id = DB_ID(@db) AND s.session_id <> @@SPID;
+    IF (LEN(@kill) > 0) EXEC(@kill);
+
+    EXEC(N'ALTER DATABASE [' + @db + N'] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;');
+END CATCH;
+";
+            ExecNonQuery(killSql, overrideCatalog: catalog);
+
+            try
+            {
+                var replace = withReplace ? ", REPLACE" : "";
+                var sql = $"RESTORE DATABASE [{dbName}] FROM {fromClauses} WITH RECOVERY{replace}, STATS = 5;";
+                ExecNonQuery(sql, overrideCatalog: catalog);
+            }
+            finally
+            {
+                // Volver a multi user aunque falle el restore
+                var toMultiUser = $"ALTER DATABASE [{dbName}] SET MULTI_USER;";
+                try { ExecNonQuery(toMultiUser, overrideCatalog: catalog); } catch { /* best effort */ }
+            }
 
             BitacoraDAL.GetInstance().Log(BE.Audit.AuditEvents.RestauracionBaseDatos,
                 $"Restore total de {dbName} desde {sourceFiles.Count} archivo(s). REPLACE {(withReplace ? "SI" : "NO")}.");
         }
 
-        private static void ExecNonQuery(string sql)
+        private static void ExecNonQuery(string sql, string overrideCatalog = null)
         {
             try
             {
-                using (var cn = new SqlConnection(ConnStr))
+                var cs = overrideCatalog == null ? ConnStr : GetConnStrFor(overrideCatalog);
+                using (var cn = new SqlConnection(cs))
                 using (var cmd = new SqlCommand(sql, cn) { CommandType = CommandType.Text, CommandTimeout = 0 })
                 {
                     cn.Open();

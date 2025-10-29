@@ -4,29 +4,30 @@ using BLL.Audit;
 using System.Collections.Generic;
 using System.Linq;
 
-using BitacoraDTO = BE.Audit.Bitacora;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
-    public partial class ConsultarBitacoraForm : Form
+    public partial class ConsultarBitacoraForm : BaseForm
     {
         // paginado
         private int _page = 1;
         private const int PageSize = 30;
         //
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public ConsultarBitacoraForm()
         {
             InitializeComponent();
+
+            UpdateTexts();
+            cmbCriticidad.DropDownStyle = ComboBoxStyle.DropDownList;
 
             dtpHasta.MaxDate = DateTime.Today;
             dtpHasta.Value = DateTime.Today;
 
             dtpDesde.MaxDate = DateTime.Today;
             dtpDesde.Value = DateTime.Today.AddDays(-1);
-
-            btnPrev.Click += btnPrev_Click;
-            btnNext.Click += btnNext_Click;
 
             btnPrev.Enabled = false;
             btnNext.Enabled = false;
@@ -56,7 +57,7 @@ namespace UI
         private void CmbCriticidad_Format(object sender, ListControlConvertEventArgs e)
         {
             var item = (BE.Audit.Criticidad)e.ListItem;
-            e.Value = (item == BE.Audit.Criticidad.None) ? "Todas" : item.ToString();
+            e.Value = (item == BE.Audit.Criticidad.None) ? param.GetLocalizable("log_criticality_all") : item.ToString();
         }
 
         private void btnConsultar_Click(object sender, EventArgs e)
@@ -67,11 +68,10 @@ namespace UI
             if (desde > hasta)
             {
                 MessageBox.Show(
-                    "Rango de fechas inválido. La fecha de inicio debe ser anterior a la fecha de fin.",
-                    "Error",
+                    param.GetLocalizable("log_invalid_date_range"),
+                    param.GetLocalizable("log_invalid_date_title"),
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                    MessageBoxIcon.Warning);
                 return;
             }
 
@@ -120,19 +120,39 @@ namespace UI
             if (_page == 1 && (result.Items == null || result.Items.Count == 0))
             {
                 MessageBox.Show(
-                    "No se encontraron eventos en el período seleccionado.",
-                    "Sin resultados",
+                    param.GetLocalizable("log_no_results_message"),
+                    param.GetLocalizable("log_no_results_title"),
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
+                    MessageBoxIcon.Information);
                 return;
             }
 
             dgvBitacora.DataSource = result.Items;
-            lblPageInfo.Text = $"Página {_page}";
+            UpdateDvg();
+            lblPageInfo.Text = $"{param.GetLocalizable("log_page_label")} {_page}";
 
             btnPrev.Enabled = (_page > 1);
             btnNext.Enabled = (result.Items != null && result.Items.Count == PageSize);
+        }
+
+        private void UpdateTexts()
+        {
+            lblCriticidad.Text = param.GetLocalizable("log_criticality_label");
+            lblDesde.Text = param.GetLocalizable("log_date_from_label");
+            lblHasta.Text = param.GetLocalizable("log_date_to_label");
+
+            btnConsultar.Text = param.GetLocalizable("log_search_button");
+        }
+        
+        private void UpdateDvg()
+        {
+            dgvBitacora.Columns["IdRegistro"].HeaderText = param.GetLocalizable("log_col_id");
+            dgvBitacora.Columns["Fecha"].HeaderText = param.GetLocalizable("log_col_date");
+            dgvBitacora.Columns["Accion"].HeaderText = param.GetLocalizable("log_col_action");
+            dgvBitacora.Columns["Criticidad"].HeaderText = param.GetLocalizable("log_col_criticality");
+            dgvBitacora.Columns["Mensaje"].HeaderText = param.GetLocalizable("log_col_message");
+            dgvBitacora.Columns["IdEjecutor"].HeaderText = param.GetLocalizable("log_col_executor_id");
+            dgvBitacora.Columns["UsuarioEjecutor"].HeaderText = param.GetLocalizable("log_col_executor_user");
         }
     }
 }

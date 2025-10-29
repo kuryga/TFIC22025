@@ -41,21 +41,21 @@ namespace UI
             // 
             // lblUsuario
             // 
-            this.lblUsuario.AutoSize = true;
-            this.lblUsuario.Location = new System.Drawing.Point(211, 38);
+            this.lblUsuario.Location = new System.Drawing.Point(156, 37);
             this.lblUsuario.Name = "lblUsuario";
-            this.lblUsuario.Size = new System.Drawing.Size(46, 13);
+            this.lblUsuario.Size = new System.Drawing.Size(155, 13);
             this.lblUsuario.TabIndex = 0;
             this.lblUsuario.Text = "Usuario:";
+            this.lblUsuario.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblContrasena
             // 
-            this.lblContrasena.AutoSize = true;
-            this.lblContrasena.Location = new System.Drawing.Point(204, 87);
+            this.lblContrasena.Location = new System.Drawing.Point(156, 86);
             this.lblContrasena.Name = "lblContrasena";
-            this.lblContrasena.Size = new System.Drawing.Size(64, 13);
+            this.lblContrasena.Size = new System.Drawing.Size(155, 13);
             this.lblContrasena.TabIndex = 2;
             this.lblContrasena.Text = "Contraseña:";
+            this.lblContrasena.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtUsuario
             // 
@@ -84,12 +84,12 @@ namespace UI
             // 
             // lblIdiomaInferior
             // 
-            this.lblIdiomaInferior.AutoSize = true;
-            this.lblIdiomaInferior.Location = new System.Drawing.Point(35, 213);
+            this.lblIdiomaInferior.Location = new System.Drawing.Point(9, 213);
             this.lblIdiomaInferior.Name = "lblIdiomaInferior";
-            this.lblIdiomaInferior.Size = new System.Drawing.Size(41, 13);
+            this.lblIdiomaInferior.Size = new System.Drawing.Size(100, 13);
             this.lblIdiomaInferior.TabIndex = 7;
             this.lblIdiomaInferior.Text = "Idioma:";
+            this.lblIdiomaInferior.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // cmbIdiomaInferior
             // 

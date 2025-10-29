@@ -5,7 +5,7 @@ using MaquinariaBLL = BLL.Genericos.MaquinariaBLL;
 
 namespace UI
 {
-    public partial class GestionarMaquinariaForm : Form
+    public partial class GestionarMaquinariaForm : BaseForm
     {
         public GestionarMaquinariaForm()
         {

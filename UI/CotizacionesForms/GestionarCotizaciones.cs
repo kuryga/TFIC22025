@@ -5,7 +5,7 @@ using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
 namespace UI
 {
-    public partial class ConsultarCotizacionesForm : Form
+    public partial class ConsultarCotizacionesForm : BaseForm
     {
         public ConsultarCotizacionesForm()
         {

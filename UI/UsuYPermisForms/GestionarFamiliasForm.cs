@@ -4,20 +4,24 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using BLL.Seguridad;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
-    public partial class GestionarFamiliasForm : Form
+    public partial class GestionarFamiliasForm : BaseForm
     {
         private int _usuarioSeleccionadoId = 0;
         private HashSet<int> _familiasAsignadasOriginal = new HashSet<int>();
         private bool _suspendSelectionEvents = false;
+
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public GestionarFamiliasForm()
         {
             InitializeComponent();
             ConfigurarGrids();
             CargarUsuarios();
+            UpdateTexts();
 
             this.Shown += (s, e) => AplicarPermisosFamilias();
         }
@@ -40,20 +44,20 @@ namespace UI
             dgvUsuarios.Columns.Clear();
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdUsuario",
                 Width = 30,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Nombre completo",
+                HeaderText = param.GetLocalizable("full_name_label"),
                 Name = "NombreCompleto",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvUsuarios.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Email",
+                HeaderText = param.GetLocalizable("user_email_label"),
                 Name = "correoElectronico",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
@@ -62,20 +66,20 @@ namespace UI
             dgvDisponibles.Columns.Clear();
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdFamilia",
                 Width = 20,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Familia",
+                HeaderText = param.GetLocalizable("familia_label"),
                 Name = "NombreFamilia",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvDisponibles.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Descripcion",
+                HeaderText = param.GetLocalizable("descripcion_label"),
                 Name = "descripcion",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
@@ -84,20 +88,20 @@ namespace UI
             dgvAsignadas.Columns.Clear();
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "ID",
+                HeaderText = param.GetLocalizable("user_id_label"),
                 Name = "IdFamilia",
                 Width = 20,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader
             });
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Familia",
+                HeaderText = param.GetLocalizable("familia_label"),
                 Name = "NombreFamilia",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
             dgvAsignadas.Columns.Add(new DataGridViewTextBoxColumn
             {
-                HeaderText = "Descripcion",
+                HeaderText = param.GetLocalizable("descripcion_label"),
                 Name = "descripcion",
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
@@ -128,15 +132,17 @@ namespace UI
             {
                 bool puedeCrear = PermisosBLL.GetInstance().PuedeCrearFamilia();
                 bool puedeModificar = PermisosBLL.GetInstance().PuedeModificarFamilia();
-                bool puedeGuerdar = PermisosBLL.GetInstance().PuedeAsignarFamilia();
+                bool puedeGuardar = PermisosBLL.GetInstance().PuedeAsignarFamilia();
                 btnCrear.Enabled = puedeCrear;
                 btnModificar.Enabled = puedeModificar;
-                btnGuardar.Enabled = puedeGuerdar;
+                btnGuardar.Enabled = puedeGuardar;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al aplicar permisos en Familias: " + ex.Message,
-                    "Permisos", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    param.GetLocalizable("familia_apply_permissions_error_message") + ex.Message,
+                    param.GetLocalizable("permissions_label"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -155,7 +161,9 @@ namespace UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error cargando familias: " + ex.Message, "Error",
+                MessageBox.Show(
+                    param.GetLocalizable("familias_load_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -203,7 +211,6 @@ namespace UI
         {
             if (_suspendSelectionEvents) return;
             _suspendSelectionEvents = true;
-
             try
             {
                 if (dgvDisponibles.Focused && dgvDisponibles.SelectedRows.Count > 0)
@@ -216,7 +223,6 @@ namespace UI
         {
             if (_suspendSelectionEvents) return;
             _suspendSelectionEvents = true;
-
             try
             {
                 if (dgvAsignadas.Focused && dgvAsignadas.SelectedRows.Count > 0)
@@ -253,7 +259,9 @@ namespace UI
         {
             if (_usuarioSeleccionadoId <= 0)
             {
-                MessageBox.Show("Seleccione un usuario.", "Aviso",
+                MessageBox.Show(
+                    param.GetLocalizable("select_user_simple_message"),
+                    param.GetLocalizable("notice_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -267,10 +275,11 @@ namespace UI
             }
 
             var hayCambios = !_familiasAsignadasOriginal.SetEquals(asignadasAhora);
-
             if (!hayCambios)
             {
-                MessageBox.Show("No hay cambios para guardar.", "Info",
+                MessageBox.Show(
+                    param.GetLocalizable("user_no_changes_message"),
+                    param.GetLocalizable("info_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -279,12 +288,16 @@ namespace UI
             {
                 PermisosBLL.GetInstance().SetFamiliasForUsuario(_usuarioSeleccionadoId, asignadasAhora);
                 _familiasAsignadasOriginal = new HashSet<int>(asignadasAhora);
-                MessageBox.Show("Familias asignadas guardadas correctamente.", "OK",
+                MessageBox.Show(
+                    param.GetLocalizable("familias_assigned_saved_success"),
+                    param.GetLocalizable("ok_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al guardar: " + ex.Message, "Error",
+                MessageBox.Show(
+                    param.GetLocalizable("save_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -292,8 +305,6 @@ namespace UI
         private BE.Familia GetFamiliaSeleccionada()
         {
             DataGridViewRow row = null;
-
-            // Buscar en ambas grillas
             if (dgvDisponibles.SelectedRows.Count > 0)
                 row = dgvDisponibles.SelectedRows[0];
             else if (dgvAsignadas.SelectedRows.Count > 0)
@@ -302,32 +313,30 @@ namespace UI
             if (row == null || row.IsNewRow)
                 return new BE.Familia { IdFamilia = -1 };
 
-            var familia = new BE.Familia
+            return new BE.Familia
             {
                 IdFamilia = Convert.ToInt32(row.Cells["IdFamilia"].Value),
                 NombreFamilia = Convert.ToString(row.Cells["NombreFamilia"].Value) ?? string.Empty,
                 Descripcion = Convert.ToString(row.Cells["descripcion"].Value) ?? string.Empty
             };
-
-            return familia;
         }
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
             try
             {
-                using (var form = new GestionarFamiliaForm(null)) 
+                using (var form = new GestionarFamiliaForm(null))
                 {
                     var dr = form.ShowDialog(this);
                     if (dr == DialogResult.OK && _usuarioSeleccionadoId > 0)
-                    {
                         CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
-                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error creando familia: " + ex.Message, "Error",
+                MessageBox.Show(
+                    param.GetLocalizable("familia_create_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -337,7 +346,9 @@ namespace UI
             var seleccion = GetFamiliaSeleccionada();
             if (seleccion == null || seleccion.IdFamilia <= 0)
             {
-                MessageBox.Show("Seleccione una familia de alguna de las listas.", "Aviso",
+                MessageBox.Show(
+                    param.GetLocalizable("select_family_from_lists_message"),
+                    param.GetLocalizable("notice_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -348,17 +359,26 @@ namespace UI
                 {
                     var dr = form.ShowDialog(this);
                     if (dr == DialogResult.OK && _usuarioSeleccionadoId > 0)
-                    {
                         CargarFamiliasParaUsuario(_usuarioSeleccionadoId);
-                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error modificando familia: " + ex.Message, "Error",
+                MessageBox.Show(
+                    param.GetLocalizable("familia_modify_error_message") + ex.Message,
+                    param.GetLocalizable("error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        private void UpdateTexts()
+        {
+            lblAsignadas.Text = param.GetLocalizable("familias_assigned_label");
+            lblDisponibles.Text = param.GetLocalizable("familias_unassigned_label");
+            lblUsuarios.Text = param.GetLocalizable("users_label");
+            btnCrear.Text = param.GetLocalizable("familia_create_button");
+            btnGuardar.Text = param.GetLocalizable("save_button");
+            btnModificar.Text = param.GetLocalizable("familia_modify_button");
+        }
     }
 }

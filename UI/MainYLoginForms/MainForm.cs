@@ -2,16 +2,18 @@
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
-using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
-using Parametrizacion = BE.Params.Parametrizacion;
 using PermisosBLL = BLL.Seguridad.PermisosBLL;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
 {
-    public partial class MainForm : Form
+    public partial class MainForm : BaseForm
     {
         public event Action LogoutRequested;
         private readonly PermisosBLL permisosBLL = PermisosBLL.GetInstance();
+
+        private string closeSessionText = "";
+        private string closeSessionTitle = "";
 
         public MainForm()
         {
@@ -37,8 +39,8 @@ namespace UI
             menuCerrarSesion.Click += (s, e) =>
             {
                 var resultado = MessageBox.Show(
-                    "¿Seguro que querés cerrar sesión?",
-                    "Confirmar cierre de sesión",
+                    closeSessionText,
+                   closeSessionTitle,
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question
                 );
@@ -50,12 +52,7 @@ namespace UI
                 }
             };
 
-            string Username = UsuarioBLL.GetInstance().GetSesionActivaNombreCompleto();
-            lblBienvenida.Text = $"Bienvenido al sistema {Username}";
-
-            Parametrizacion param = ParametrizacionBLL.GetInstance().GetParametrizacion();
-
-            this.Text = $"Menu principal - {param.NombreEmpresa}";
+            UpdateTexts();
 
             this.Shown += (s, e) => AplicarPermisos();
         }
@@ -129,6 +126,45 @@ namespace UI
             var desiredHeight = form.Height + menuStrip1.Height + panelContenedor.Margin.Vertical + 35;
 
             this.Size = new System.Drawing.Size(desiredWidth, desiredHeight);
+        }
+
+        private void UpdateTexts()
+        {
+            cotizacionesMenu.Text = ParametrizacionBLL.GetInstance().GetLocalizable("quotes");
+            menuConsultar.Text = ParametrizacionBLL.GetInstance().GetLocalizable("consult");
+            menuNuevaCotizacion.Text = ParametrizacionBLL.GetInstance().GetLocalizable("new_quote");
+
+            gestionesMenu.Text = ParametrizacionBLL.GetInstance().GetLocalizable("management");
+            menuMaquinaria.Text = ParametrizacionBLL.GetInstance().GetLocalizable("machinery");
+            menuMateriales.Text = ParametrizacionBLL.GetInstance().GetLocalizable("materials");
+            menuServicios.Text = ParametrizacionBLL.GetInstance().GetLocalizable("services");
+            menuTipoEdif.Text = ParametrizacionBLL.GetInstance().GetLocalizable("building_type");
+            menuMoneda.Text = ParametrizacionBLL.GetInstance().GetLocalizable("currencies");
+
+            usuariosMenu.Text = ParametrizacionBLL.GetInstance().GetLocalizable("users_permissions");
+            menuUsuarios.Text = ParametrizacionBLL.GetInstance().GetLocalizable("users");
+            menuFamilias.Text = ParametrizacionBLL.GetInstance().GetLocalizable("families");
+            menuPatentes.Text = ParametrizacionBLL.GetInstance().GetLocalizable("patents");
+
+            auditoriaMenu.Text = ParametrizacionBLL.GetInstance().GetLocalizable("audit");
+            menuBitacora.Text = ParametrizacionBLL.GetInstance().GetLocalizable("log_view");
+
+            sistemaMenu.Text = ParametrizacionBLL.GetInstance().GetLocalizable("system");
+            menuBackup.Text = ParametrizacionBLL.GetInstance().GetLocalizable("backup");
+            menuRestore.Text = ParametrizacionBLL.GetInstance().GetLocalizable("restore");
+
+            menuCerrarSesion.Text = ParametrizacionBLL.GetInstance().GetLocalizable("logout");
+
+            string menuText = ParametrizacionBLL.GetInstance().GetLocalizable("main_menu");
+            string welcomeText = ParametrizacionBLL.GetInstance().GetLocalizable("welcome_message");
+            string NombreEmpresa = ParametrizacionBLL.GetInstance().GetNombreEmpresa();
+            string Username = UsuarioBLL.GetInstance().GetSesionActivaNombreCompleto();
+
+            this.closeSessionText = ParametrizacionBLL.GetInstance().GetLocalizable("logout_confirm_question");
+            this.closeSessionTitle = ParametrizacionBLL.GetInstance().GetLocalizable("logout_confirm_title");
+            lblBienvenida.Text = $"{welcomeText} {Username}";
+
+            this.Text = $"{menuText} - {NombreEmpresa}";
         }
     }
 }

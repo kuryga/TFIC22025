@@ -46,6 +46,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UsuYPermisForms\GestionarUsuarioForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UsuYPermisForms\GestionarUsuarioForm.Designer.cs">
+      <DependentUpon>GestionarUsuarioForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +97,8 @@
     <Compile Include="CotizacionesForms\GestionarCotizaciones.Designer.cs">
       <DependentUpon>GestionarCotizaciones.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\InputSanitizer.cs" />
+    <Compile Include="Helpers\PhoneValidator.cs" />
     <Compile Include="UsuYPermisForms\GestionarFamiliaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -154,7 +165,7 @@
     <Compile Include="UsuYPermisForms\GestionarUsuariosForm.Designer.cs">
       <DependentUpon>GestionarUsuariosForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoginAppContext.cs" />
+    <Compile Include="Helpers\LoginAppContext.cs" />
     <Compile Include="MainYLoginForms\LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -193,6 +204,9 @@
     <Compile Include="GestionesSisForm\RestoreForm.Designer.cs">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="UsuYPermisForms\GestionarUsuarioForm.resx">
+      <DependentUpon>GestionarUsuarioForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GestionesForms\AgregarForms\AgregarMaquinariasForm.resx">
       <DependentUpon>AgregarMaquinariasForm.cs</DependentUpon>
     </EmbeddedResource>

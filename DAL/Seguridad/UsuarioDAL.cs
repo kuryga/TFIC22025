@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 using segUtils = DAL.Seguridad.SecurityUtilities;
@@ -23,11 +25,14 @@ namespace DAL.Seguridad
         private const string userIdCol = "idUsuario";
         private const string userPublicCols =
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
-            "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado";
+            "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado, Deshabilitado";
+
+        private const int AdminUserId = 999;
 
         public List<BE.Usuario> GetAll()
         {
-            var sql = "SELECT " + userPublicCols + " FROM " + userTable + ";";
+            var sql = "SELECT " + userPublicCols + " FROM " + userTable +
+                      " WHERE " + userIdCol + " <> " + AdminUserId + ";";
 
             var list = db.QueryListAndLog<BE.Usuario>(
                 sql,
@@ -58,13 +63,56 @@ namespace DAL.Seguridad
 
         public void Create(BE.Usuario obj)
         {
+            if (obj == null)
+                throw new System.ArgumentNullException(nameof(obj));
+
+            string mailEnc = segUtils.EncriptarReversible((obj.CorreoElectronico ?? string.Empty).Trim());
+            string documento = (obj.NumeroDocumento ?? string.Empty).Trim();
+
+            string sqlCheckMail = @"
+SELECT COUNT(1)
+FROM " + userTable + @"
+WHERE correoElectronico = @mail;";
+
+            object oCountMail = db.ExecuteScalarAndLog(
+                sqlCheckMail,
+                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value = mailEnc,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
+                "Verificación de email duplicado: " + (obj.CorreoElectronico ?? string.Empty),
+                shouldCalculate: false
+            );
+            int countMail = System.Convert.ToInt32(oCountMail ?? 0);
+            if (countMail > 0)
+                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_email_exists"));
+
+            string sqlCheckDoc = @"
+SELECT COUNT(1)
+FROM " + userTable + @"
+WHERE numeroDocumento = @doc;";
+
+            object oCountDoc = db.ExecuteScalarAndLog(
+                sqlCheckDoc,
+                c => c.Parameters.Add("@doc", SqlDbType.VarChar, 20).Value = documento,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarios,
+                "Verificación de documento duplicado: " + documento,
+                shouldCalculate: false
+            );
+            int countDoc = System.Convert.ToInt32(oCountDoc ?? 0);
+            if (countDoc > 0)
+                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
+
+            string randomPassword = GenerarContrasenaAleatoria(20);
+            string passwordHash32 = CalcularMd5Hex(randomPassword);
+
             var sql = @"
 INSERT INTO " + userTable + @"
 ( nombreUsuario, apellidoUsuario, correoElectronico, telefonoContacto, direccionUsuario,
-  numeroDocumento, Bloqueado )
+  numeroDocumento, contrasenaHash, Bloqueado, Deshabilitado )
 VALUES
 ( @nombreUsuario, @apellidoUsuario, @correoElectronico, @telefonoContacto, @direccionUsuario,
-  @numeroDocumento, @Bloqueado );
+  @numeroDocumento, @contrasenaHash, @Bloqueado, @Deshabilitado );
 SELECT CAST(SCOPE_IDENTITY() AS int);";
 
             object newId = db.ExecuteScalarAndLog(
@@ -73,18 +121,18 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 {
                     cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
-
-                    string encMail = segUtils.EncriptarReversible(obj.CorreoElectronico ?? string.Empty);
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? System.DBNull.Value;
-
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)mailEnc ?? System.DBNull.Value;
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
+                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash32 ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;       // se crea bloqueado
+                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = 0;   // por defecto habilitado
                 },
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.CreacionUsuario,
-                "Alta de usuario: " + (obj.CorreoElectronico ?? string.Empty)
+                "Alta de usuario: " + (obj.CorreoElectronico ?? string.Empty),
+                shouldCalculate: false
             );
 
             if (newId != null && newId != System.DBNull.Value)
@@ -104,7 +152,8 @@ UPDATE " + userTable + @" SET
     telefonoContacto  = @telefonoContacto,
     direccionUsuario  = @direccionUsuario,
     numeroDocumento   = @numeroDocumento,
-    Bloqueado         = @Bloqueado
+    Bloqueado         = @Bloqueado,
+    Deshabilitado     = @Deshabilitado
 WHERE " + userIdCol + @" = @idUsuario;";
 
             db.ExecuteNonQueryAndLog(
@@ -122,6 +171,7 @@ WHERE " + userIdCol + @" = @idUsuario;";
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)obj.NumeroDocumento ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
+                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = obj.Deshabilitado;
                 },
                 userTable, userIdCol, obj.IdUsuario,
                 BE.Audit.AuditEvents.ModificacionUsuario,
@@ -139,11 +189,11 @@ WHERE " + userIdCol + @" = @idUsuario;";
             public string contrasenaHash { get; set; }
             public int? contadorIntentosFallidos { get; set; }
             public bool Bloqueado { get; set; }
+            public bool Deshabilitado { get; set; }
         }
 
         public UsuarioLoginRow GetLoginRowByCorreo(string correoElectronico)
         {
-
             string mailEnc = segUtils.EncriptarReversible((correoElectronico ?? string.Empty).Trim());
 
             string sql = @"
@@ -154,7 +204,8 @@ SELECT TOP 1
     apellidoUsuario,
     contrasenaHash,
     contadorIntentosFallidos,
-    Bloqueado
+    Bloqueado,
+    Deshabilitado
 FROM dbo.Usuario
 WHERE correoElectronico = @mail;";
 
@@ -253,6 +304,36 @@ UPDATE " + userTable + @"
         public void VerifyAndRepairAllTablesAuto()
         {
             db.VerifyAndRepairAllTablesAuto();
+        }
+
+        private static string GenerarContrasenaAleatoria(int length)
+        {
+            const string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var sb = new StringBuilder(length);
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var buffer = new byte[4];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    int val = System.BitConverter.ToInt32(buffer, 0) & int.MaxValue;
+                    sb.Append(pool[val % pool.Length]);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private static string CalcularMd5Hex(string input)
+        {
+            using (var md5 = MD5.Create())
+            {
+                var bytes = Encoding.UTF8.GetBytes(input ?? string.Empty);
+                var hash = md5.ComputeHash(bytes);
+                var sb = new StringBuilder(hash.Length * 2);
+                for (int i = 0; i < hash.Length; i++)
+                    sb.Append(hash[i].ToString("x2"));
+                return sb.ToString();
+            }
         }
     }
 }

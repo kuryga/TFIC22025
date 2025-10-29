@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace UI
 {
-    public partial class NuevaContrasenaForm : Form
+    public partial class NuevaContrasenaForm : BaseForm
     {
         public NuevaContrasenaForm()
         {

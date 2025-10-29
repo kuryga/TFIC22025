@@ -38,15 +38,6 @@ namespace BLL.Seguridad
             catch (Exception) { throw; }
         }
 
-
-        public bool Disable(BE.Usuario objUdp)
-        {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
-        }
-
         public string GetSesionActivaNombreCompleto()
         {
             return SessionContext.Current.NombreCompleto;

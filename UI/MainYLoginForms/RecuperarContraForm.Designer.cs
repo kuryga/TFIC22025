@@ -26,25 +26,26 @@ namespace UI
             // 
             // lblInstruccion
             // 
-            this.lblInstruccion.AutoSize = true;
-            this.lblInstruccion.Location = new System.Drawing.Point(71, 28);
+            this.lblInstruccion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInstruccion.Location = new System.Drawing.Point(12, 18);
             this.lblInstruccion.Name = "lblInstruccion";
-            this.lblInstruccion.Size = new System.Drawing.Size(147, 13);
+            this.lblInstruccion.Size = new System.Drawing.Size(257, 22);
             this.lblInstruccion.TabIndex = 0;
             this.lblInstruccion.Text = "Ingrese su correo electrónico:";
+            this.lblInstruccion.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtEmail
             // 
-            this.txtEmail.Location = new System.Drawing.Point(21, 43);
+            this.txtEmail.Location = new System.Drawing.Point(27, 43);
             this.txtEmail.Name = "txtEmail";
-            this.txtEmail.Size = new System.Drawing.Size(241, 20);
+            this.txtEmail.Size = new System.Drawing.Size(229, 20);
             this.txtEmail.TabIndex = 1;
             // 
             // btnEnviar
             // 
-            this.btnEnviar.Location = new System.Drawing.Point(108, 68);
+            this.btnEnviar.Location = new System.Drawing.Point(70, 82);
             this.btnEnviar.Name = "btnEnviar";
-            this.btnEnviar.Size = new System.Drawing.Size(64, 26);
+            this.btnEnviar.Size = new System.Drawing.Size(140, 26);
             this.btnEnviar.TabIndex = 2;
             this.btnEnviar.Text = "Enviar";
             this.btnEnviar.UseVisualStyleBackColor = true;

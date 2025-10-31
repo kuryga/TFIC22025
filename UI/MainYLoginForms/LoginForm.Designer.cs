@@ -112,6 +112,7 @@ namespace UI
             this.btnRecuperarContrasena.TabIndex = 9;
             this.btnRecuperarContrasena.Text = "¿Olvidaste tu contraseña?";
             this.btnRecuperarContrasena.UseVisualStyleBackColor = true;
+            this.btnRecuperarContrasena.Click += new System.EventHandler(this.btnRecuperarContrasena_Click);
             // 
             // LoginForm
             // 

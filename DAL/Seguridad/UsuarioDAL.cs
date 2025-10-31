@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO;
 
 using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 using segUtils = DAL.Seguridad.SecurityUtilities;
@@ -64,7 +66,7 @@ namespace DAL.Seguridad
         public void Create(BE.Usuario obj)
         {
             if (obj == null)
-                throw new System.ArgumentNullException(nameof(obj));
+                throw new ArgumentNullException(nameof(obj));
 
             string mailEnc = segUtils.EncriptarReversible((obj.CorreoElectronico ?? string.Empty).Trim());
             string documento = (obj.NumeroDocumento ?? string.Empty).Trim();
@@ -82,9 +84,9 @@ WHERE correoElectronico = @mail;";
                 "Verificación de email duplicado: " + (obj.CorreoElectronico ?? string.Empty),
                 shouldCalculate: false
             );
-            int countMail = System.Convert.ToInt32(oCountMail ?? 0);
+            int countMail = Convert.ToInt32(oCountMail ?? 0);
             if (countMail > 0)
-                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_email_exists"));
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_email_exists"));
 
             string sqlCheckDoc = @"
 SELECT COUNT(1)
@@ -99,9 +101,9 @@ WHERE numeroDocumento = @doc;";
                 "Verificación de documento duplicado: " + documento,
                 shouldCalculate: false
             );
-            int countDoc = System.Convert.ToInt32(oCountDoc ?? 0);
+            int countDoc = Convert.ToInt32(oCountDoc ?? 0);
             if (countDoc > 0)
-                throw new System.InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
             string randomPassword = GenerarContrasenaAleatoria(20);
             string passwordHash32 = CalcularMd5Hex(randomPassword);
@@ -233,6 +235,64 @@ WHERE correoElectronico = @mail;";
             return row;
         }
 
+        public void enviarRecuperoContrasena(string userMail)
+        {
+            if (string.IsNullOrWhiteSpace(userMail))
+                throw new ArgumentNullException(nameof(userMail));
+
+            string mailEnc = segUtils.EncriptarReversible(userMail.Trim());
+
+            const string sqlGetId = @"
+SELECT TOP 1 " + userIdCol + @"
+FROM " + userTable + @"
+WHERE correoElectronico = @mail;";
+
+            object oId = db.ExecuteScalarAndLog(
+                sqlGetId,
+                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value = mailEnc,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
+                "Búsqueda de usuario para recupero: " + userMail,
+                shouldCalculate: false
+            );
+
+            int idUsuario = Convert.ToInt32(oId ?? 0);
+            if (idUsuario <= 0)
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("recover_email_sent_message"));
+
+            string codigoPlano = GenerarCodigoRecupero(6);
+            string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            string safeMail = SanitizarParaNombreArchivo(userMail);
+            string filePath = Path.Combine(desktop, $"Recupero_{safeMail}_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+
+            File.WriteAllText(filePath, codigoPlano, System.Text.Encoding.UTF8);
+
+            string tokenHash = segUtils.EncriptarIrreversible(codigoPlano);
+
+            DateTime expiracion = DateTime.Now.AddMinutes(5);
+
+
+            string sqlUpdate = @"
+UPDATE " + userTable + @"
+   SET tokenRecuperoSesionHash = @token,
+       tiempoExpiracionToken   = @exp
+ WHERE " + userIdCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sqlUpdate,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@token", SqlDbType.VarChar, -1).Value = (object)tokenHash ?? DBNull.Value;
+                    cmd.Parameters.Add("@exp", SqlDbType.DateTime).Value = expiracion;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
+                },
+                userTable, userIdCol, idUsuario,
+                BE.Audit.AuditEvents.RecuperoContrasenaSolicitud,
+                "Generación de token de recupero. IdUsuario=" + idUsuario,
+                true
+            );
+        }
+
         public void IncrementarIntentosFallidos(int idUsuario, int nuevosIntentos)
         {
             string sql = @"
@@ -334,6 +394,31 @@ UPDATE " + userTable + @"
                     sb.Append(hash[i].ToString("x2"));
                 return sb.ToString();
             }
+        }
+
+        private static string GenerarCodigoRecupero(int length)
+        {
+            const string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var sb = new StringBuilder(length);
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                var buffer = new byte[4];
+                for (int i = 0; i < length; i++)
+                {
+                    rng.GetBytes(buffer);
+                    int val = BitConverter.ToInt32(buffer, 0) & int.MaxValue;
+                    sb.Append(pool[val % pool.Length]);
+                }
+            }
+            return sb.ToString().ToUpperInvariant();
+        }
+
+        private static string SanitizarParaNombreArchivo(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "usuario";
+            foreach (var c in Path.GetInvalidFileNameChars())
+                input = input.Replace(c, '_');
+            return input;
         }
     }
 }

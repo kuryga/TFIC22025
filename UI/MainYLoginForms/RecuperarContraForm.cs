@@ -34,8 +34,7 @@ namespace UI
 
         private async void BtnEnviar_Click(object sender, EventArgs e)
         {
-            var txt = this.Controls.ContainsKey("txtEmail") ? this.Controls["txtEmail"] as TextBox : null;
-            var email = txt?.Text?.Trim() ?? string.Empty;
+            var email = txtEmail.Text.Trim() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -43,7 +42,7 @@ namespace UI
                     param.GetLocalizable("recover_email_required_message"),
                     param.GetLocalizable("warning_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txt?.Focus();
+                txtEmail.Focus();
                 return;
             }
 
@@ -52,11 +51,10 @@ namespace UI
 
             try
             {
-                // Llama a tu BLL (ajusta el método si tu firma es distinta)
-               // await Task.Run(() => LoginBLL.GetInstance().StartPasswordRecovery(email));
+                UsuarioBLL.GetInstance().EnviarRecuperoContrasena(txtEmail.Text);
 
                 MessageBox.Show(
-                    param.GetLocalizable("recover_email_sent_message"),
+                    param.GetLocalizable("recover_email_sent_generic_message"),
                     param.GetLocalizable("ok_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 

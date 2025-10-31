@@ -258,7 +258,7 @@ WHERE correoElectronico = @mail;";
 
             int idUsuario = Convert.ToInt32(oId ?? 0);
             if (idUsuario <= 0)
-                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("recover_email_sent_message"));
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("recover_email_sent_generic_message"));
 
             string codigoPlano = GenerarCodigoRecupero(6);
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);

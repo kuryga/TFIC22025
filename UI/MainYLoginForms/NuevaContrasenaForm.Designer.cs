@@ -6,7 +6,7 @@ namespace UI
     partial class NuevaContrasenaForm
     {
         private Label lblNueva;
-        private TextBox txtNueva;
+        private TextBox txtContra;
         private Button btnConfirmar;
 
         private System.ComponentModel.IContainer components = null;
@@ -20,43 +20,94 @@ namespace UI
         private void InitializeComponent()
         {
             this.lblNueva = new System.Windows.Forms.Label();
-            this.txtNueva = new System.Windows.Forms.TextBox();
+            this.txtContra = new System.Windows.Forms.TextBox();
             this.btnConfirmar = new System.Windows.Forms.Button();
+            this.lblConfirmar = new System.Windows.Forms.Label();
+            this.txtConfirmacion = new System.Windows.Forms.TextBox();
+            this.btnVerContra = new System.Windows.Forms.Button();
+            this.btnVerConfirmacion = new System.Windows.Forms.Button();
+            this.lblRequisitos = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblNueva
             // 
-            this.lblNueva.AutoSize = true;
-            this.lblNueva.Location = new System.Drawing.Point(75, 9);
+            this.lblNueva.Location = new System.Drawing.Point(12, 8);
             this.lblNueva.Name = "lblNueva";
-            this.lblNueva.Size = new System.Drawing.Size(105, 15);
+            this.lblNueva.Size = new System.Drawing.Size(195, 12);
             this.lblNueva.TabIndex = 0;
             this.lblNueva.Text = "Nueva contraseña:";
             // 
-            // txtNueva
+            // txtContra
             // 
-            this.txtNueva.Location = new System.Drawing.Point(36, 27);
-            this.txtNueva.Name = "txtNueva";
-            this.txtNueva.Size = new System.Drawing.Size(180, 23);
-            this.txtNueva.TabIndex = 1;
-            this.txtNueva.UseSystemPasswordChar = true;
+            this.txtContra.Location = new System.Drawing.Point(12, 23);
+            this.txtContra.Name = "txtContra";
+            this.txtContra.Size = new System.Drawing.Size(178, 20);
+            this.txtContra.TabIndex = 1;
+            this.txtContra.UseSystemPasswordChar = true;
             // 
             // btnConfirmar
             // 
-            this.btnConfirmar.Location = new System.Drawing.Point(75, 56);
+            this.btnConfirmar.Location = new System.Drawing.Point(76, 282);
             this.btnConfirmar.Name = "btnConfirmar";
-            this.btnConfirmar.Size = new System.Drawing.Size(100, 30);
+            this.btnConfirmar.Size = new System.Drawing.Size(144, 26);
             this.btnConfirmar.TabIndex = 4;
             this.btnConfirmar.Text = "Confirmar";
             this.btnConfirmar.UseVisualStyleBackColor = true;
+            this.btnConfirmar.Click += new System.EventHandler(this.btnConfirmar_Click);
+            // 
+            // lblConfirmar
+            // 
+            this.lblConfirmar.Location = new System.Drawing.Point(9, 58);
+            this.lblConfirmar.Name = "lblConfirmar";
+            this.lblConfirmar.Size = new System.Drawing.Size(195, 12);
+            this.lblConfirmar.TabIndex = 5;
+            this.lblConfirmar.Text = "Confirmar contraseña:";
+            // 
+            // txtConfirmacion
+            // 
+            this.txtConfirmacion.Location = new System.Drawing.Point(12, 73);
+            this.txtConfirmacion.Name = "txtConfirmacion";
+            this.txtConfirmacion.Size = new System.Drawing.Size(178, 20);
+            this.txtConfirmacion.TabIndex = 6;
+            this.txtConfirmacion.UseSystemPasswordChar = true;
+            // 
+            // btnVerContra
+            // 
+            this.btnVerContra.Location = new System.Drawing.Point(237, 23);
+            this.btnVerContra.Name = "btnVerContra";
+            this.btnVerContra.Size = new System.Drawing.Size(46, 20);
+            this.btnVerContra.TabIndex = 8;
+            this.btnVerContra.Text = "Ver";
+            this.btnVerContra.UseVisualStyleBackColor = true;
+            // 
+            // btnVerConfirmacion
+            // 
+            this.btnVerConfirmacion.Location = new System.Drawing.Point(237, 73);
+            this.btnVerConfirmacion.Name = "btnVerConfirmacion";
+            this.btnVerConfirmacion.Size = new System.Drawing.Size(46, 20);
+            this.btnVerConfirmacion.TabIndex = 9;
+            this.btnVerConfirmacion.Text = "Ver";
+            this.btnVerConfirmacion.UseVisualStyleBackColor = true;
+            // 
+            // lblRequisitos
+            // 
+            this.lblRequisitos.Location = new System.Drawing.Point(9, 109);
+            this.lblRequisitos.Name = "lblRequisitos";
+            this.lblRequisitos.Size = new System.Drawing.Size(274, 164);
+            this.lblRequisitos.TabIndex = 7;
             // 
             // NuevaContrasenaForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(256, 102);
+            this.ClientSize = new System.Drawing.Size(295, 320);
+            this.Controls.Add(this.btnVerConfirmacion);
+            this.Controls.Add(this.btnVerContra);
+            this.Controls.Add(this.lblRequisitos);
+            this.Controls.Add(this.lblConfirmar);
+            this.Controls.Add(this.txtConfirmacion);
             this.Controls.Add(this.lblNueva);
-            this.Controls.Add(this.txtNueva);
+            this.Controls.Add(this.txtContra);
             this.Controls.Add(this.btnConfirmar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -68,5 +119,11 @@ namespace UI
             this.PerformLayout();
 
         }
+
+        private Label lblConfirmar;
+        private TextBox txtConfirmacion;
+        private Button btnVerContra;
+        private Button btnVerConfirmacion;
+        private Label lblRequisitos;
     }
 }

@@ -18,7 +18,6 @@ namespace UI
 
         private static void TextBox_KeyPress_Filter(object sender, KeyPressEventArgs e)
         {
-
             if (char.IsControl(e.KeyChar))
             {
                 if (e.KeyChar == '\r' || e.KeyChar == '\n')
@@ -33,7 +32,6 @@ namespace UI
             var tag = (tb != null ? tb.Tag as string : null)?.Trim();
             var isSafe = string.Equals(tag, "SAFE", StringComparison.OrdinalIgnoreCase);
 
-
             var pattern = isSafe ? AllowedPatternWithSpaces : AllowedPattern;
 
             if (e.KeyChar == '\r' || e.KeyChar == '\n')
@@ -42,7 +40,6 @@ namespace UI
                 System.Media.SystemSounds.Beep.Play();
                 return;
             }
-
 
             if (!Regex.IsMatch(e.KeyChar.ToString(), pattern))
             {
@@ -120,6 +117,29 @@ namespace UI
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
             return Regex.IsMatch(input.Trim(), @"^[a-z0-9._%+-]+@urbansoft\.com$", RegexOptions.IgnoreCase);
+        }
+
+        public static bool IsValidNewPassword(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            if (input.Length < 8)
+                return false;
+
+            if (!input.Any(char.IsUpper))
+                return false;
+
+            if (!Regex.IsMatch(input, @"[!@#$^&?_+<>.:]"))
+                return false;
+
+            if (Regex.Matches(input, @"\d").Count < 2)
+                return false;
+
+            if (!IsSafeForSql(input))
+                return false;
+
+            return true;
         }
 
         public static bool IsSafeForSql(string input)

@@ -63,10 +63,17 @@ namespace UI
 
                         if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
                             AttachSafeSqlValidation(tb);
+
                         if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachSafeSqlValidation(tb);
+                        }
+
+                        if (string.Equals(tagUpper, "VERIFY_PASS", StringComparison.Ordinal))
+                        {
+                            tb.UseSystemPasswordChar = true;
+                            AttachPasswordVerification(tb);
                         }
                     }
                 }
@@ -197,6 +204,42 @@ namespace UI
 
             var txt = tb.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrEmpty(txt) || InputSanitizer.IsSafeForSql(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void AttachPasswordVerification(TextBox tb)
+        {
+            tb.Validating -= PasswordVerification_Validating;
+            tb.Validating += PasswordVerification_Validating;
+
+            tb.TextChanged -= PasswordVerification_TextChanged;
+            tb.TextChanged += PasswordVerification_TextChanged;
+        }
+
+        private void PasswordVerification_Validating(object sender, CancelEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNewPassword(txt))
+            {
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_password_validation_message"));
+                e.Cancel = true;
+            }
+        }
+
+        private void PasswordVerification_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNewPassword(txt))
                 _sharedErrorProvider.SetError(tb, string.Empty);
         }
     }

@@ -55,5 +55,44 @@ namespace BLL.Audit
 
         public int Log(string accion, string mensaje, BE.Audit.Criticidad criticidad)
             => BitacoraDAL.GetInstance().Log(accion, mensaje, criticidad.ToString());
+
+        public string ExportarReporte(
+            DateTime? desde,
+            DateTime? hasta,
+            int? page,
+            int? pageSize,
+            string criticidad = null,
+            string destino = null,
+            bool exportarTodos = false)
+            => BitacoraDAL.GetInstance().ExportarReporte(desde, hasta, page, pageSize, criticidad, destino, exportarTodos);
+
+        public string ExportarReporte(
+            DateTime? desde,
+            DateTime? hasta,
+            int? page,
+            int? pageSize,
+            BE.Audit.Criticidad criticidad,
+            string destino = null,
+            bool exportarTodos = false)
+        {
+            string crit = (criticidad == BE.Audit.Criticidad.None) ? null : criticidad.ToString();
+            return BitacoraDAL.GetInstance().ExportarReporte(desde, hasta, page, pageSize, crit, destino, exportarTodos);
+        }
+
+        public string ExportarReportePagina(
+            DateTime? desde,
+            DateTime? hasta,
+            int page,
+            int pageSize,
+            string criticidad = null,
+            string destino = null)
+            => BitacoraDAL.GetInstance().ExportarReporte(desde, hasta, page, pageSize, criticidad, destino, false);
+
+        public string ExportarReporteTodos(
+            DateTime? desde,
+            DateTime? hasta,
+            string criticidad = null,
+            string destino = null)
+            => BitacoraDAL.GetInstance().ExportarReporte(desde, hasta, null, null, criticidad, destino, true);
     }
 }

@@ -32,6 +32,7 @@ namespace UI
             this.lblPageInfo = new System.Windows.Forms.Label();
             this.cmbCriticidad = new System.Windows.Forms.ComboBox();
             this.lblCriticidad = new System.Windows.Forms.Label();
+            this.btnReporte = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBitacora)).BeginInit();
             this.SuspendLayout();
             // 
@@ -138,9 +139,18 @@ namespace UI
             this.lblCriticidad.TabIndex = 10;
             this.lblCriticidad.Text = "Criticidad:";
             // 
+            // btnReporte
+            // 
+            this.btnReporte.Location = new System.Drawing.Point(851, 467);
+            this.btnReporte.Name = "btnReporte";
+            this.btnReporte.Size = new System.Drawing.Size(112, 23);
+            this.btnReporte.TabIndex = 11;
+            this.btnReporte.Text = "Generar reporte";
+            // 
             // ConsultarBitacoraForm
             // 
             this.ClientSize = new System.Drawing.Size(989, 500);
+            this.Controls.Add(this.btnReporte);
             this.Controls.Add(this.lblCriticidad);
             this.Controls.Add(this.cmbCriticidad);
             this.Controls.Add(this.lblPageInfo);
@@ -165,5 +175,6 @@ namespace UI
         private Label lblPageInfo;
         private ComboBox cmbCriticidad;
         private Label lblCriticidad;
+        private Button btnReporte;
     }
 }

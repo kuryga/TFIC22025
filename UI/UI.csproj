@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuditoriaForms\GenerarReporteForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AuditoriaForms\GenerarReporteForm.Designer.cs">
+      <DependentUpon>GenerarReporteForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainYLoginForms\IngresoCodigoRecupContraForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -210,6 +216,9 @@
     <Compile Include="GestionesSisForm\RestoreForm.Designer.cs">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AuditoriaForms\GenerarReporteForm.resx">
+      <DependentUpon>GenerarReporteForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainYLoginForms\IngresoCodigoRecupContraForm.resx">
       <DependentUpon>IngresoCodigoRecupContraForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -46,6 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainYLoginForms\IngresoCodigoRecupContraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainYLoginForms\IngresoCodigoRecupContraForm.Designer.cs">
+      <DependentUpon>IngresoCodigoRecupContraForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UsuYPermisForms\GestionarUsuarioForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -204,6 +210,9 @@
     <Compile Include="GestionesSisForm\RestoreForm.Designer.cs">
       <DependentUpon>RestoreForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="MainYLoginForms\IngresoCodigoRecupContraForm.resx">
+      <DependentUpon>IngresoCodigoRecupContraForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UsuYPermisForms\GestionarUsuarioForm.resx">
       <DependentUpon>GestionarUsuarioForm.cs</DependentUpon>
     </EmbeddedResource>

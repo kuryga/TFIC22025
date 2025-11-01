@@ -24,15 +24,13 @@ namespace UI
         private void UpdateTexts()
         {
             this.txtEmail.Tag = "MAIL_URBANSOFT";
-
             this.Text = param.GetLocalizable("recover_title");
-
             lblInstruccion.Text = param.GetLocalizable("recover_email_label");
-
             btnEnviar.Text = param.GetLocalizable("recover_submit_button");
+            btnCodigo.Text = param.GetLocalizable("recover_have_code_button");
         }
 
-        private async void BtnEnviar_Click(object sender, EventArgs e)
+        private void BtnEnviar_Click(object sender, EventArgs e)
         {
             var email = txtEmail.Text.Trim() ?? string.Empty;
 
@@ -46,7 +44,6 @@ namespace UI
                 return;
             }
 
-
             ToggleBusy(true);
 
             try
@@ -57,6 +54,11 @@ namespace UI
                     param.GetLocalizable("recover_email_sent_generic_message"),
                     param.GetLocalizable("ok_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                using (var formCodigo = new IngresoCodigoRecupContraForm())
+                {
+                    formCodigo.ShowDialog(this);
+                }
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -79,13 +81,19 @@ namespace UI
             UseWaitCursor = busy;
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
 
-            if (this.Controls.ContainsKey("btnEnviar"))
-                this.Controls["btnEnviar"].Enabled = !busy;
-
-            if (this.Controls.ContainsKey("txtEmail"))
-                this.Controls["txtEmail"].Enabled = !busy;
+            btnEnviar.Enabled = !busy;
+            txtEmail.Enabled = !busy;
+            btnCodigo.Enabled = !busy;
 
             Application.DoEvents();
+        }
+
+        private void BtnCodigo_Click(object sender, EventArgs e)
+        {
+            using (var formCodigo = new IngresoCodigoRecupContraForm())
+            {
+                formCodigo.ShowDialog(this);
+            }
         }
     }
 }

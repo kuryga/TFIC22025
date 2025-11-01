@@ -13,7 +13,6 @@ namespace UI
         private bool _showNueva = false;
         private bool _showConfirm = false;
 
-        // Nuevos: se reciben desde el form anterior
         private readonly int _idUsuario;
         private readonly string _correoUsuario;
 
@@ -26,17 +25,16 @@ namespace UI
 
             this.Load += NuevaContrasenaForm_Load;
 
-            if (btnVerContra != null) btnVerContra.Click += BtnVerNueva_Click;
-            if (btnVerConfirmacion != null) btnVerConfirmacion.Click += BtnVerConfirmar_Click;
-            if (btnConfirmar != null) btnConfirmar.Click += btnConfirmar_Click;
+            btnVerContra.Click += BtnVerNueva_Click;
+            btnVerConfirmacion.Click += BtnVerConfirmar_Click;
 
-            if (btnConfirmar != null) this.AcceptButton = btnConfirmar;
+            this.AcceptButton = btnConfirmar;
         }
 
         private void NuevaContrasenaForm_Load(object sender, EventArgs e)
         {
-            if (txtContra != null) txtContra.UseSystemPasswordChar = true;
-            if (txtConfirmacion != null) txtConfirmacion.UseSystemPasswordChar = true;
+            txtContra.UseSystemPasswordChar = true;
+            txtConfirmacion.UseSystemPasswordChar = true;
 
             UpdateTexts();
 
@@ -123,7 +121,7 @@ namespace UI
 
         private void UpdateTexts()
         {
-            txtContra.Tag = "";
+            txtContra.Tag = "VERIFY_PASS";
             this.Text = param.GetLocalizable("reset_password_title");
             lblNueva.Text = param.GetLocalizable("reset_password_new_label");
             lblConfirmar.Text = param.GetLocalizable("reset_password_confirm_label");

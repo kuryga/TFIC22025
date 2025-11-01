@@ -33,7 +33,7 @@ namespace UI
 
         private void BtnEnviar_Click(object sender, EventArgs e)
         {
-            var email = txtEmail.Text.Trim() ?? string.Empty;
+            var email = txtEmail.Text.Trim().ToLower() ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -67,9 +67,17 @@ namespace UI
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    param.GetLocalizable("recover_email_error_prefix_message") + " " + ex.Message,
-                    param.GetLocalizable("error_title"),
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    param.GetLocalizable("recover_email_sent_generic_message"),
+                    param.GetLocalizable("ok_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                using (var formCodigo = new IngresoCodigoRecupContraForm(email))
+                {
+                    formCodigo.ShowDialog(this);
+                }
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
             }
             finally
             {

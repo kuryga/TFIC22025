@@ -55,7 +55,7 @@ namespace UI
 
             try
             {
-                string usuario = txtUsuario.Text?.Trim();
+                string usuario = txtUsuario.Text?.Trim().ToLower();
                 string pass = txtContrasena.Text;
                 bool ok = await Task.Run(() =>
                 {

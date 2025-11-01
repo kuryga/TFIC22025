@@ -59,17 +59,19 @@ namespace UI
             // 
             // txtUsuario
             // 
-            this.txtUsuario.Location = new System.Drawing.Point(156, 53);
+            this.txtUsuario.Location = new System.Drawing.Point(99, 53);
             this.txtUsuario.Name = "txtUsuario";
-            this.txtUsuario.Size = new System.Drawing.Size(155, 20);
+            this.txtUsuario.Size = new System.Drawing.Size(272, 20);
             this.txtUsuario.TabIndex = 1;
+            this.txtUsuario.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // txtContrasena
             // 
-            this.txtContrasena.Location = new System.Drawing.Point(156, 102);
+            this.txtContrasena.Location = new System.Drawing.Point(99, 102);
             this.txtContrasena.Name = "txtContrasena";
-            this.txtContrasena.Size = new System.Drawing.Size(155, 20);
+            this.txtContrasena.Size = new System.Drawing.Size(272, 20);
             this.txtContrasena.TabIndex = 3;
+            this.txtContrasena.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtContrasena.UseSystemPasswordChar = true;
             // 
             // btnLogin

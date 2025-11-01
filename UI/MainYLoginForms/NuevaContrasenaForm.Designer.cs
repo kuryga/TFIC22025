@@ -41,16 +41,16 @@ namespace UI
             // 
             this.txtContra.Location = new System.Drawing.Point(12, 23);
             this.txtContra.Name = "txtContra";
-            this.txtContra.Size = new System.Drawing.Size(178, 20);
+            this.txtContra.Size = new System.Drawing.Size(227, 20);
             this.txtContra.TabIndex = 1;
             this.txtContra.UseSystemPasswordChar = true;
             // 
             // btnConfirmar
             // 
-            this.btnConfirmar.Location = new System.Drawing.Point(76, 282);
+            this.btnConfirmar.Location = new System.Drawing.Point(95, 258);
             this.btnConfirmar.Name = "btnConfirmar";
             this.btnConfirmar.Size = new System.Drawing.Size(144, 26);
-            this.btnConfirmar.TabIndex = 4;
+            this.btnConfirmar.TabIndex = 5;
             this.btnConfirmar.Text = "Confirmar";
             this.btnConfirmar.UseVisualStyleBackColor = true;
             this.btnConfirmar.Click += new System.EventHandler(this.btnConfirmar_Click);
@@ -67,25 +67,25 @@ namespace UI
             // 
             this.txtConfirmacion.Location = new System.Drawing.Point(12, 73);
             this.txtConfirmacion.Name = "txtConfirmacion";
-            this.txtConfirmacion.Size = new System.Drawing.Size(178, 20);
-            this.txtConfirmacion.TabIndex = 6;
+            this.txtConfirmacion.Size = new System.Drawing.Size(227, 20);
+            this.txtConfirmacion.TabIndex = 3;
             this.txtConfirmacion.UseSystemPasswordChar = true;
             // 
             // btnVerContra
             // 
-            this.btnVerContra.Location = new System.Drawing.Point(237, 23);
+            this.btnVerContra.Location = new System.Drawing.Point(276, 23);
             this.btnVerContra.Name = "btnVerContra";
             this.btnVerContra.Size = new System.Drawing.Size(46, 20);
-            this.btnVerContra.TabIndex = 8;
+            this.btnVerContra.TabIndex = 2;
             this.btnVerContra.Text = "Ver";
             this.btnVerContra.UseVisualStyleBackColor = true;
             // 
             // btnVerConfirmacion
             // 
-            this.btnVerConfirmacion.Location = new System.Drawing.Point(237, 73);
+            this.btnVerConfirmacion.Location = new System.Drawing.Point(276, 73);
             this.btnVerConfirmacion.Name = "btnVerConfirmacion";
             this.btnVerConfirmacion.Size = new System.Drawing.Size(46, 20);
-            this.btnVerConfirmacion.TabIndex = 9;
+            this.btnVerConfirmacion.TabIndex = 4;
             this.btnVerConfirmacion.Text = "Ver";
             this.btnVerConfirmacion.UseVisualStyleBackColor = true;
             // 
@@ -93,14 +93,14 @@ namespace UI
             // 
             this.lblRequisitos.Location = new System.Drawing.Point(9, 109);
             this.lblRequisitos.Name = "lblRequisitos";
-            this.lblRequisitos.Size = new System.Drawing.Size(274, 164);
+            this.lblRequisitos.Size = new System.Drawing.Size(313, 135);
             this.lblRequisitos.TabIndex = 7;
             // 
             // NuevaContrasenaForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(295, 320);
+            this.ClientSize = new System.Drawing.Size(334, 296);
             this.Controls.Add(this.btnVerConfirmacion);
             this.Controls.Add(this.btnVerContra);
             this.Controls.Add(this.lblRequisitos);

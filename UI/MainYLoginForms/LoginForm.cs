@@ -55,7 +55,7 @@ namespace UI
 
             try
             {
-                string usuario = txtUsuario.Text?.Trim();
+                string usuario = txtUsuario.Text?.Trim().ToLower();
                 string pass = txtContrasena.Text;
                 bool ok = await Task.Run(() =>
                 {
@@ -173,6 +173,15 @@ namespace UI
             string NombreEmpresa = ParametrizacionBLL.GetInstance().GetNombreEmpresa();
 
             this.Text = $"{titleText} - {NombreEmpresa}";
+        }
+
+        private void btnRecuperarContrasena_Click(object sender, EventArgs e)
+        {
+            using (var frm = new RecuperarContraForm())
+            {
+                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.ShowDialog(this);
+            }
         }
     }
 }

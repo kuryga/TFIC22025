@@ -91,6 +91,7 @@ namespace BE.Audit
         public const string RespaldoBase = "BaseDatos.Respaldo";
         public const string EliminacionPatentesCriticaUsuario = "Patentes.IntentoEliminacionCritica";
         public const string AltaFamilia = "Familia.Alta";
+        public const string RecuperoContrasenaSolicitud = "Contrasena.Recupero";
 
         // ==== C1 (muy críticas) ====
         public const string FalloConexionBD = "BaseDatos.FalloConexion";
@@ -188,6 +189,7 @@ namespace BE.Audit
                 case IntentosFallidosAcceso:
                 case RespaldoBase:
                 case AltaFamilia:
+                case RecuperoContrasenaSolicitud:
                     return Criticidad.C2;
             }
 

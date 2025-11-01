@@ -54,5 +54,29 @@ namespace BLL.Seguridad
                 throw;
             }
         }
+
+        public int VerificarCodigoRecuperacion(string correoUsuario, string codigoPlano)
+        {
+            try
+            {
+                return UsuarioDAL.GetInstance().VerificarCodigoRecuperacion(correoUsuario?.Trim(), codigoPlano?.Trim());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public void CambiarContrasenaConToken(int idUsuario, string nuevaContrasena)
+        {
+            try
+            {
+                UsuarioDAL.GetInstance().CambiarContrasenaConToken(idUsuario, nuevaContrasena);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

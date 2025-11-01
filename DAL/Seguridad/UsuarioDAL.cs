@@ -105,8 +105,9 @@ WHERE numeroDocumento = @doc;";
             if (countDoc > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
+
             string randomPassword = GenerarContrasenaAleatoria(20);
-            string passwordHash32 = CalcularMd5Hex(randomPassword);
+            string passwordHash = segUtils.EncriptarIrreversible(randomPassword);
 
             var sql = @"
 INSERT INTO " + userTable + @"
@@ -127,7 +128,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                     cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
                     cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash32 ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash ?? System.DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;       // se crea bloqueado
                     cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = 0;   // por defecto habilitado
                 },
@@ -261,16 +262,14 @@ WHERE correoElectronico = @mail;";
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("recover_email_sent_generic_message"));
 
             string codigoPlano = GenerarCodigoRecupero(6);
+
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             string safeMail = SanitizarParaNombreArchivo(userMail);
             string filePath = Path.Combine(desktop, $"Recupero_{safeMail}_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-
             File.WriteAllText(filePath, codigoPlano, System.Text.Encoding.UTF8);
 
             string tokenHash = segUtils.EncriptarIrreversible(codigoPlano);
-
             DateTime expiracion = DateTime.Now.AddMinutes(5);
-
 
             string sqlUpdate = @"
 UPDATE " + userTable + @"
@@ -290,6 +289,132 @@ UPDATE " + userTable + @"
                 BE.Audit.AuditEvents.RecuperoContrasenaSolicitud,
                 "Generación de token de recupero. IdUsuario=" + idUsuario,
                 true
+            );
+        }
+        private sealed class UsuarioTokenRow
+        {
+            public int idUsuario { get; set; }
+            public string tokenRecuperoSesionHash { get; set; }
+            public DateTime? tiempoExpiracionToken { get; set; }
+        }
+
+        public int VerificarCodigoRecuperacion(string userMail, string codigoPlano)
+        {
+            if (string.IsNullOrWhiteSpace(userMail))
+                throw new ArgumentNullException(nameof(userMail));
+            if (string.IsNullOrWhiteSpace(codigoPlano))
+                throw new ArgumentNullException(nameof(codigoPlano));
+
+            string mailEnc = segUtils.EncriptarReversible(userMail.Trim());
+
+            const string sqlGet = @"
+SELECT TOP 1
+    idUsuario,
+    tokenRecuperoSesionHash,
+    tiempoExpiracionToken
+FROM dbo.Usuario
+WHERE correoElectronico = @mail;";
+
+            var row = db.QuerySingleOrDefaultAndLog<UsuarioTokenRow>(
+                sqlGet,
+                c => c.Parameters.Add("@mail", SqlDbType.VarChar, 150).Value = mailEnc,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarioPorCorreo,
+                "Verificación de código de recupero: " + userMail
+            );
+
+            if (row == null || string.IsNullOrWhiteSpace(row.tokenRecuperoSesionHash))
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_incorrect_message"));
+
+            DateTime ahora = DateTime.Now;
+
+            if (!row.tiempoExpiracionToken.HasValue || ahora > row.tiempoExpiracionToken.Value)
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_expired_message"));
+
+            bool valido = segUtils.VerificarIrreversible(
+                (codigoPlano ?? string.Empty).Trim().ToUpperInvariant(),
+                row.tokenRecuperoSesionHash
+            );
+
+            if (!valido)
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_incorrect_message"));
+
+
+            DateTime nuevaExpiracion = ahora.AddMinutes(5);
+
+            const string sqlUpd = @"
+UPDATE dbo.Usuario
+   SET tiempoExpiracionToken = @nuevaExp
+ WHERE idUsuario = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sqlUpd,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@nuevaExp", SqlDbType.DateTime).Value = nuevaExpiracion;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = row.idUsuario;
+                },
+                userTable, userIdCol, row.idUsuario,
+                BE.Audit.AuditEvents.RecuperoContrasenaSolicitud,
+                "Extensión de expiración tras verificación OK. IdUsuario=" + row.idUsuario,
+                shouldCalculate: true
+            );
+
+            return row.idUsuario;
+        }
+
+        public void CambiarContrasenaConToken(int idUsuario, string nuevaContrasena)
+        {
+            if (idUsuario <= 0)
+                throw new ArgumentOutOfRangeException(nameof(idUsuario));
+            if (string.IsNullOrWhiteSpace(nuevaContrasena))
+                throw new ArgumentNullException(nameof(nuevaContrasena));
+
+            const string sqlGet = @"
+SELECT TOP 1
+    idUsuario,
+    tokenRecuperoSesionHash,
+    tiempoExpiracionToken
+FROM dbo.Usuario
+WHERE idUsuario = @id;";
+
+            var row = db.QuerySingleOrDefaultAndLog<UsuarioTokenRow>(
+                sqlGet,
+                c => c.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarios,
+                "Validación de token previo a cambio de contraseña. IdUsuario=" + idUsuario
+            );
+
+            if (row == null || string.IsNullOrWhiteSpace(row.tokenRecuperoSesionHash))
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_incorrect_message"));
+
+            var ahora = DateTime.Now;
+            if (!row.tiempoExpiracionToken.HasValue || ahora > row.tiempoExpiracionToken.Value)
+                throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_expired_message"));
+
+            string nuevaHashIrreversible = segUtils.EncriptarIrreversible(nuevaContrasena.Trim());
+
+            const string sqlUpd = @"
+UPDATE dbo.Usuario
+   SET contrasenaHash           = @hash,
+       tokenRecuperoSesionHash  = NULL,
+       tiempoExpiracionToken    = NULL,
+       contadorIntentosFallidos = 0,
+       Bloqueado                = 0
+ WHERE idUsuario = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sqlUpd,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@hash", SqlDbType.VarChar, -1).Value = (object)nuevaHashIrreversible ?? DBNull.Value;
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idUsuario;
+                },
+                userTable, userIdCol, idUsuario,
+                BE.Audit.AuditEvents.ModificacionUsuario,
+                "Cambio de contraseña (recupero). IdUsuario=" + idUsuario,
+                shouldCalculate: true
             );
         }
 
@@ -381,19 +506,6 @@ UPDATE " + userTable + @"
                 }
             }
             return sb.ToString();
-        }
-
-        private static string CalcularMd5Hex(string input)
-        {
-            using (var md5 = MD5.Create())
-            {
-                var bytes = Encoding.UTF8.GetBytes(input ?? string.Empty);
-                var hash = md5.ComputeHash(bytes);
-                var sb = new StringBuilder(hash.Length * 2);
-                for (int i = 0; i < hash.Length; i++)
-                    sb.Append(hash[i].ToString("x2"));
-                return sb.ToString();
-            }
         }
 
         private static string GenerarCodigoRecupero(int length)

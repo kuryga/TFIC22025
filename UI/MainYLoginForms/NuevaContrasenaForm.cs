@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
 namespace UI
 {
@@ -12,9 +13,16 @@ namespace UI
         private bool _showNueva = false;
         private bool _showConfirm = false;
 
-        public NuevaContrasenaForm()
+        // Nuevos: se reciben desde el form anterior
+        private readonly int _idUsuario;
+        private readonly string _correoUsuario;
+
+        public NuevaContrasenaForm(int idUsuario, string correo)
         {
             InitializeComponent();
+
+            _idUsuario = idUsuario;
+            _correoUsuario = correo;
 
             this.Load += NuevaContrasenaForm_Load;
 
@@ -62,14 +70,14 @@ namespace UI
             if (!string.Equals(p1, p2, StringComparison.Ordinal))
             {
                 MessageBox.Show(
-                    param.GetLocalizable("password_requirements_message"),
+                    param.GetLocalizable("password_mismatch_message") ?? param.GetLocalizable("password_requirements_message"),
                     param.GetLocalizable("error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtConfirmacion?.Focus();
                 return;
             }
 
-            var ok = ValidatePasswordRules(p1);
+            var ok = InputSanitizer.IsValidNewPassword(p2);
             if (!ok)
             {
                 MessageBox.Show(
@@ -80,27 +88,37 @@ namespace UI
                 return;
             }
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-        }
+            ToggleBusy(true);
+            try
+            {
+                UsuarioBLL.GetInstance().CambiarContrasenaConToken(_idUsuario, p2);
 
-        private static bool ValidatePasswordRules(string pass)
-        {
-            if (string.IsNullOrEmpty(pass)) return false;
-            if (pass.Length < 8) return false;
-            if (pass.Contains("\r") || pass.Contains("\n")) return false;
+                MessageBox.Show(
+                    param.GetLocalizable("reset_password_success_message"),
+                    param.GetLocalizable("ok_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            if (!Regex.IsMatch(pass, "[A-Z]")) return false;
-
-            int digits = 0; foreach (char c in pass) if (char.IsDigit(c)) digits++;
-            if (digits < 2) return false;
-
-            var symbolSet = @"!@#$^&?_+<>.:";
-            bool hasSymbol = false;
-            foreach (var ch in pass) if (symbolSet.IndexOf(ch) >= 0) { hasSymbol = true; break; }
-            if (!hasSymbol) return false;
-
-            return true;
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(
+                    (param.GetLocalizable("unexpected_error_prefix") + " " + ex.Message),
+                    param.GetLocalizable("warning_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    param.GetLocalizable("unexpected_error_prefix") + " " + ex.Message,
+                    param.GetLocalizable("error_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                ToggleBusy(false);
+            }
         }
 
         private void UpdateTexts()
@@ -113,6 +131,20 @@ namespace UI
             btnVerContra.Text = param.GetLocalizable("password_show_button");
             btnVerConfirmacion.Text = param.GetLocalizable("password_show_button");
             btnConfirmar.Text = param.GetLocalizable("reset_password_confirm_button");
+        }
+
+        private void ToggleBusy(bool busy)
+        {
+            UseWaitCursor = busy;
+            Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
+
+            btnConfirmar.Enabled = !busy;
+            btnVerContra.Enabled = !busy;
+            btnVerConfirmacion.Enabled = !busy;
+            txtContra.Enabled = !busy;
+            txtConfirmacion.Enabled = !busy;
+
+            Application.DoEvents();
         }
     }
 }

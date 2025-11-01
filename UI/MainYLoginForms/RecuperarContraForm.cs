@@ -16,6 +16,7 @@ namespace UI
             InitializeComponent();
 
             btnEnviar.Click += BtnEnviar_Click;
+            btnCodigo.Click += BtnCodigo_Click;
             this.AcceptButton = (IButtonControl)this.btnEnviar;
 
             UpdateTexts();
@@ -48,14 +49,14 @@ namespace UI
 
             try
             {
-                UsuarioBLL.GetInstance().EnviarRecuperoContrasena(txtEmail.Text);
+                UsuarioBLL.GetInstance().EnviarRecuperoContrasena(email);
 
                 MessageBox.Show(
                     param.GetLocalizable("recover_email_sent_generic_message"),
                     param.GetLocalizable("ok_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                using (var formCodigo = new IngresoCodigoRecupContraForm())
+                using (var formCodigo = new IngresoCodigoRecupContraForm(email))
                 {
                     formCodigo.ShowDialog(this);
                 }
@@ -76,6 +77,26 @@ namespace UI
             }
         }
 
+        private void BtnCodigo_Click(object sender, EventArgs e)
+        {
+            var email = txtEmail.Text.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                MessageBox.Show(
+                    param.GetLocalizable("recover_email_required_message"),
+                    param.GetLocalizable("warning_title"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
+                return;
+            }
+
+            using (var formCodigo = new IngresoCodigoRecupContraForm(email))
+            {
+                formCodigo.ShowDialog(this);
+            }
+        }
+
         private void ToggleBusy(bool busy)
         {
             UseWaitCursor = busy;
@@ -86,14 +107,6 @@ namespace UI
             btnCodigo.Enabled = !busy;
 
             Application.DoEvents();
-        }
-
-        private void BtnCodigo_Click(object sender, EventArgs e)
-        {
-            using (var formCodigo = new IngresoCodigoRecupContraForm())
-            {
-                formCodigo.ShowDialog(this);
-            }
         }
     }
 }

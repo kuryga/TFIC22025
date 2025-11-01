@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
+using System.Text;
+using System.Text.Json;
 
 using SessionContext = DAL.Seguridad.SessionContext;
 using segUtils = DAL.Seguridad.SecurityUtilities;
@@ -19,11 +22,9 @@ namespace DAL.Audit
         }
 
         private static readonly DalToolkit db = new DalToolkit();
-
         private const string TblBitacora = "dbo.Bitacora";
         private const string PkBitacora = "idRegistro";
         private const string TblCriticidad = "dbo.Criticidad";
-
         private static bool _isListingBitacora;
 
         private static string TryDecryptOrNull(string s)
@@ -38,18 +39,37 @@ namespace DAL.Audit
             return GetBitacoraList(desde, hasta, page, pageSize, null);
         }
 
-        public List<BE.Audit.Bitacora> GetBitacoraList(
-            DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
+        public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
         {
-            if (page <= 0) page = 1;
-            if (pageSize <= 0) pageSize = 30;
-
-            int start = ((page - 1) * pageSize) + 1;
-            int end = page * pageSize;
-
+            bool sinFiltros = !desde.HasValue && !hasta.HasValue && string.IsNullOrWhiteSpace(criticidad);
             var items = new List<BE.Audit.Bitacora>();
+            string sql;
 
-            string sql = @"
+            if (sinFiltros)
+            {
+                sql = @"
+SET ROWCOUNT 0;
+SELECT 
+    b." + PkBitacora + @" AS idRegistro,
+    b.fecha,
+    b.criticidad,
+    b.accion,
+    b.mensaje,
+    b.idEjecutor,
+    b.UsuarioEjecutor
+FROM " + TblBitacora + @" b
+ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
+            }
+            else
+            {
+                if (page <= 0) page = 1;
+                if (pageSize <= 0) pageSize = 30;
+
+                int start = ((page - 1) * pageSize) + 1;
+                int end = page * pageSize;
+
+                sql = @"
+SET ROWCOUNT 0;
 WITH CTE AS (
     SELECT
         b." + PkBitacora + @",
@@ -62,12 +82,7 @@ WITH CTE AS (
         ROW_NUMBER() OVER (ORDER BY b.fecha DESC, b." + PkBitacora + @" DESC) AS rn
     FROM " + TblBitacora + @" b
     WHERE (@desde IS NULL OR CAST(b.fecha AS date) >= @desde)
-      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)";
-
-            if (!string.IsNullOrWhiteSpace(criticidad))
-                sql += " AND b.criticidad = @criticidad";
-
-            sql += @"
+      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta" + @")" + (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
 )
 SELECT
     " + PkBitacora + @" AS idRegistro,
@@ -80,19 +95,25 @@ SELECT
 FROM CTE
 WHERE rn BETWEEN @start AND @end
 ORDER BY rn;";
+            }
 
             using (var conn = new SqlConnection(DalToolkit.connectionString))
             using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
             {
-                cmd.Parameters.Add("@desde", SqlDbType.Date).Value =
-                    desde.HasValue ? (object)desde.Value.Date : DBNull.Value;
-                cmd.Parameters.Add("@hasta", SqlDbType.Date).Value =
-                    hasta.HasValue ? (object)hasta.Value.Date : DBNull.Value;
-                cmd.Parameters.Add("@start", SqlDbType.Int).Value = start;
-                cmd.Parameters.Add("@end", SqlDbType.Int).Value = end;
+                cmd.CommandTimeout = 0;
 
-                if (!string.IsNullOrWhiteSpace(criticidad))
-                    cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                if (!sinFiltros)
+                {
+                    cmd.Parameters.Add("@desde", SqlDbType.Date).Value =
+                        desde.HasValue ? (object)desde.Value.Date : DBNull.Value;
+                    cmd.Parameters.Add("@hasta", SqlDbType.Date).Value =
+                        hasta.HasValue ? (object)hasta.Value.Date : DBNull.Value;
+                    cmd.Parameters.Add("@start", SqlDbType.Int).Value = ((page - 1) * pageSize) + 1;
+                    cmd.Parameters.Add("@end", SqlDbType.Int).Value = page * pageSize;
+
+                    if (!string.IsNullOrWhiteSpace(criticidad))
+                        cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                }
 
                 conn.Open();
                 using (var rdr = cmd.ExecuteReader())
@@ -135,13 +156,11 @@ ORDER BY rn;";
                 try
                 {
                     _isListingBitacora = true;
-
                     string msg =
                         $"Listado de bitácora (página={page}, tamaño={pageSize}, " +
                         $"desde={(desde.HasValue ? desde.Value.ToString("yyyy-MM-dd") : "-")}, " +
                         $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}, " +
                         $"criticidad={(string.IsNullOrWhiteSpace(criticidad) ? "Todas" : criticidad)}).";
-
                     Log(BE.Audit.AuditEvents.ConsultaBitacora, msg);
                 }
                 finally
@@ -152,7 +171,6 @@ ORDER BY rn;";
 
             return items;
         }
-
 
         public int Log(string accion, string mensaje, string criticidad)
         {
@@ -192,7 +210,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 pId.Value = idValue;
 
                 cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value = userValue;
-
                 cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
 
                 conn.Open();
@@ -216,9 +233,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
         public List<BE.Audit.Criticidad> GetCriticidades()
         {
             var list = new List<BE.Audit.Criticidad>();
-
             const string sql = @"SELECT codigo FROM dbo.Criticidad WHERE codigo IS NOT NULL ORDER BY codigo;";
-
             using (var conn = new SqlConnection(DalToolkit.connectionString))
             using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
             {
@@ -226,13 +241,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 using (var rdr = cmd.ExecuteReader())
                 {
                     int oCodigo = rdr.GetOrdinal("codigo");
-
                     while (rdr.Read())
                     {
                         if (!rdr.IsDBNull(oCodigo))
                         {
                             string codigo = rdr.GetString(oCodigo).Trim();
-
                             if (Enum.TryParse(codigo, true, out BE.Audit.Criticidad crit))
                                 list.Add(crit);
                         }
@@ -240,8 +253,160 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 }
                 conn.Close();
             }
-
             return list;
+        }
+
+        public string ExportarReporte(DateTime? desde, DateTime? hasta, int? page, int? pageSize, string criticidad = null, string destino = null, bool exportarTodos = false)
+        {
+            List<BE.Audit.Bitacora> items;
+
+            if (exportarTodos)
+            {
+                var sql = @"
+SET ROWCOUNT 0;
+SELECT 
+    b." + PkBitacora + @" AS idRegistro,
+    b.fecha,
+    b.criticidad,
+    b.accion,
+    b.mensaje,
+    b.idEjecutor,
+    b.UsuarioEjecutor
+FROM " + TblBitacora + @" b
+WHERE (@desde IS NULL OR CAST(b.fecha AS date) >= @desde)
+  AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta" + @")" + (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
+ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
+
+                items = new List<BE.Audit.Bitacora>();
+                using (var conn = new SqlConnection(DalToolkit.connectionString))
+                using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
+                {
+                    cmd.CommandTimeout = 0;
+
+                    cmd.Parameters.Add("@desde", SqlDbType.Date).Value =
+                        desde.HasValue ? (object)desde.Value.Date : DBNull.Value;
+                    cmd.Parameters.Add("@hasta", SqlDbType.Date).Value =
+                        hasta.HasValue ? (object)hasta.Value.Date : DBNull.Value;
+
+                    if (!string.IsNullOrWhiteSpace(criticidad))
+                        cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+
+                    conn.Open();
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        int oId = rdr.GetOrdinal("idRegistro");
+                        int oFecha = rdr.GetOrdinal("fecha");
+                        int oCrit = rdr.GetOrdinal("criticidad");
+                        int oAcc = rdr.GetOrdinal("accion");
+                        int oMsg = rdr.GetOrdinal("mensaje");
+                        int oIdExec = rdr.GetOrdinal("idEjecutor");
+                        int oUsr = rdr.GetOrdinal("UsuarioEjecutor");
+
+                        while (rdr.Read())
+                        {
+                            var crit = BE.Audit.Criticidad.C5;
+                            if (!rdr.IsDBNull(oCrit))
+                            {
+                                var s = rdr.GetString(oCrit);
+                                if (Enum.TryParse(s, true, out BE.Audit.Criticidad tmp))
+                                    crit = tmp;
+                            }
+
+                            items.Add(new BE.Audit.Bitacora
+                            {
+                                IdRegistro = rdr.GetInt32(oId),
+                                Fecha = rdr.GetDateTime(oFecha),
+                                Criticidad = crit,
+                                Accion = rdr.IsDBNull(oAcc) ? null : rdr.GetString(oAcc),
+                                Mensaje = rdr.IsDBNull(oMsg) ? null : TryDecryptOrNull(rdr.GetString(oMsg)),
+                                IdEjecutor = rdr.IsDBNull(oIdExec) ? (int?)null : rdr.GetInt32(oIdExec),
+                                UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : rdr.GetString(oUsr),
+                            });
+                        }
+                    }
+                    conn.Close();
+                }
+            }
+            else
+            {
+                items = GetBitacoraList(desde, hasta, page.GetValueOrDefault(1), pageSize.GetValueOrDefault(30), criticidad);
+            }
+
+            var payload = new
+            {
+                generadoEn = DateTime.Now,
+                filtros = new
+                {
+                    desde = desde?.ToString("yyyy-MM-dd"),
+                    hasta = hasta?.ToString("yyyy-MM-dd"),
+                    criticidad = string.IsNullOrWhiteSpace(criticidad) ? "Todas" : criticidad,
+                    exportarTodos = exportarTodos,
+                    pagina = exportarTodos ? (int?)null : page.GetValueOrDefault(1),
+                    tamanoPagina = exportarTodos ? (int?)null : pageSize.GetValueOrDefault(30)
+                },
+                totalRegistros = items?.Count ?? 0,
+                registros = items?.ConvertAll(i => new
+                {
+                    i.IdRegistro,
+                    Fecha = i.Fecha.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Criticidad = i.Criticidad.ToString(),
+                    i.Accion,
+                    i.Mensaje,
+                    i.IdEjecutor,
+                    i.UsuarioEjecutor
+                })
+            };
+
+            var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
+            var rutaArchivo = ResolverDestinoArchivo(destino);
+            File.WriteAllText(rutaArchivo, json, Encoding.UTF8);
+
+            try
+            {
+                string msg =
+                    $"Exportar reporte bitácora. total={items.Count}, " +
+                    $"desde={(desde.HasValue ? desde.Value.ToString("yyyy-MM-dd") : "-")}, " +
+                    $"hasta={(hasta.HasValue ? hasta.Value.ToString("yyyy-MM-dd") : "-")}, " +
+                    $"criticidad={(string.IsNullOrWhiteSpace(criticidad) ? "Todas" : criticidad)}, " +
+                    $"exportarTodos={exportarTodos}, " +
+                    $"pagina={(exportarTodos ? "-" : page?.ToString() ?? "1")}, " +
+                    $"pageSize={(exportarTodos ? "-" : pageSize?.ToString() ?? "30")}, " +
+                    $"archivo={rutaArchivo}";
+                Log(BE.Audit.AuditEvents.ExportarReporteBitacora, msg);
+            }
+            catch { }
+
+            return rutaArchivo;
+        }
+
+        private static string ResolverDestinoArchivo(string destino)
+        {
+            string defaultFileName = $"Bitacora_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+
+            if (string.IsNullOrWhiteSpace(destino))
+            {
+                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                return Path.Combine(desktop, defaultFileName);
+            }
+
+            if (Directory.Exists(destino))
+                return Path.Combine(destino, defaultFileName);
+
+            var ext = Path.GetExtension(destino);
+            if (!string.IsNullOrEmpty(ext))
+            {
+                var dir = Path.GetDirectoryName(destino);
+                if (!string.IsNullOrWhiteSpace(dir) && !Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                if (!ext.Equals(".txt", StringComparison.OrdinalIgnoreCase))
+                    destino = Path.ChangeExtension(destino, ".txt");
+                return destino;
+            }
+
+            if (!Directory.Exists(destino))
+                Directory.CreateDirectory(destino);
+
+            return Path.Combine(destino, defaultFileName);
         }
     }
 }

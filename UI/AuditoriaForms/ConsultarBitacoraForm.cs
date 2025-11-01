@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using BLL.Audit;
-using System.Collections.Generic;
-using System.Linq;
 
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
@@ -10,10 +9,10 @@ namespace UI
 {
     public partial class ConsultarBitacoraForm : BaseForm
     {
-        // paginado
         private int _page = 1;
         private const int PageSize = 30;
-        //
+        private bool _hasSearched = false;
+
         private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public ConsultarBitacoraForm()
@@ -32,15 +31,16 @@ namespace UI
             btnPrev.Enabled = false;
             btnNext.Enabled = false;
 
-            lblPageInfo.Text = $"";
+            lblPageInfo.Text = string.Empty;
 
             CargarCriticidades();
+
+            btnReporte.Click += BtnGenerarReporte_Click;
         }
+
         private void CargarCriticidades()
         {
             var crits = BitacoraBLL.GetInstance().GetCriticidades();
-
-
             var lista = new List<BE.Audit.Criticidad> { BE.Audit.Criticidad.None };
             lista.AddRange(crits);
 
@@ -76,6 +76,7 @@ namespace UI
             }
 
             _page = 1;
+            _hasSearched = true;
             LoadPage();
         }
 
@@ -100,7 +101,6 @@ namespace UI
             DateTime? hasta = dtpHasta.Value.Date;
 
             var criticidadSeleccionada = (BE.Audit.Criticidad)cmbCriticidad.SelectedItem;
-
 
             string crit = (criticidadSeleccionada == BE.Audit.Criticidad.None)
                 ? null
@@ -135,15 +135,41 @@ namespace UI
             btnNext.Enabled = (result.Items != null && result.Items.Count == PageSize);
         }
 
+        private void BtnGenerarReporte_Click(object sender, EventArgs e)
+        {
+            DateTime? desde = null;
+            DateTime? hasta = null;
+            int page = 0;
+            int pageSize = 0;
+            string crit = null;
+
+            if (_hasSearched)
+            {
+                desde = dtpDesde.Value.Date;
+                hasta = dtpHasta.Value.Date;
+
+                var criticidadSeleccionada = (BE.Audit.Criticidad)cmbCriticidad.SelectedItem;
+                crit = (criticidadSeleccionada == BE.Audit.Criticidad.None) ? null : criticidadSeleccionada.ToString();
+
+                page = _page;
+                pageSize = PageSize;
+            }
+
+            using (var frm = new UI.AuditoriaForms.GenerarReporteForm(desde, hasta, page, pageSize, crit))
+            {
+                frm.ShowDialog(this);
+            }
+        }
+
         private void UpdateTexts()
         {
             lblCriticidad.Text = param.GetLocalizable("log_criticality_label");
             lblDesde.Text = param.GetLocalizable("log_date_from_label");
             lblHasta.Text = param.GetLocalizable("log_date_to_label");
-
             btnConsultar.Text = param.GetLocalizable("log_search_button");
+            btnReporte.Text = param.GetLocalizable("generate_report_button");
         }
-        
+
         private void UpdateDvg()
         {
             dgvBitacora.Columns["IdRegistro"].HeaderText = param.GetLocalizable("log_col_id");

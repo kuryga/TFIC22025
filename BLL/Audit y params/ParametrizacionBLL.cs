@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using IdiomaDAL = DAL.Genericos.IdiomaDAL;
 using ParametrizacionDAL = DAL.Genericos.ParametrizacionDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
 using TranslationContext = DAL.Genericos.TraduccionContext;
-using IdiomaDAL = DAL.Genericos.IdiomaDAL;
 
 namespace BLL.Genericos
 {

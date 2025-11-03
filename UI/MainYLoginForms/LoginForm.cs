@@ -1,14 +1,14 @@
-﻿using System;
+﻿using BLL.Seguridad;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using BLL.Seguridad;
-using System.Configuration;
-using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
+using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
-using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using Idioma = BE.Idioma;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp
 {
@@ -20,7 +20,7 @@ namespace WinApp
         {
             InitializeComponent();
             loadParametrizacion();
-            
+
             this.UpdateTexts();
             List<Idioma> idiomas = ParametrizacionBLL.GetInstance().GetIdiomas();
             int idiomaSeleccionado = ParametrizacionBLL.GetInstance().GetIdIdioma();

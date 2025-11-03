@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Text;
 using System.Linq;
-using System.Configuration;
-
+using System.Text;
 using BitacoraDAL = DAL.Audit.BitacoraDAL;
 
 public sealed class DalToolkit

@@ -97,8 +97,8 @@ namespace WinApp
 
         private void UpdateTexts()
         {
-            
-            lblTitle.Text = param.GetLocalizable("moneda_title"); 
+
+            lblTitle.Text = param.GetLocalizable("moneda_title");
             lblId.Text = param.GetLocalizable("moneda_id_label");
             lblNombre.Text = param.GetLocalizable("moneda_name_label");
             lblSimbolo.Text = param.GetLocalizable("moneda_symbol_label");

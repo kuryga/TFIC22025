@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
-using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 using Usuario = BE.Usuario;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
 namespace WinApp
 {
@@ -31,7 +31,7 @@ namespace WinApp
             txtDireccion.Tag = TextBoxTag.SqlSafe;
             txtNombre.Tag = TextBoxTag.SqlSafe;
             txtApellido.Tag = TextBoxTag.SqlSafe;
- 
+
             lblNombre.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_firstname_label");
             lblApellido.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_lastname_label");
             lblDocumento.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_document_label");

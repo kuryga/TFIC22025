@@ -1,8 +1,7 @@
-﻿using System;
+﻿using BLL.Audit;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using BLL.Audit;
-
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp

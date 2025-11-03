@@ -6,8 +6,6 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 public sealed class ColumnAttribute : Attribute

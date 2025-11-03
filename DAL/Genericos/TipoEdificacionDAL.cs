@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.TipoEdificacion>;
 

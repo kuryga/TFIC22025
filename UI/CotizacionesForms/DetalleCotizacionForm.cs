@@ -1,7 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Collections.Generic;
-
 using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
 namespace WinApp

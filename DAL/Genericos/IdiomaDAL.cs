@@ -28,7 +28,7 @@ namespace DAL.Genericos
                 "Listado de idiomas",
                 false
             );
-        }   
+        }
 
         public Dictionary<string, string> LoadDiccionarioTraducciones(int idIdioma)
         {

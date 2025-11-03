@@ -17,7 +17,7 @@ namespace DAL.Genericos
 
         static ParametrizacionDAL()
         {
- 
+
             int.TryParse(ConfigurationManager.AppSettings["IdEmpresa"], out idEmpresa);
             if (idEmpresa <= 0)
                 idEmpresa = 1;

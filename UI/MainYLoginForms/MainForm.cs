@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
-using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
-using PermisosBLL = BLL.Seguridad.PermisosBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using PermisosBLL = BLL.Seguridad.PermisosBLL;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
 namespace WinApp
 {

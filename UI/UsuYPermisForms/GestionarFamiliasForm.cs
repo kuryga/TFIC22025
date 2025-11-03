@@ -1,9 +1,9 @@
-﻿using System;
+﻿using BLL.Seguridad;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using BLL.Seguridad;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp

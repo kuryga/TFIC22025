@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
-using TipoEdificacionBLL = BLL.Genericos.TipoEdificacionBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using TipoEdificacionBLL = BLL.Genericos.TipoEdificacionBLL;
 
 namespace WinApp
 {

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using BLL.Seguridad;
+using System;
 using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
-using BLL.Seguridad;
 
 namespace WinApp
 {

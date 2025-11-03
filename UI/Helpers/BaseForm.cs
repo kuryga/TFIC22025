@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using System.Globalization;
+using System.Linq;
+using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp

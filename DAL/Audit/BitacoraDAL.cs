@@ -5,9 +5,8 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-
-using SessionContext = DAL.Seguridad.SessionContext;
 using segUtils = DAL.Seguridad.SecurityUtilities;
+using SessionContext = DAL.Seguridad.SessionContext;
 
 namespace DAL.Audit
 {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.IO;
-
-using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 using segUtils = DAL.Seguridad.SecurityUtilities;
+using UserDaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Usuario>;
 
 namespace DAL.Seguridad
 {

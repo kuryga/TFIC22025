@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BE.Audit
+﻿namespace BE.Audit
 {
     public static class AuditEvents
     {
@@ -14,7 +12,7 @@ namespace BE.Audit
         public const string ConsultaUsuariosPorPatente = "Usuarios.ConsultaPatentes";
         public const string ConsultaFamilias = "Familias.ConsultaDeListado";
         public const string ConsultaPatentes = "Patentes.ConsultaDeListado";
-       
+
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";

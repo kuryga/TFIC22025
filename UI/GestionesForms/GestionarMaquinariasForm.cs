@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace UI.Forms
+namespace WinApp.Forms
 {
     public partial class AgregarMaquinariasForm : BaseForm
     {

@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using TipoEdificacionBLL = BLL.Genericos.TipoEdificacionBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarTipoEdificacionForm : BaseForm
     {

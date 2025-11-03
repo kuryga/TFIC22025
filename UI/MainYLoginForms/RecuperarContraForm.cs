@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using BLL.Seguridad;
 
-namespace UI
+namespace WinApp
 {
     public partial class RecuperarContraForm : BaseForm
     {

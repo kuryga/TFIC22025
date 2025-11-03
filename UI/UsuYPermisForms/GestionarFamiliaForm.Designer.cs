@@ -1,5 +1,5 @@
 ﻿
-namespace UI
+namespace WinApp
 {
     partial class GestionarFamiliaForm
     {

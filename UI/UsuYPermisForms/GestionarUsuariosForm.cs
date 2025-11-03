@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarUsuariosForm : BaseForm
     {

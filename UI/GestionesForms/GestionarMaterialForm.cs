@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using MaterialBLL = BLL.Genericos.MaterialBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarMaterialForm : BaseForm
     {

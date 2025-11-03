@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class ConsultarCotizacionesForm : BaseForm
     {

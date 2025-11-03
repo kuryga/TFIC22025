@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using System;
 
-namespace UI
+namespace WinApp
 {
     partial class GestionarFamiliasForm
     {

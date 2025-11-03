@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Globalization;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public class BaseForm : Form
     {

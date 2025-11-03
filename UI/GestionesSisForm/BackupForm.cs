@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using BLL.Seguridad.Mantenimiento;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class BackupForm : BaseForm
     {

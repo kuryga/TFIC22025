@@ -5,7 +5,7 @@ using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 using PermisosBLL = BLL.Seguridad.PermisosBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class MainForm : BaseForm
     {

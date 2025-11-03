@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class NuevaContrasenaForm : BaseForm
     {

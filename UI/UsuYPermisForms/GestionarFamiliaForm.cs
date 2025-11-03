@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using BLL.Seguridad;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarFamiliaForm : BaseForm
     {

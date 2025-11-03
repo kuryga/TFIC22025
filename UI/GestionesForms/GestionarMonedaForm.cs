@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using MonedaBLL = BLL.Genericos.MonedaBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarMonedaForm : BaseForm
     {

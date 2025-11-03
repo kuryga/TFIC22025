@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using MaquinariaBLL = BLL.Genericos.MaquinariaBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarMaquinariaForm : BaseForm
     {

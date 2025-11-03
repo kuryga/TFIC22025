@@ -1,5 +1,5 @@
 ﻿
-namespace UI.AuditoriaForms
+namespace WinApp.AuditoriaForms
 {
     partial class GenerarReporteForm
     {

@@ -1,4 +1,4 @@
-﻿namespace UI
+﻿namespace WinApp
 {
     partial class IngresoCodigoRecupContraForm
     {

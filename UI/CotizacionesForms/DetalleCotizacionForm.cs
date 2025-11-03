@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class DetalleCotizacionForm : BaseForm
     {

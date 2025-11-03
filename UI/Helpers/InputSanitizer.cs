@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Globalization;
 
-namespace UI
+namespace WinApp
 {
     public static class TextBoxTag
     {

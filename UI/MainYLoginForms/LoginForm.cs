@@ -9,7 +9,7 @@ using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using Idioma = BE.Idioma;
 
-namespace UI
+namespace WinApp
 {
     public partial class LoginForm : BaseForm
     {

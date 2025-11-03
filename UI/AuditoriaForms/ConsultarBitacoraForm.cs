@@ -5,7 +5,7 @@ using BLL.Audit;
 
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class ConsultarBitacoraForm : BaseForm
     {
@@ -155,7 +155,7 @@ namespace UI
                 pageSize = PageSize;
             }
 
-            using (var frm = new UI.AuditoriaForms.GenerarReporteForm(desde, hasta, page, pageSize, crit))
+            using (var frm = new WinApp.AuditoriaForms.GenerarReporteForm(desde, hasta, page, pageSize, crit))
             {
                 frm.ShowDialog(this);
             }

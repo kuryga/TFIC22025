@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using BLL.Audit;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI.AuditoriaForms
+namespace WinApp.AuditoriaForms
 {
     public partial class GenerarReporteForm : Form
     {

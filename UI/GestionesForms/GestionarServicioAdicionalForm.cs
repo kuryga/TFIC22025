@@ -85,6 +85,7 @@ namespace UI
         private void UpdateTexts()
         {
             txtDescripcion.Tag = TextBoxTag.SqlSafe;
+            txtPrecio.Tag = TextBoxTag.Price;
             lblTitle.Text = param.GetLocalizable("servicio_title");
 
             if (dgvServicios.Columns["colId"] != null)

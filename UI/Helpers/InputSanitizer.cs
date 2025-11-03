@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Globalization;
 
 namespace UI
 {
@@ -13,9 +14,10 @@ namespace UI
         public const string Pwd = "PASSWORD";
         public const string PwdVerify = "VERIFY_PASS";
         public const string PhoneNumber = "AR_PHONE";
-
+        public const string Price = "PRICE";
         public const string NoSanitize = "NoSanitize";
     }
+
     public static class InputSanitizer
     {
         public const string AllowedPattern = @"^[a-zA-Z0-9!@#$^&?_+<>.:]+$";
@@ -41,8 +43,58 @@ namespace UI
 
             var tb = sender as TextBox;
             var tag = (tb != null ? tb.Tag as string : null)?.Trim();
-            var isSafe = string.Equals(tag, TextBoxTag.SqlSafe, StringComparison.OrdinalIgnoreCase);
 
+            if (string.Equals(tag, TextBoxTag.Price, StringComparison.OrdinalIgnoreCase))
+            {
+                var decSep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                var text = tb.Text ?? string.Empty;
+
+                // permitir solo dígitos y un separador decimal
+                if (char.IsDigit(e.KeyChar))
+                {
+                    var sepIndex = text.IndexOf(decSep);
+                    if (sepIndex >= 0)
+                    {
+                        var decimalsCount = text.Length - sepIndex - 1;
+                        var cursorPos = tb.SelectionStart;
+                        if (cursorPos > sepIndex && decimalsCount >= 2)
+                        {
+                            e.Handled = true;
+                            System.Media.SystemSounds.Beep.Play();
+                            return;
+                        }
+                    }
+                    return;
+                }
+
+                if (e.KeyChar == '.' || e.KeyChar == ',')
+                {
+                    var hasSep = text.Contains(".") || text.Contains(",");
+                    if (hasSep)
+                    {
+                        e.Handled = true;
+                        System.Media.SystemSounds.Beep.Play();
+                        return;
+                    }
+
+                    if (e.KeyChar.ToString() != decSep)
+                    {
+                        int sel = tb.SelectionStart;
+                        tb.Text = text.Insert(sel, decSep);
+                        tb.SelectionStart = sel + decSep.Length;
+                        e.Handled = true;
+                        return;
+                    }
+
+                    return;
+                }
+
+                e.Handled = true;
+                System.Media.SystemSounds.Beep.Play();
+                return;
+            }
+
+            var isSafe = string.Equals(tag, TextBoxTag.SqlSafe, StringComparison.OrdinalIgnoreCase);
             var pattern = isSafe ? AllowedPatternWithSpaces : AllowedPattern;
 
             if (e.KeyChar == '\r' || e.KeyChar == '\n')
@@ -163,6 +215,59 @@ namespace UI
 
             string forbiddenPattern = @"['"";\\/*]|--|\b(ALTER|DROP|DELETE|INSERT|UPDATE|EXEC|UNION|SELECT)\b";
             return !Regex.IsMatch(input, forbiddenPattern, RegexOptions.IgnoreCase);
+        }
+
+        public static bool TryParsePrice(string input, out decimal price)
+        {
+            price = 0m;
+            if (string.IsNullOrWhiteSpace(input)) return false;
+
+            var s = input.Trim();
+            var styles = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
+            var cultures = new CultureInfo[]
+            {
+                CultureInfo.CurrentCulture,
+                CultureInfo.InvariantCulture,
+                new CultureInfo("es-AR")
+            };
+
+            for (int i = 0; i < cultures.Length; i++)
+            {
+                var c = cultures[i];
+                if (decimal.TryParse(s, styles, c, out price))
+                {
+                    price = Math.Round(price, 2, MidpointRounding.AwayFromZero);
+                    return true;
+                }
+            }
+
+            s = s.Replace(" ", "").Replace(".", "").Replace(",", ".");
+            var success = decimal.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out price);
+            if (success)
+                price = Math.Round(price, 2, MidpointRounding.AwayFromZero);
+            return success;
+        }
+
+        public static bool IsValidPrice(string input, int maxIntegerDigits = 12)
+        {
+            decimal val;
+            if (!TryParsePrice(input, out val)) return false;
+
+            var abs = Math.Abs(val);
+            var integerPart = (long)Math.Truncate(abs);
+            return integerPart.ToString(CultureInfo.InvariantCulture).Length <= maxIntegerDigits;
+        }
+
+        public static string FormatPrice2(string input, CultureInfo culture, bool includeCurrencySymbol)
+        {
+            decimal val;
+            if (!TryParsePrice(input, out val)) return "0.00";
+
+            if (culture == null) culture = CultureInfo.CurrentCulture;
+
+            return includeCurrencySymbol
+                ? val.ToString("C2", culture)
+                : val.ToString("N2", culture);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Globalization;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace UI
@@ -74,6 +75,11 @@ namespace UI
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachPasswordVerification(tb);
+                        }
+
+                        if (string.Equals(tagUpper, TextBoxTag.Price, StringComparison.Ordinal))
+                        {
+                            AttachPriceValidation(tb);
                         }
                     }
                 }
@@ -241,6 +247,62 @@ namespace UI
             var txt = tb.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNewPassword(txt))
                 _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void AttachPriceValidation(TextBox tb)
+        {
+            tb.Validating -= Price_Validating;
+            tb.Validating += Price_Validating;
+
+            tb.TextChanged -= Price_TextChanged;
+            tb.TextChanged += Price_TextChanged;
+
+            tb.Leave -= Price_Leave;
+            tb.Leave += Price_Leave;
+        }
+
+        private void Price_Validating(object sender, CancelEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+
+            if (txt.Length == 0 || InputSanitizer.IsValidPrice(txt))
+            {
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_price_validation_message"));
+                e.Cancel = true;
+            }
+        }
+
+        private void Price_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+            if (txt.Length == 0 || InputSanitizer.IsValidPrice(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void Price_Leave(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+            if (txt.Length == 0) return;
+
+            decimal _;
+            if (InputSanitizer.TryParsePrice(txt, out _))
+            {
+                tb.Text = InputSanitizer.FormatPrice2(txt, CultureInfo.CurrentCulture, false);
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
         }
     }
 }

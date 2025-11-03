@@ -16,7 +16,7 @@ namespace DAL.Genericos
 
         private const string table = "dbo.Material";
         private const string idCol = "idMaterial";
-        private const string publicCols = "idMaterial, nombre, unidadMedida, precioUnidad, usoPorM2";
+        private const string publicCols = "idMaterial, nombre, unidadMedida, precioUnidad, usoPorM2, deshabilitado";
 
         public List<BE.Material> GetAll()
         {
@@ -104,6 +104,31 @@ UPDATE " + table + @"
                 "Modificación de material Id=" + obj.IdMaterial,
                 true
             );
+        }
+
+        public void Deshabilitar(int idMaterial, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idMaterial;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idMaterial,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionMaterial
+                    : BE.Audit.AuditEvents.HabilitacionMaterial,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") + " de material Id=" + idMaterial,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idMaterial, false);
         }
     }
 }

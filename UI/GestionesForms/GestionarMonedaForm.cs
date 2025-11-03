@@ -103,6 +103,7 @@ namespace UI
             lblNombre.Text = param.GetLocalizable("moneda_name_label");
             lblSimbolo.Text = param.GetLocalizable("moneda_symbol_label");
             lblValor.Text = param.GetLocalizable("moneda_rate_label");
+            txtId.ReadOnly = true;
             txtNombre.Text = TextBoxTag.SqlSafe;
             txtSimbolo.Text = TextBoxTag.SqlSafe;
             txtValor.Text = TextBoxTag.Price;

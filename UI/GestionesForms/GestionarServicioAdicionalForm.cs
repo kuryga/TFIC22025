@@ -86,6 +86,7 @@ namespace UI
         {
             txtDescripcion.Tag = TextBoxTag.SqlSafe;
             txtPrecio.Tag = TextBoxTag.Price;
+            txtId.ReadOnly = true;
             lblTitle.Text = param.GetLocalizable("servicio_title");
 
             if (dgvServicios.Columns["colId"] != null)

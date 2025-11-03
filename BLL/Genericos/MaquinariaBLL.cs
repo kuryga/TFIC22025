@@ -15,15 +15,16 @@ namespace BLL.Genericos
             return instance;
         }
 
-
         public bool Create(BE.Maquinaria objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (objAdd == null) throw new ArgumentNullException(nameof(objAdd));
+                MaquinariaDAL.GetInstance().Create(objAdd);
+                return objAdd.IdMaquinaria > 0;
+            }
+            catch (Exception) { throw; }
         }
-
 
         public List<BE.Maquinaria> GetAll()
         {
@@ -31,33 +32,27 @@ namespace BLL.Genericos
             catch (Exception) { throw; }
         }
 
-
-        public BE.Maquinaria GetByID(string idMaq)
-        {
-            // try { return MonedaDAL.GetInstance().GetByCorreoElectronico(username); }
-            //catch (Exception) { throw; }
-            // TODO: sacar esto y modificar
-            return new BE.Maquinaria();
-        }
-
-
         public bool Update(BE.Maquinaria objUpd)
         {
             try
             {
+                if (objUpd == null) throw new ArgumentNullException(nameof(objUpd));
+                if (objUpd.IdMaquinaria <= 0) throw new ArgumentException("Id inválido");
                 MaquinariaDAL.GetInstance().Update(objUpd);
                 return true;
             }
             catch (Exception) { throw; }
         }
 
-
         public bool Deshabilitar(int idMaq, bool deshabilitar)
         {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (idMaq <= 0) throw new ArgumentException("Id inválido");
+                MaquinariaDAL.GetInstance().Deshabilitar(idMaq, deshabilitar);
+                return true;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Maquinaria>;
 
@@ -15,7 +16,7 @@ namespace DAL.Genericos
 
         private const string table = "dbo.Maquinaria";
         private const string idCol = "idMaquinaria";
-        private const string publicCols = "idMaquinaria, nombre, costoPorHora";
+        private const string publicCols = "idMaquinaria, nombre, costoPorHora, deshabilitado";
 
         public List<BE.Maquinaria> GetAll()
         {
@@ -88,6 +89,31 @@ UPDATE " + table + @"
                 "Modificación de maquinaria Id=" + obj.IdMaquinaria,
                 true
             );
+        }
+
+        public void Deshabilitar(int idMaquinaria, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idMaquinaria;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idMaquinaria,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionMaquinaria
+                    : BE.Audit.AuditEvents.HabilitacionMaquinaria,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") + " de maquinaria Id=" + idMaquinaria,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idMaquinaria, false);
         }
     }
 }

@@ -73,6 +73,7 @@ namespace UI
         private void UpdateTexts()
         {
             lblTitle.Text = param.GetLocalizable("tipoedif_title");
+            txtId.ReadOnly = true;
 
             if (dgvTipos.Columns["colId"] != null)
                 dgvTipos.Columns["colId"].HeaderText = param.GetLocalizable("tipoedif_id_label");

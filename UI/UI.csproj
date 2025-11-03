@@ -123,12 +123,6 @@
     <Compile Include="UsuYPermisForms\GestionarFamiliasForm.Designer.cs">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionesForms\GestionarItemPersonalizadoForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GestionesForms\GestionarItemPersonalizadoForm.Designer.cs">
-      <DependentUpon>GestionarItemPersonalizadoForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="GestionesForms\GestionarMaquinariaForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -251,9 +245,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UsuYPermisForms\GestionarFamiliasForm.resx">
       <DependentUpon>GestionarFamiliasForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GestionesForms\GestionarItemPersonalizadoForm.resx">
-      <DependentUpon>GestionarItemPersonalizadoForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GestionesForms\GestionarMaquinariaForm.resx">
       <DependentUpon>GestionarMaquinariaForm.cs</DependentUpon>

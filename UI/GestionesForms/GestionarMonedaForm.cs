@@ -103,6 +103,9 @@ namespace UI
             lblNombre.Text = param.GetLocalizable("moneda_name_label");
             lblSimbolo.Text = param.GetLocalizable("moneda_symbol_label");
             lblValor.Text = param.GetLocalizable("moneda_rate_label");
+            txtNombre.Text = TextBoxTag.SqlSafe;
+            txtSimbolo.Text = TextBoxTag.SqlSafe;
+            txtValor.Text = TextBoxTag.Price;
 
             if (dgvMoneda.Columns["colId"] != null)
                 dgvMoneda.Columns["colId"].HeaderText = param.GetLocalizable("moneda_id_label");

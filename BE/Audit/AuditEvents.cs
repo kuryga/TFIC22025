@@ -84,6 +84,9 @@ namespace BE.Audit
         public const string DeshabilitacionTipoEdificacion = "TipoEdificacion.Deshabilitar";
         public const string HabilitacionServicioAdicional = "ServicioAdicional.Habilitar";
         public const string DeshabilitacionServicioAdicional = "ServicioAdicional.Deshabilitar";
+        public const string DeshabilitacionMoneda = "Moneda.Deshabilitar";
+        public const string HabilitacionMoneda = "Moneda.Deshabilitar";
+        
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";

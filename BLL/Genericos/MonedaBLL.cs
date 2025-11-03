@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using MonedaDAL = DAL.Genericos.MonedaDAL;
 
 namespace BLL.Genericos
@@ -15,15 +14,16 @@ namespace BLL.Genericos
             return instance;
         }
 
-
         public bool Create(BE.Moneda objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (objAdd == null) throw new ArgumentNullException(nameof(objAdd));
+                MonedaDAL.GetInstance().Create(objAdd);
+                return objAdd.IdMoneda > 0;
+            }
+            catch (Exception) { throw; }
         }
-
 
         public List<BE.Moneda> GetAll()
         {
@@ -31,33 +31,27 @@ namespace BLL.Genericos
             catch (Exception) { throw; }
         }
 
-
-        public BE.Moneda GetByID(string username)
-        {
-            // try { return MonedaDAL.GetInstance().GetByCorreoElectronico(username); }
-            //catch (Exception) { throw; }
-            // TODO: sacar esto y modificar
-            return new BE.Moneda();
-        }
-
-
         public bool Update(BE.Moneda objUpd)
         {
             try
             {
+                if (objUpd == null) throw new ArgumentNullException(nameof(objUpd));
+                if (objUpd.IdMoneda <= 0) throw new ArgumentException("Id inválido");
                 MonedaDAL.GetInstance().Update(objUpd);
                 return true;
             }
             catch (Exception) { throw; }
         }
 
-
         public bool Deshabilitar(int idMoneda, bool deshabilitar)
         {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (idMoneda <= 0) throw new ArgumentException("Id inválido");
+                MonedaDAL.GetInstance().Deshabilitar(idMoneda, deshabilitar);
+                return true;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

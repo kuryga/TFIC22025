@@ -5,12 +5,13 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.Text;
 using System.Linq;
+using System.Configuration;
+
 using BitacoraDAL = DAL.Audit.BitacoraDAL;
 
 public sealed class DalToolkit
 {
-    public const string connectionString =
-        @"Server=.;Database=UrbanSoft;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True;";
+    public static string connectionString = ConfigurationManager.ConnectionStrings["UrbanSoftConnection"].ConnectionString;
 
     private const string dvvTable = "[dbo].[DigitoVerificadorVertical]";
     private const string dvvColTableName = "tabla";

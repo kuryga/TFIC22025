@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using BLL.Seguridad;
+using System.Configuration;
 using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
 using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
@@ -18,9 +19,8 @@ namespace WinApp
         public LoginForm()
         {
             InitializeComponent();
-
-            ParametrizacionBLL.GetInstance().LoadParametrizacion();
-
+            loadParametrizacion();
+            
             this.UpdateTexts();
             List<Idioma> idiomas = ParametrizacionBLL.GetInstance().GetIdiomas();
             int idiomaSeleccionado = ParametrizacionBLL.GetInstance().GetIdIdioma();
@@ -38,6 +38,26 @@ namespace WinApp
                 txtContrasena.UseSystemPasswordChar = true;
 
             txtUsuario?.Focus();
+        }
+
+        private void loadParametrizacion()
+        {
+            try
+            {
+                ParametrizacionBLL.GetInstance().LoadParametrizacion();
+            }
+            catch (Exception ex)
+            {
+                string mensaje = ConfigurationManager.AppSettings["MensajeErrorConexion"];
+                string titulo = ConfigurationManager.AppSettings["TituloErrorConexion"];
+
+                MessageBox.Show(
+                    mensaje,
+                    titulo,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
 
         private void CmbIdiomaInferior_SelectedValueChanged(object sender, EventArgs e)

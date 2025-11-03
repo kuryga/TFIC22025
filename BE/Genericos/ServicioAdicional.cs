@@ -9,5 +9,6 @@ namespace BE {
         public int IdServicio { get; set; }
         public string Descripcion { get; set; } = string.Empty;
         public decimal Precio { get; set; }
+        public bool Deshabilitado { get; set; }
     }
 }

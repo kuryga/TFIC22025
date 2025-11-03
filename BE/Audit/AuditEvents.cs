@@ -82,6 +82,8 @@ namespace BE.Audit
         public const string ModificacionFamilia = "Familia.Modificacion";
         public const string HabilitacionTipoEdificacion = "TipoEdificacion.Habilitar";
         public const string DeshabilitacionTipoEdificacion = "TipoEdificacion.Deshabilitar";
+        public const string HabilitacionServicioAdicional = "ServicioAdicional.Habilitar";
+        public const string DeshabilitacionServicioAdicional = "ServicioAdicional.Deshabilitar";
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";
@@ -180,6 +182,8 @@ namespace BE.Audit
                 case ModificacionFamilia:
                 case DeshabilitacionTipoEdificacion:
                 case HabilitacionTipoEdificacion:
+                case HabilitacionServicioAdicional:
+                case DeshabilitacionServicioAdicional:
                     return Criticidad.C3;
             }
 

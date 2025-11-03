@@ -15,15 +15,16 @@ namespace BLL.Genericos
             return instance;
         }
 
-
         public bool Create(BE.ServicioAdicional objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (objAdd == null) throw new ArgumentNullException(nameof(objAdd));
+                ServicioAdicionalDAL.GetInstance().Create(objAdd);
+                return objAdd.IdServicio > 0;
+            }
+            catch (Exception) { throw; }
         }
-
 
         public List<BE.ServicioAdicional> GetAll()
         {
@@ -31,33 +32,27 @@ namespace BLL.Genericos
             catch (Exception) { throw; }
         }
 
-
-        public BE.ServicioAdicional GetByID(string idServicioAd)
-        {
-            // try { return MonedaDAL.GetInstance().GetByCorreoElectronico(username); }
-            //catch (Exception) { throw; }
-            // TODO: sacar esto y modificar
-            return new BE.ServicioAdicional();
-        }
-
-
         public bool Update(BE.ServicioAdicional objUpd)
         {
             try
             {
+                if (objUpd == null) throw new ArgumentNullException(nameof(objUpd));
+                if (objUpd.IdServicio <= 0) throw new ArgumentException("Id inválido");
                 ServicioAdicionalDAL.GetInstance().Update(objUpd);
                 return true;
             }
             catch (Exception) { throw; }
         }
 
-
-        public bool Deshabilitar(int idTipEd, bool deshabilitar)
+        public bool Deshabilitar(int idServicio, bool deshabilitar)
         {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (idServicio <= 0) throw new ArgumentException("Id inválido");
+                ServicioAdicionalDAL.GetInstance().Deshabilitar(idServicio, deshabilitar);
+                return true;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

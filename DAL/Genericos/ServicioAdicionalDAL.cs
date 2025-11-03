@@ -10,13 +10,17 @@ namespace DAL.Genericos
     {
         private static ServicioAdicionalDAL instance;
         private ServicioAdicionalDAL() { }
-        public static ServicioAdicionalDAL GetInstance() { if (instance == null) instance = new ServicioAdicionalDAL(); return instance; }
+        public static ServicioAdicionalDAL GetInstance()
+        {
+            if (instance == null) instance = new ServicioAdicionalDAL();
+            return instance;
+        }
 
         private static readonly DalToolkit db = new DalToolkit();
 
         private const string table = "dbo.ServicioAdicional";
         private const string idCol = "idServicio";
-        private const string publicCols = "idServicio, descripcion, precio";
+        private const string publicCols = "idServicio, descripcion, precio, deshabilitado";
 
         public List<BE.ServicioAdicional> GetAll()
         {
@@ -46,7 +50,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                         (object)obj.Descripcion ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precio", SqlDbType.Decimal);
-                    pPrecio.Precision = 18; pPrecio.Scale = 2;
+                    pPrecio.Precision = 18;
+                    pPrecio.Scale = 2;
                     pPrecio.Value = obj.Precio;
                 },
                 table, idCol,
@@ -80,7 +85,8 @@ UPDATE " + table + @"
                         (object)obj.Descripcion ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precio", SqlDbType.Decimal);
-                    pPrecio.Precision = 18; pPrecio.Scale = 2;
+                    pPrecio.Precision = 18;
+                    pPrecio.Scale = 2;
                     pPrecio.Value = obj.Precio;
                 },
                 table, idCol, obj.IdServicio,
@@ -88,6 +94,32 @@ UPDATE " + table + @"
                 "Modificación de servicio adicional Id=" + obj.IdServicio,
                 true
             );
+        }
+
+        public void Deshabilitar(int idServicio, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idServicio;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idServicio,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionServicioAdicional
+                    : BE.Audit.AuditEvents.HabilitacionServicioAdicional,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") +
+                " de servicio adicional Id=" + idServicio,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idServicio, false);
         }
     }
 }

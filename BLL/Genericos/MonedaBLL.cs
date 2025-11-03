@@ -52,7 +52,7 @@ namespace BLL.Genericos
         }
 
 
-        public bool Delete(BE.Moneda objUdp)
+        public bool Deshabilitar(int idMoneda, bool deshabilitar)
         {
             //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
             //catch (Exception) { throw; }

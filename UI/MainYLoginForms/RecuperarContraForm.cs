@@ -24,7 +24,7 @@ namespace UI
 
         private void UpdateTexts()
         {
-            this.txtEmail.Tag = "MAIL_URBANSOFT";
+            this.txtEmail.Tag = TextBoxTag.MailUrban;
             this.Text = param.GetLocalizable("recover_title");
             lblInstruccion.Text = param.GetLocalizable("recover_email_label");
             btnEnviar.Text = param.GetLocalizable("recover_submit_button");

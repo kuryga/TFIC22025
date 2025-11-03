@@ -5,6 +5,17 @@ using System.Windows.Forms;
 
 namespace UI
 {
+    public static class TextBoxTag
+    {
+        public const string Num12 = "NUM_12";
+        public const string MailUrban = "MAIL_URBANSOFT";
+        public const string SqlSafe = "SAFE";
+        public const string Pwd = "PASSWORD";
+        public const string PwdVerify = "VERIFY_PASS";
+        public const string PhoneNumber = "AR_PHONE";
+
+        public const string NoSanitize = "NoSanitize";
+    }
     public static class InputSanitizer
     {
         public const string AllowedPattern = @"^[a-zA-Z0-9!@#$^&?_+<>.:]+$";
@@ -30,7 +41,7 @@ namespace UI
 
             var tb = sender as TextBox;
             var tag = (tb != null ? tb.Tag as string : null)?.Trim();
-            var isSafe = string.Equals(tag, "SAFE", StringComparison.OrdinalIgnoreCase);
+            var isSafe = string.Equals(tag, TextBoxTag.SqlSafe, StringComparison.OrdinalIgnoreCase);
 
             var pattern = isSafe ? AllowedPatternWithSpaces : AllowedPattern;
 
@@ -54,7 +65,7 @@ namespace UI
             {
                 if (c is TextBox tb)
                 {
-                    if (!(tb.Tag is string tag && tag.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
+                    if (!(tb.Tag is string tag && tag.Equals(TextBoxTag.NoSanitize, StringComparison.OrdinalIgnoreCase)))
                         ProtectTextBox(tb);
                 }
                 if (c.HasChildren)

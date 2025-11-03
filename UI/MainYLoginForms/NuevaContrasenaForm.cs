@@ -121,7 +121,7 @@ namespace UI
 
         private void UpdateTexts()
         {
-            txtContra.Tag = "VERIFY_PASS";
+            txtContra.Tag = TextBoxTag.PwdVerify;
             this.Text = param.GetLocalizable("reset_password_title");
             lblNueva.Text = param.GetLocalizable("reset_password_new_label");
             lblConfirmar.Text = param.GetLocalizable("reset_password_confirm_label");

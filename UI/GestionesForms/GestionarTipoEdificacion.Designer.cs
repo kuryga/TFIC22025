@@ -7,7 +7,7 @@ namespace UI
         private DataGridView dgvTipos;
         private TextBox txtId, txtDescripcion;
         private Label lblId, lblDescripcion;
-        private Button btnCrear, btnModificar, btnBorrar;
+        private Button btnCrear, btnModificar, btnDeshabilitar;
 
         private System.ComponentModel.IContainer components = null;
 
@@ -26,7 +26,8 @@ namespace UI
             this.lblDescripcion = new System.Windows.Forms.Label();
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
-            this.btnBorrar = new System.Windows.Forms.Button();
+            this.btnDeshabilitar = new System.Windows.Forms.Button();
+            this.lblTitle = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTipos)).BeginInit();
             this.SuspendLayout();
             // 
@@ -34,18 +35,18 @@ namespace UI
             // 
             this.dgvTipos.AllowUserToAddRows = false;
             this.dgvTipos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvTipos.Location = new System.Drawing.Point(20, 20);
+            this.dgvTipos.Location = new System.Drawing.Point(20, 36);
             this.dgvTipos.MultiSelect = false;
             this.dgvTipos.Name = "dgvTipos";
             this.dgvTipos.ReadOnly = true;
             this.dgvTipos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvTipos.Size = new System.Drawing.Size(410, 150);
+            this.dgvTipos.Size = new System.Drawing.Size(594, 150);
             this.dgvTipos.TabIndex = 0;
             this.dgvTipos.SelectionChanged += new System.EventHandler(this.dgvTipos_SelectionChanged);
             // 
             // txtId
             // 
-            this.txtId.Location = new System.Drawing.Point(130, 180);
+            this.txtId.Location = new System.Drawing.Point(130, 196);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
             this.txtId.Size = new System.Drawing.Size(150, 20);
@@ -53,14 +54,14 @@ namespace UI
             // 
             // txtDescripcion
             // 
-            this.txtDescripcion.Location = new System.Drawing.Point(130, 210);
+            this.txtDescripcion.Location = new System.Drawing.Point(130, 226);
             this.txtDescripcion.Name = "txtDescripcion";
             this.txtDescripcion.Size = new System.Drawing.Size(300, 20);
             this.txtDescripcion.TabIndex = 4;
             // 
             // lblId
             // 
-            this.lblId.Location = new System.Drawing.Point(20, 185);
+            this.lblId.Location = new System.Drawing.Point(20, 201);
             this.lblId.Name = "lblId";
             this.lblId.Size = new System.Drawing.Size(100, 23);
             this.lblId.TabIndex = 1;
@@ -68,7 +69,7 @@ namespace UI
             // 
             // lblDescripcion
             // 
-            this.lblDescripcion.Location = new System.Drawing.Point(20, 215);
+            this.lblDescripcion.Location = new System.Drawing.Point(20, 231);
             this.lblDescripcion.Name = "lblDescripcion";
             this.lblDescripcion.Size = new System.Drawing.Size(100, 23);
             this.lblDescripcion.TabIndex = 3;
@@ -76,7 +77,7 @@ namespace UI
             // 
             // btnCrear
             // 
-            this.btnCrear.Location = new System.Drawing.Point(20, 260);
+            this.btnCrear.Location = new System.Drawing.Point(20, 276);
             this.btnCrear.Name = "btnCrear";
             this.btnCrear.Size = new System.Drawing.Size(75, 23);
             this.btnCrear.TabIndex = 5;
@@ -85,25 +86,34 @@ namespace UI
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(186, 260);
+            this.btnModificar.Location = new System.Drawing.Point(281, 276);
             this.btnModificar.Name = "btnModificar";
             this.btnModificar.Size = new System.Drawing.Size(75, 23);
             this.btnModificar.TabIndex = 6;
             this.btnModificar.Text = "Modificar tipo";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
-            // btnBorrar
+            // btnDeshabilitar
             // 
-            this.btnBorrar.Location = new System.Drawing.Point(355, 260);
-            this.btnBorrar.Name = "btnBorrar";
-            this.btnBorrar.Size = new System.Drawing.Size(75, 23);
-            this.btnBorrar.TabIndex = 7;
-            this.btnBorrar.Text = "Borrar tipo";
-            this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
+            this.btnDeshabilitar.Location = new System.Drawing.Point(539, 276);
+            this.btnDeshabilitar.Name = "btnDeshabilitar";
+            this.btnDeshabilitar.Size = new System.Drawing.Size(75, 23);
+            this.btnDeshabilitar.TabIndex = 7;
+            this.btnDeshabilitar.Text = "Deshabilitar";
+            this.btnDeshabilitar.Click += new System.EventHandler(this.btnDeshabilitar_Click);
+            // 
+            // lblTitle
+            // 
+            this.lblTitle.Location = new System.Drawing.Point(17, 10);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(597, 23);
+            this.lblTitle.TabIndex = 8;
+            this.lblTitle.Text = "Descripción:";
             // 
             // GestionarTipoEdificacionForm
             // 
-            this.ClientSize = new System.Drawing.Size(452, 294);
+            this.ClientSize = new System.Drawing.Size(636, 309);
+            this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.dgvTipos);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);
@@ -111,7 +121,7 @@ namespace UI
             this.Controls.Add(this.txtDescripcion);
             this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnModificar);
-            this.Controls.Add(this.btnBorrar);
+            this.Controls.Add(this.btnDeshabilitar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GestionarTipoEdificacionForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -124,5 +134,6 @@ namespace UI
 
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private Label lblTitle;
     }
 }

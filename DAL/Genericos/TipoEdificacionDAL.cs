@@ -10,13 +10,18 @@ namespace DAL.Genericos
     {
         private static TipoEdificacionDAL instance;
         private TipoEdificacionDAL() { }
-        public static TipoEdificacionDAL GetInstance() { if (instance == null) instance = new TipoEdificacionDAL(); return instance; }
+        public static TipoEdificacionDAL GetInstance()
+        {
+            if (instance == null)
+                instance = new TipoEdificacionDAL();
+            return instance;
+        }
 
         private static readonly DalToolkit db = new DalToolkit();
 
         private const string table = "dbo.TipoEdificacion";
         private const string idCol = "idTipoEdificacion";
-        private const string publicCols = "idTipoEdificacion, descripcion";
+        private const string publicCols = "idTipoEdificacion, descripcion, deshabilitado";
 
         public List<BE.TipoEdificacion> GetAll()
         {
@@ -78,6 +83,32 @@ UPDATE " + table + @"
                 "Modificación de tipo de edificación Id=" + obj.IdTipoEdificacion,
                 true
             );
+        }
+
+        public void Deshabilitar(int idTipoEdificacion, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idTipoEdificacion;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idTipoEdificacion,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionTipoEdificacion
+                    : BE.Audit.AuditEvents.HabilitacionTipoEdificacion,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") +
+                " de tipo de edificación Id=" + idTipoEdificacion,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idTipoEdificacion, false);
         }
     }
 }

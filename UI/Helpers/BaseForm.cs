@@ -46,31 +46,31 @@ namespace UI
                     var tagUpper = string.IsNullOrWhiteSpace(tag) ? null : tag.Trim().ToUpperInvariant();
                     if (EnableSanitization)
                     {
-                        if (!(tb.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
+                        if (!(tb.Tag is string tagSan && tagSan.Equals(TextBoxTag.NoSanitize, StringComparison.OrdinalIgnoreCase)))
                             InputSanitizer.ProtectTextBox(tb);
                     }
 
                     if (!string.IsNullOrEmpty(tagUpper))
                     {
-                        if (EnableArPhoneValidation && string.Equals(tagUpper, "AR_PHONE", StringComparison.Ordinal))
+                        if (EnableArPhoneValidation && string.Equals(tagUpper, TextBoxTag.PhoneNumber, StringComparison.Ordinal))
                             PhoneValidator.Attach(tb, _sharedErrorProvider);
 
-                        if (string.Equals(tagUpper, "NUM_12", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.Num12, StringComparison.Ordinal))
                             AttachNumeric12Validation(tb);
 
-                        if (string.Equals(tagUpper, "MAIL_URBANSOFT", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.MailUrban, StringComparison.Ordinal))
                             AttachUrbansoftEmailValidation(tb);
 
-                        if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.SqlSafe, StringComparison.Ordinal))
                             AttachSafeSqlValidation(tb);
 
-                        if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.Pwd, StringComparison.Ordinal))
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachSafeSqlValidation(tb);
                         }
 
-                        if (string.Equals(tagUpper, "VERIFY_PASS", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.PwdVerify, StringComparison.Ordinal))
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachPasswordVerification(tb);

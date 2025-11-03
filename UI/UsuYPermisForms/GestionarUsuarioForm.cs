@@ -25,12 +25,12 @@ namespace UI
 
         private void UpdateTexts()
         {
-            txtTelefono.Tag = "AR_PHONE";
-            txtDocumento.Tag = "NUM_12";
-            txtCorreo.Tag = "MAIL_URBANSOFT";
-            txtDireccion.Tag = "SAFE";
-            txtNombre.Tag = "SAFE";
-            txtApellido.Tag = "SAFE";
+            txtTelefono.Tag = TextBoxTag.PhoneNumber;
+            txtDocumento.Tag = TextBoxTag.Num12;
+            txtCorreo.Tag = TextBoxTag.MailUrban;
+            txtDireccion.Tag = TextBoxTag.SqlSafe;
+            txtNombre.Tag = TextBoxTag.SqlSafe;
+            txtApellido.Tag = TextBoxTag.SqlSafe;
  
             lblNombre.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_firstname_label");
             lblApellido.Text = ParametrizacionBLL.GetInstance().GetLocalizable("user_lastname_label");

@@ -80,6 +80,8 @@ namespace BE.Audit
         public const string ModificarPatentesUsuario = "Patentes.ModificacionPorUsuario";
         public const string AsignarPatentesAFamilia = "Familia.AsignacionDePatente";
         public const string ModificacionFamilia = "Familia.Modificacion";
+        public const string HabilitacionTipoEdificacion = "TipoEdificacion.Habilitar";
+        public const string DeshabilitacionTipoEdificacion = "TipoEdificacion.Deshabilitar";
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";
@@ -176,6 +178,8 @@ namespace BE.Audit
                 case ModificarFamiliasUsuario:
                 case AsignarPatentesAFamilia:
                 case ModificacionFamilia:
+                case DeshabilitacionTipoEdificacion:
+                case HabilitacionTipoEdificacion:
                     return Criticidad.C3;
             }
 

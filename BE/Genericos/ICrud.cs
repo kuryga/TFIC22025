@@ -11,6 +11,6 @@ namespace BE
         bool Create(T objAdd);
         List<T> GetAll();
         bool Update(T objUpd);
-        bool Delete(T objUdp);
+        bool Deshabilitar(int idObj, bool deshabilitar);
     }
 }

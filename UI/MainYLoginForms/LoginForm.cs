@@ -162,8 +162,8 @@ namespace UI
 
         private void UpdateTexts()
         {
-            txtUsuario.Tag = "MAIL_URBANSOFT";
-            txtContrasena.Tag = "PASSWORD";
+            txtUsuario.Tag = TextBoxTag.MailUrban;
+            txtContrasena.Tag = TextBoxTag.Pwd;
             lblUsuario.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_username_label");
             lblContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_password_label");
             lblIdiomaInferior.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_language_label");

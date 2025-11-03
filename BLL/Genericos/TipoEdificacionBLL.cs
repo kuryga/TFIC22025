@@ -15,15 +15,16 @@ namespace BLL.Genericos
             return instance;
         }
 
-
         public bool Create(BE.TipoEdificacion objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (objAdd == null) throw new ArgumentNullException(nameof(objAdd));
+                TipoEdificacionDAL.GetInstance().Create(objAdd);
+                return objAdd.IdTipoEdificacion > 0;
+            }
+            catch (Exception) { throw; }
         }
-
 
         public List<BE.TipoEdificacion> GetAll()
         {
@@ -31,33 +32,39 @@ namespace BLL.Genericos
             catch (Exception) { throw; }
         }
 
-
-        public BE.TipoEdificacion GetByID(string idEdificacion)
-        {
-            // try { return MonedaDAL.GetInstance().GetByCorreoElectronico(username); }
-            //catch (Exception) { throw; }
-            // TODO: sacar esto y modificar
-            return new BE.TipoEdificacion();
-        }
-
-
         public bool Update(BE.TipoEdificacion objUpd)
         {
             try
             {
+                if (objUpd == null) throw new ArgumentNullException(nameof(objUpd));
+                if (objUpd.IdTipoEdificacion <= 0) throw new ArgumentException("Id inválido");
                 TipoEdificacionDAL.GetInstance().Update(objUpd);
                 return true;
             }
             catch (Exception) { throw; }
         }
 
-
         public bool Delete(BE.TipoEdificacion objUdp)
         {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
+            try
+            {
+                if (objUdp == null) throw new ArgumentNullException(nameof(objUdp));
+                if (objUdp.IdTipoEdificacion <= 0) throw new ArgumentException("Id inválido");
+                TipoEdificacionDAL.GetInstance().Deshabilitar(objUdp.IdTipoEdificacion, true);
+                return true;
+            }
+            catch (Exception) { throw; }
+        }
 
-            return false;
+        public bool Deshabilitar(int idTipoEdificacion, bool deshabilitar)
+        {
+            try
+            {
+                if (idTipoEdificacion <= 0) throw new ArgumentException("Id inválido");
+                TipoEdificacionDAL.GetInstance().Deshabilitar(idTipoEdificacion, deshabilitar);
+                return true;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

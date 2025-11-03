@@ -52,7 +52,7 @@ namespace BLL.Genericos
         }
 
 
-        public bool Delete(BE.ServicioAdicional objUdp)
+        public bool Deshabilitar(int idTipEd, bool deshabilitar)
         {
             //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
             //catch (Exception) { throw; }

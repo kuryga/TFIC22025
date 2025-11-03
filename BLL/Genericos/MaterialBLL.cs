@@ -52,7 +52,7 @@ namespace BLL.Genericos
         }
 
 
-        public bool Delete(BE.Material objUdp)
+        public bool Deshabilitar(int idMat, bool deshabilitar)
         {
             //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
             //catch (Exception) { throw; }

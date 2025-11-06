@@ -6,7 +6,7 @@ using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp.AuditoriaForms
 {
-    public partial class GenerarReporteForm : Form
+    public partial class GenerarReporteForm : BaseForm
     {
         public DateTime? Desde { get; set; }
         public DateTime? Hasta { get; set; }
@@ -74,6 +74,10 @@ namespace WinApp.AuditoriaForms
             chkPaginaAct.Text = param.GetLocalizable("current_page_only_label");
             btnCarpeta.Text = param.GetLocalizable("select_folder_button");
             btnGenerar.Text = param.GetLocalizable("report_generate_button");
+
+            string helpTitle = param.GetLocalizable("report_help_title");
+            string helpBody = param.GetLocalizable("report_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void BtnExplorar_Click(object sender, EventArgs e)

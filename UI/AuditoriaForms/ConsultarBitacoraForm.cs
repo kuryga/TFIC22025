@@ -167,6 +167,10 @@ namespace WinApp
             lblHasta.Text = param.GetLocalizable("log_date_to_label");
             btnConsultar.Text = param.GetLocalizable("log_search_button");
             btnReporte.Text = param.GetLocalizable("generate_report_button");
+
+            string helpTitle = param.GetLocalizable("log_help_title");
+            string helpBody = param.GetLocalizable("log_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void UpdateDvg()

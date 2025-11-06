@@ -23,28 +23,16 @@ namespace WinApp
             btnBackup.Click += BtnBackup_Click;
             cboDestino.SelectedIndexChanged += CboDestino_SelectedIndexChanged;
 
-            // Bloquear tipeo manual en NumericUpDown
             var tb = nudPartes.Controls[1] as TextBox;
             if (tb != null) tb.ReadOnly = true;
 
             UpdateTexts();
         }
 
-        private void UpdateTexts()
-        {
-            lblUnidad.Text = param.GetLocalizable("backup_destination_label");
-            lblPartes.Text = param.GetLocalizable("backup_parts_label");
-
-            btnCarpeta.Text = param.GetLocalizable("backup_browse_button");
-            btnBackup.Text = param.GetLocalizable("backup_execute_button");
-
-            this.Text = param.GetLocalizable("backup_title");
-        }
-
         private void BackupForm_Load(object sender, EventArgs e)
         {
             CargarUnidades();
-            btnBackup.Enabled = false; // Deshabilitado hasta que el usuario elija una carpeta
+            btnBackup.Enabled = false;
         }
 
         private void CargarUnidades()
@@ -152,6 +140,21 @@ namespace WinApp
             UseWaitCursor = busy;
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
             Application.DoEvents();
+        }
+
+        private void UpdateTexts()
+        {
+            lblUnidad.Text = param.GetLocalizable("backup_destination_label");
+            lblPartes.Text = param.GetLocalizable("backup_parts_label");
+
+            btnCarpeta.Text = param.GetLocalizable("backup_browse_button");
+            btnBackup.Text = param.GetLocalizable("backup_execute_button");
+
+            this.Text = param.GetLocalizable("backup_title");
+
+            string helpTitle = param.GetLocalizable("backup_help_title");
+            string helpBody = param.GetLocalizable("backup_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

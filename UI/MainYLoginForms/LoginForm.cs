@@ -16,14 +16,17 @@ namespace WinApp
     {
         public event Action LoginSucceeded;
 
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
+
         public LoginForm()
         {
             InitializeComponent();
             loadParametrizacion();
 
             this.UpdateTexts();
-            List<Idioma> idiomas = ParametrizacionBLL.GetInstance().GetIdiomas();
-            int idiomaSeleccionado = ParametrizacionBLL.GetInstance().GetIdIdioma();
+
+            List<Idioma> idiomas = param.GetIdiomas();
+            int idiomaSeleccionado = param.GetIdIdioma();
 
             cmbIdiomaInferior.DataSource = idiomas;
             cmbIdiomaInferior.DisplayMember = "nombre";
@@ -44,9 +47,9 @@ namespace WinApp
         {
             try
             {
-                ParametrizacionBLL.GetInstance().LoadParametrizacion();
+                param.LoadParametrizacion();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 string mensaje = ConfigurationManager.AppSettings["MensajeErrorConexion"];
                 string titulo = ConfigurationManager.AppSettings["TituloErrorConexion"];
@@ -64,7 +67,7 @@ namespace WinApp
         {
             if (cmbIdiomaInferior.SelectedItem is BE.Idioma idioma)
             {
-                ParametrizacionBLL.GetInstance().LoadLocalizablesForIdioma(idioma.IdIdioma);
+                param.LoadLocalizablesForIdioma(idioma.IdIdioma);
                 this.UpdateTexts();
             }
         }
@@ -77,21 +80,15 @@ namespace WinApp
             {
                 string usuario = txtUsuario.Text?.Trim().ToLower();
                 string pass = txtContrasena.Text;
-                bool ok = await Task.Run(() =>
-                {
-                    return LoginBLL.GetInstance().TryLogin(usuario, pass);
-                });
+
+                bool ok = await Task.Run(() => LoginBLL.GetInstance().TryLogin(usuario, pass));
+
+                SetBusy(false);
 
                 if (ok)
-                {
-                    SetBusy(false);
                     OpenAfterLogin();
-                }
                 else
-                {
-                    SetBusy(false);
                     MostrarLoginError();
-                }
             }
             catch (DeshabilitadoException)
             {
@@ -112,8 +109,8 @@ namespace WinApp
             {
                 SetBusy(false);
                 MessageBox.Show(
-                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_message"),
-                    ParametrizacionBLL.GetInstance().GetLocalizable("login_error_title"),
+                    param.GetLocalizable("login_error_message"),
+                    param.GetLocalizable("login_error_title"),
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -144,8 +141,8 @@ namespace WinApp
         private void MostrarLoginError()
         {
             MessageBox.Show(
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_message"),
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_invalid_title"),
+                param.GetLocalizable("login_invalid_message"),
+                param.GetLocalizable("login_invalid_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -157,8 +154,8 @@ namespace WinApp
         private void MostrarBloqueadoError()
         {
             MessageBox.Show(
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_message"),
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_blocked_title"),
+                param.GetLocalizable("login_blocked_message"),
+                param.GetLocalizable("login_blocked_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -170,8 +167,8 @@ namespace WinApp
         private void MostrarDeshabilitadoError()
         {
             MessageBox.Show(
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_message"),
-                ParametrizacionBLL.GetInstance().GetLocalizable("login_disabled_title"),
+                param.GetLocalizable("login_disabled_message"),
+                param.GetLocalizable("login_disabled_title"),
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -184,15 +181,22 @@ namespace WinApp
         {
             txtUsuario.Tag = TextBoxTag.MailUrban;
             txtContrasena.Tag = TextBoxTag.Pwd;
-            lblUsuario.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_username_label");
-            lblContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_password_label");
-            lblIdiomaInferior.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_language_label");
-            btnLogin.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_button");
-            btnRecuperarContrasena.Text = ParametrizacionBLL.GetInstance().GetLocalizable("login_forgot_password");
-            string titleText = ParametrizacionBLL.GetInstance().GetLocalizable("login_title");
-            string NombreEmpresa = ParametrizacionBLL.GetInstance().GetNombreEmpresa();
 
-            this.Text = $"{titleText} - {NombreEmpresa}";
+            lblUsuario.Text = param.GetLocalizable("login_username_label");
+            lblContrasena.Text = param.GetLocalizable("login_password_label");
+            lblIdiomaInferior.Text = param.GetLocalizable("login_language_label");
+            btnLogin.Text = param.GetLocalizable("login_button");
+            btnRecuperarContrasena.Text = param.GetLocalizable("login_forgot_password");
+
+            string titleText = param.GetLocalizable("login_title");
+            string nombreEmpresa = param.GetNombreEmpresa();
+
+            this.Text = $"{titleText} {nombreEmpresa}";
+
+            SetHelpContext(
+                param.GetLocalizable("login_help_title"),
+                param.GetLocalizable("login_help_body")
+            );
         }
 
         private void btnRecuperarContrasena_Click(object sender, EventArgs e)

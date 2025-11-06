@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using System.Collections.Generic;                   // NUEVO
+using UI.Infrastructure;                            // NUEVO: protocolo de ayuda
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp
@@ -15,10 +17,14 @@ namespace WinApp
         public bool EnableArPhoneValidation { get; set; } = true;
 
         private readonly ErrorProvider _sharedErrorProvider;
+        private IContextualMenuExecutable _helpProtocol;
 
         public BaseForm()
         {
             _sharedErrorProvider = new ErrorProvider { BlinkStyle = ErrorBlinkStyle.NeverBlink };
+
+            this.KeyPreview = true;
+            _helpProtocol = new ContextualMenuExecutable(this);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -302,6 +308,20 @@ namespace WinApp
                 tb.Text = InputSanitizer.FormatPrice2(txt, CultureInfo.CurrentCulture, false);
                 _sharedErrorProvider.SetError(tb, string.Empty);
             }
+        }
+
+        protected void SetHelpContext(string title, string text)
+        {
+            if (_helpProtocol != null)
+                _helpProtocol.Configure(title, text);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (_helpProtocol != null && _helpProtocol.HandleKey(keyData))
+                return true;
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

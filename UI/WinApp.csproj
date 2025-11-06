@@ -53,6 +53,7 @@
     <Compile Include="AuditoriaForms\GenerarReporteForm.Designer.cs">
       <DependentUpon>GenerarReporteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ContextualMenuExecutable.cs" />
     <Compile Include="MainYLoginForms\IngresoCodigoRecupContraForm.cs">
       <SubType>Form</SubType>
     </Compile>

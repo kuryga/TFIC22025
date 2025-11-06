@@ -128,6 +128,10 @@ namespace WinApp
             btnVerContra.Text = param.GetLocalizable("password_show_button");
             btnVerConfirmacion.Text = param.GetLocalizable("password_show_button");
             btnConfirmar.Text = param.GetLocalizable("reset_password_confirm_button");
+
+            string helpTitle = param.GetLocalizable("reset_password_help_title");
+            string helpBody = param.GetLocalizable("reset_password_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void ToggleBusy(bool busy)

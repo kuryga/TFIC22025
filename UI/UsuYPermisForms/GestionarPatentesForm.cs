@@ -244,6 +244,10 @@ namespace WinApp
             lblDisponibles.Text = param.GetLocalizable("patentes_assigned_label");
 
             brnGuardar.Text = param.GetLocalizable("save_button");
+
+            string helpTitle = param.GetLocalizable("user_patents_help_title");
+            string helpBody = param.GetLocalizable("user_patents_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

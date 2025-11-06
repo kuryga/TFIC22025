@@ -324,41 +324,6 @@ namespace WinApp
             }
         }
 
-        private void UpdateTexts()
-        {
-            txtTelefono.Tag = TextBoxTag.PhoneNumber;
-            txtDocumento.Tag = TextBoxTag.Num12;
-            txtCorreo.Tag = TextBoxTag.MailUrban;
-            txtDireccion.Tag = TextBoxTag.SqlSafe;
-            txtNombre.Tag = TextBoxTag.SqlSafe;
-            txtApellido.Tag = TextBoxTag.SqlSafe;
-
-            lblId.Text = param.GetLocalizable("user_id_label");
-            lblNombre.Text = param.GetLocalizable("user_firstname_label");
-            lblApellido.Text = param.GetLocalizable("user_lastname_label");
-            lblDocumento.Text = param.GetLocalizable("user_document_label");
-            lblCorreo.Text = param.GetLocalizable("user_email_label");
-            lblTelefono.Text = param.GetLocalizable("user_phone_label");
-            lblDireccion.Text = param.GetLocalizable("user_address_label");
-
-            btnCrear.Text = param.GetLocalizable("user_create_button");
-            btnModificar.Text = param.GetLocalizable("user_modify_button");
-
-            string titleText = param.GetLocalizable("something_title");
-            string NombreEmpresa = param.GetNombreEmpresa();
-            this.Text = $"{titleText} - {NombreEmpresa}";
-
-            if (dgvUsuarios.Columns.Count > 0)
-            {
-                dgvUsuarios.Columns["colId"].HeaderText = param.GetLocalizable("user_id_label");
-                dgvUsuarios.Columns["colNombre"].HeaderText = param.GetLocalizable("user_firstname_label");
-                dgvUsuarios.Columns["colApellido"].HeaderText = param.GetLocalizable("user_lastname_label");
-                dgvUsuarios.Columns["colCorreo"].HeaderText = param.GetLocalizable("user_email_label");
-                dgvUsuarios.Columns["colBloqueado"].HeaderText = param.GetLocalizable("user_blocked_label");
-                dgvUsuarios.Columns["colDeshabilitado"].HeaderText = param.GetLocalizable("user_disabled_label");
-            }
-        }
-
         private void InputsChanged(object sender, EventArgs e)
         {
             UpdateModifyButton();
@@ -457,6 +422,44 @@ namespace WinApp
                 f.CancelButton = btnCancel;
                 return f.ShowDialog(this) == DialogResult.OK;
             }
+        }
+        private void UpdateTexts()
+        {
+            txtTelefono.Tag = TextBoxTag.PhoneNumber;
+            txtDocumento.Tag = TextBoxTag.Num12;
+            txtCorreo.Tag = TextBoxTag.MailUrban;
+            txtDireccion.Tag = TextBoxTag.SqlSafe;
+            txtNombre.Tag = TextBoxTag.SqlSafe;
+            txtApellido.Tag = TextBoxTag.SqlSafe;
+
+            lblId.Text = param.GetLocalizable("user_id_label");
+            lblNombre.Text = param.GetLocalizable("user_firstname_label");
+            lblApellido.Text = param.GetLocalizable("user_lastname_label");
+            lblDocumento.Text = param.GetLocalizable("user_document_label");
+            lblCorreo.Text = param.GetLocalizable("user_email_label");
+            lblTelefono.Text = param.GetLocalizable("user_phone_label");
+            lblDireccion.Text = param.GetLocalizable("user_address_label");
+
+            btnCrear.Text = param.GetLocalizable("user_create_button");
+            btnModificar.Text = param.GetLocalizable("user_modify_button");
+
+            string titleText = param.GetLocalizable("something_title");
+            string NombreEmpresa = param.GetNombreEmpresa();
+            this.Text = $"{titleText} - {NombreEmpresa}";
+
+            if (dgvUsuarios.Columns.Count > 0)
+            {
+                dgvUsuarios.Columns["colId"].HeaderText = param.GetLocalizable("user_id_label");
+                dgvUsuarios.Columns["colNombre"].HeaderText = param.GetLocalizable("user_firstname_label");
+                dgvUsuarios.Columns["colApellido"].HeaderText = param.GetLocalizable("user_lastname_label");
+                dgvUsuarios.Columns["colCorreo"].HeaderText = param.GetLocalizable("user_email_label");
+                dgvUsuarios.Columns["colBloqueado"].HeaderText = param.GetLocalizable("user_blocked_label");
+                dgvUsuarios.Columns["colDeshabilitado"].HeaderText = param.GetLocalizable("user_disabled_label");
+            }
+
+            string helpTitle = param.GetLocalizable("users_management_help_title");
+            string helpBody = param.GetLocalizable("users_management_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

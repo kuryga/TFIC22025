@@ -165,6 +165,10 @@ namespace WinApp
             lblBienvenida.Text = $"{welcomeText} {Username}";
 
             this.Text = $"{menuText} - {NombreEmpresa}";
+
+            string helpTitle = ParametrizacionBLL.GetInstance().GetLocalizable("main_help_title");
+            string helpBody = ParametrizacionBLL.GetInstance().GetLocalizable("main_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

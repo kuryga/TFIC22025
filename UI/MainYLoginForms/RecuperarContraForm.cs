@@ -20,15 +20,6 @@ namespace WinApp
             UpdateTexts();
         }
 
-        private void UpdateTexts()
-        {
-            this.txtEmail.Tag = TextBoxTag.MailUrban;
-            this.Text = param.GetLocalizable("recover_title");
-            lblInstruccion.Text = param.GetLocalizable("recover_email_label");
-            btnEnviar.Text = param.GetLocalizable("recover_submit_button");
-            btnCodigo.Text = param.GetLocalizable("recover_have_code_button");
-        }
-
         private void BtnEnviar_Click(object sender, EventArgs e)
         {
             var email = txtEmail.Text.Trim().ToLower() ?? string.Empty;
@@ -113,6 +104,19 @@ namespace WinApp
             btnCodigo.Enabled = !busy;
 
             Application.DoEvents();
+        }
+
+        private void UpdateTexts()
+        {
+            this.txtEmail.Tag = TextBoxTag.MailUrban;
+            this.Text = param.GetLocalizable("recover_title");
+            lblInstruccion.Text = param.GetLocalizable("recover_email_label");
+            btnEnviar.Text = param.GetLocalizable("recover_submit_button");
+            btnCodigo.Text = param.GetLocalizable("recover_have_code_button");
+
+            string helpTitle = param.GetLocalizable("recover_help_title");
+            string helpBody = param.GetLocalizable("recover_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

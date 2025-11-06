@@ -379,6 +379,10 @@ namespace WinApp
             btnCrear.Text = param.GetLocalizable("familia_create_button");
             btnGuardar.Text = param.GetLocalizable("save_button");
             btnModificar.Text = param.GetLocalizable("familia_modify_button");
+
+            string helpTitle = param.GetLocalizable("user_families_help_title");
+            string helpBody = param.GetLocalizable("user_families_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

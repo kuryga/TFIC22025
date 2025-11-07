@@ -11,6 +11,11 @@ namespace WinApp
         {
             InitializeComponent();
             CargarDatos();
+
+            var param = BLL.Genericos.ParametrizacionBLL.GetInstance();
+            string helpTitle = param.GetLocalizable("cotizacion_list_help_title");
+            string helpBody = param.GetLocalizable("cotizacion_list_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos()

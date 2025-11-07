@@ -122,6 +122,10 @@ namespace WinApp
             if (btnCrear != null) btnCrear.Text = param.GetLocalizable("moneda_create_button");
             if (btnModificar != null) btnModificar.Text = param.GetLocalizable("moneda_modify_button");
             AjustarTextoBotonToggle();
+
+            string helpTitle = param.GetLocalizable("moneda_help_title");
+            string helpBody = param.GetLocalizable("moneda_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos(int? seleccionarId = null)

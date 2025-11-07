@@ -118,6 +118,10 @@ namespace WinApp
             if (btnCrear != null) btnCrear.Text = param.GetLocalizable("material_create_button");
             if (btnModificar != null) btnModificar.Text = param.GetLocalizable("material_modify_button");
             AjustarTextoBotonToggle();
+
+            string helpTitle = param.GetLocalizable("material_help_title");
+            string helpBody = param.GetLocalizable("material_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos(int? seleccionarId = null)

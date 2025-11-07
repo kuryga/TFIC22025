@@ -101,6 +101,10 @@ namespace WinApp
             if (btnModificar != null) btnModificar.Text = param.GetLocalizable("servicio_modify_button");
 
             AjustarTextoBotonToggle();
+
+            string helpTitle = param.GetLocalizable("servicio_help_title");
+            string helpBody = param.GetLocalizable("servicio_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos(int? seleccionarId = null)

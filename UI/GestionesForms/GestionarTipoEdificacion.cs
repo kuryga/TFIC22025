@@ -84,6 +84,10 @@ namespace WinApp
 
             if (btnCrear != null) btnCrear.Text = param.GetLocalizable("tipoedif_create_button");
             if (btnModificar != null) btnModificar.Text = param.GetLocalizable("tipoedif_modify_button");
+
+            string helpTitle = param.GetLocalizable("tipoedif_help_title");
+            string helpBody = param.GetLocalizable("tipoedif_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos(int? seleccionarId = null)

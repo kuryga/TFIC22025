@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace WinApp
 {
-    public partial class AgregarMaquinariasForm : Form
+    public partial class AgregarMaquinariasForm : BaseForm
     {
         public AgregarMaquinariasForm()
         {

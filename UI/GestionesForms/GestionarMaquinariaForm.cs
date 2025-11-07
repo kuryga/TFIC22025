@@ -90,6 +90,10 @@ namespace WinApp
             if (btnCrear != null) btnCrear.Text = param.GetLocalizable("maquinaria_create_button");
             if (btnModificar != null) btnModificar.Text = param.GetLocalizable("maquinaria_modify_button");
             AjustarTextoBotonToggle();
+
+            string helpTitle = param.GetLocalizable("maquinaria_help_title");
+            string helpBody = param.GetLocalizable("maquinaria_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos(int? seleccionarId = null)

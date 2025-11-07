@@ -131,12 +131,6 @@
     <Compile Include="GestionesForms\GestionarMaquinariaForm.Designer.cs">
       <DependentUpon>GestionarMaquinariaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GestionesForms\GestionarMaquinariasForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GestionesForms\GestionarMaquinariasForm.Designer.cs">
-      <DependentUpon>GestionarMaquinariasForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="GestionesForms\GestionarMaterialForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -250,9 +244,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GestionesForms\GestionarMaquinariaForm.resx">
       <DependentUpon>GestionarMaquinariaForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GestionesForms\GestionarMaquinariasForm.resx">
-      <DependentUpon>GestionarMaquinariasForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GestionesForms\GestionarMaterialForm.resx">
       <DependentUpon>GestionarMaterialForm.cs</DependentUpon>

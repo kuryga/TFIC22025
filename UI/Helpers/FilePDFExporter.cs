@@ -92,9 +92,8 @@ namespace Utils.Reporting
             public string UsuarioEjecutor { get; set; }
         }
 
-        // Colores corporativos
-        private static readonly BaseColor CorporateGreen = new BaseColor(0, 102, 64);       // header
-        private static readonly BaseColor RowAlt = new BaseColor(234, 242, 234);            // zebra más notorio (verde muy suave)
+        private static readonly BaseColor CorporateGreen = new BaseColor(0, 102, 64);
+        private static readonly BaseColor RowAlt = new BaseColor(234, 242, 234);
         private static readonly BaseColor LightGray = new BaseColor(245, 245, 245);
 
         private static void GenerarPdf(BitacoraExport data, string rutaSalida, string empresa, byte[] logoBytes)
@@ -105,7 +104,7 @@ namespace Utils.Reporting
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
             using (var fs = new FileStream(rutaSalida, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (var doc = new Document(PageSize.A4, 36, 36, 100, 50)) // margen superior aumentado
+            using (var doc = new Document(PageSize.A4, 36, 36, 100, 50))
             {
                 var writer = PdfWriter.GetInstance(doc, fs);
 
@@ -134,7 +133,6 @@ namespace Utils.Reporting
 
                 doc.Open();
 
-                // --- Filtros
                 var fLbl = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9);
                 var fTxt = FontFactory.GetFont(FontFactory.HELVETICA, 9);
                 var tablaFiltros = new PdfPTable(6) { WidthPercentage = 100 };
@@ -163,7 +161,6 @@ namespace Utils.Reporting
 
                 doc.Add(new Paragraph(" "));
 
-                // --- Tabla de resultados
                 var table = new PdfPTable(6) { WidthPercentage = 100 };
                 table.SetWidths(new float[] { 1.0f, 1.5f, 0.8f, 1.6f, 3.6f, 1.8f });
 
@@ -208,7 +205,7 @@ namespace Utils.Reporting
         {
             t.AddCell(new PdfPCell(new Phrase(text, f))
             {
-                BackgroundColor = CorporateGreen, // verde corporativo oscuro
+                BackgroundColor = CorporateGreen,
                 HorizontalAlignment = Element.ALIGN_CENTER,
                 Padding = 5
             });

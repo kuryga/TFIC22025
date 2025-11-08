@@ -21,7 +21,7 @@ namespace WinApp
         public LoginForm()
         {
             InitializeComponent();
-            LoadLogo();          // ✅ logo cargado aquí
+            LoadLogo();
             loadParametrizacion();
             this.UpdateTexts();
 

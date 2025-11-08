@@ -21,8 +21,8 @@ namespace WinApp
         public LoginForm()
         {
             InitializeComponent();
+            LoadLogo();          // ✅ logo cargado aquí
             loadParametrizacion();
-
             this.UpdateTexts();
 
             List<Idioma> idiomas = param.GetIdiomas();
@@ -41,6 +41,30 @@ namespace WinApp
                 txtContrasena.UseSystemPasswordChar = true;
 
             txtUsuario?.Focus();
+        }
+
+        private void LoadLogo()
+        {
+            try
+            {
+                string logoPath = ConfigurationManager.AppSettings["ReportLogoPath"];
+
+                if (string.IsNullOrWhiteSpace(logoPath))
+                    return;
+
+                if (!System.IO.Path.IsPathRooted(logoPath))
+                    logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logoPath);
+
+                if (System.IO.File.Exists(logoPath))
+                {
+                    ptbLogo.SizeMode = PictureBoxSizeMode.Zoom;
+                    ptbLogo.Image = System.Drawing.Image.FromFile(logoPath);
+                }
+            }
+            catch
+            {
+                // nada
+            }
         }
 
         private void loadParametrizacion()

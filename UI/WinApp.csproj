@@ -326,7 +326,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\LogoUrbansoft.png" />
+    <Content Include="Resources\LogoUrbansoft.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\loader_gif.gif" />

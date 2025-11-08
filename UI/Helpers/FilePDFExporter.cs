@@ -92,8 +92,9 @@ namespace Utils.Reporting
             public string UsuarioEjecutor { get; set; }
         }
 
-        private static readonly BaseColor BrandBlue = new BaseColor(33, 150, 243);
-        private static readonly BaseColor RowAlt = new BaseColor(250, 250, 250);
+        // Colores corporativos
+        private static readonly BaseColor CorporateGreen = new BaseColor(0, 102, 64);       // header
+        private static readonly BaseColor RowAlt = new BaseColor(234, 242, 234);            // zebra más notorio (verde muy suave)
         private static readonly BaseColor LightGray = new BaseColor(245, 245, 245);
 
         private static void GenerarPdf(BitacoraExport data, string rutaSalida, string empresa, byte[] logoBytes)
@@ -104,7 +105,7 @@ namespace Utils.Reporting
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
             using (var fs = new FileStream(rutaSalida, FileMode.Create, FileAccess.Write, FileShare.None))
-            using (var doc = new Document(PageSize.A4, 36, 36, 90, 50))
+            using (var doc = new Document(PageSize.A4, 36, 36, 100, 50)) // margen superior aumentado
             {
                 var writer = PdfWriter.GetInstance(doc, fs);
 
@@ -112,7 +113,8 @@ namespace Utils.Reporting
                 if (logoBytes != null && logoBytes.Length > 0)
                 {
                     logo = Image.GetInstance(logoBytes);
-                    logo.ScaleToFit(60f, 60f);
+                    logo.ScaleToFit(110f, 110f);
+                    logo.Alignment = Image.ALIGN_LEFT;
                 }
 
                 string reportTitle = L("report_title", "Reporte de Bitácora del Sistema");
@@ -132,7 +134,7 @@ namespace Utils.Reporting
 
                 doc.Open();
 
-                // Filtros
+                // --- Filtros
                 var fLbl = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9);
                 var fTxt = FontFactory.GetFont(FontFactory.HELVETICA, 9);
                 var tablaFiltros = new PdfPTable(6) { WidthPercentage = 100 };
@@ -161,7 +163,7 @@ namespace Utils.Reporting
 
                 doc.Add(new Paragraph(" "));
 
-                // Tabla de resultados
+                // --- Tabla de resultados
                 var table = new PdfPTable(6) { WidthPercentage = 100 };
                 table.SetWidths(new float[] { 1.0f, 1.5f, 0.8f, 1.6f, 3.6f, 1.8f });
 
@@ -206,7 +208,7 @@ namespace Utils.Reporting
         {
             t.AddCell(new PdfPCell(new Phrase(text, f))
             {
-                BackgroundColor = BrandBlue,
+                BackgroundColor = CorporateGreen, // verde corporativo oscuro
                 HorizontalAlignment = Element.ALIGN_CENTER,
                 Padding = 5
             });
@@ -230,8 +232,8 @@ namespace Utils.Reporting
             public string Pie { get; set; }
             public string PageLabel { get; set; } = "Página";
 
-            private readonly Font fTitulo = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 13);
-            private readonly Font fSub = FontFactory.GetFont(FontFactory.HELVETICA, 9, BaseColor.DARK_GRAY);
+            private readonly Font fTitulo = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 15);
+            private readonly Font fSub = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.DARK_GRAY);
             private readonly Font fPie = FontFactory.GetFont(FontFactory.HELVETICA, 8, BaseColor.GRAY);
 
             public override void OnEndPage(PdfWriter writer, Document document)
@@ -240,16 +242,35 @@ namespace Utils.Reporting
                 float width = document.PageSize.Width - document.LeftMargin - document.RightMargin;
 
                 var header = new PdfPTable(2) { TotalWidth = width };
-                header.SetWidths(new float[] { 1.2f, 3f });
+                header.SetWidths(new float[] { 1.6f, 4f });
 
                 PdfPCell cLogo = Logo != null
-                    ? new PdfPCell(Logo, false) { Border = Rectangle.NO_BORDER, Rowspan = 2, PaddingRight = 10f, VerticalAlignment = Element.ALIGN_MIDDLE }
+                    ? new PdfPCell(Logo, false)
+                    {
+                        Border = Rectangle.NO_BORDER,
+                        Rowspan = 2,
+                        PaddingRight = 12f,
+                        PaddingTop = -20f,
+                        VerticalAlignment = Element.ALIGN_TOP
+                    }
                     : new PdfPCell(new Phrase(string.Empty)) { Border = Rectangle.NO_BORDER };
 
                 header.AddCell(cLogo);
-                header.AddCell(new PdfPCell(new Phrase(Titulo ?? string.Empty, fTitulo)) { Border = Rectangle.NO_BORDER, HorizontalAlignment = Element.ALIGN_LEFT });
-                header.AddCell(new PdfPCell(new Phrase(Subtitulo ?? string.Empty, fSub)) { Border = Rectangle.NO_BORDER, PaddingTop = -4f });
-                header.WriteSelectedRows(0, -1, document.LeftMargin, document.PageSize.Height - 10, cb);
+
+                header.AddCell(new PdfPCell(new Phrase(Titulo ?? string.Empty, fTitulo))
+                {
+                    Border = Rectangle.NO_BORDER,
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    PaddingBottom = 6f
+                });
+
+                header.AddCell(new PdfPCell(new Phrase(Subtitulo ?? string.Empty, fSub))
+                {
+                    Border = Rectangle.NO_BORDER,
+                    PaddingTop = 2f
+                });
+
+                header.WriteSelectedRows(0, -1, document.LeftMargin, document.PageSize.Height - 16, cb);
 
                 var footer = new PdfPTable(2) { TotalWidth = width };
                 footer.SetWidths(new float[] { 4f, 1f });

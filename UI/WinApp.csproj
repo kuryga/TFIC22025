@@ -66,6 +66,12 @@
     <Compile Include="AuditoriaForms\GenerarReporteForm.Designer.cs">
       <DependentUpon>GenerarReporteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMonedaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMonedaForm.Designer.cs">
+      <DependentUpon>CrearMonedaForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GestionesForms\GestionCrearForms\CrearServicioAdicionalForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -259,6 +259,7 @@ namespace WinApp
             txtContrasena.Enabled = !busy;
             btnRecuperarContrasena.Enabled = !busy;
             cmbIdiomaInferior.Enabled = !busy;
+            btnVer.Enabled = !busy;
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
             Application.DoEvents();
         }

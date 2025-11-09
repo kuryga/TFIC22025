@@ -25,6 +25,9 @@ namespace WinApp.AuditoriaForms
             InitializeComponent();
             this.Text = param.GetLocalizable("report_generation_title") ?? "Generación de reportes";
             Load += GenerarReporteForm_Load;
+
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.ShowInTaskbar = false; 
         }
 
         public GenerarReporteForm(DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad)

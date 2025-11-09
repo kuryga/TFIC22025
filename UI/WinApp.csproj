@@ -66,6 +66,12 @@
     <Compile Include="AuditoriaForms\GenerarReporteForm.Designer.cs">
       <DependentUpon>GenerarReporteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearTipoEdificacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearTipoEdificacionForm.Designer.cs">
+      <DependentUpon>CrearTipoEdificacionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\SecretStore.cs" />
     <Compile Include="Helpers\ContextualMenuExecutable.cs" />
     <Compile Include="Helpers\FilePDFExporter.cs" />
@@ -350,5 +356,6 @@
   <ItemGroup>
     <None Include="Resources\loader_gif.gif" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

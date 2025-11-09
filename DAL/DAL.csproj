@@ -87,6 +87,7 @@
     <Compile Include="IDAOInterface.cs" />
     <Compile Include="Seguridad\BackupDAL.cs" />
     <Compile Include="Seguridad\PermisosDAL.cs" />
+    <Compile Include="Seguridad\SecretStore.cs" />
     <Compile Include="Seguridad\SecurityUtilities.cs" />
     <Compile Include="Seguridad\SessionContext.cs" />
     <Compile Include="Seguridad\TraduccionContext.cs" />

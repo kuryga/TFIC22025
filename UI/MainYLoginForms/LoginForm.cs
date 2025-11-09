@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data.SqlClient;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
@@ -17,10 +20,20 @@ namespace WinApp
         public event Action LoginSucceeded;
 
         private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
+        private readonly string secretPath =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                         "UrbanSoft", "conn.secret");
 
         public LoginForm()
         {
             InitializeComponent();
+
+            if (!EnsureConnectionConfiguredAndHealthy())
+            {
+                Application.Exit();
+                return;
+            }
+
             LoadLogo();
             loadParametrizacion();
             this.UpdateTexts();
@@ -43,12 +56,80 @@ namespace WinApp
             txtUsuario?.Focus();
         }
 
+        private bool EnsureConnectionConfiguredAndHealthy()
+        {
+            if (TryGetConnectionStringFromSecret(out var cs) && ProbarConexion(cs))
+                return true;
+
+            while (true)
+            {
+                using (var dlg = new ConexionErrorForm())
+                {
+                    var dr = dlg.ShowDialog(this);
+                    if (dr != DialogResult.OK || !dlg.ReconfigureSelected)
+                        return false;
+
+                    using (var cfg = new ConfigurarConexionForm(dlg.SelectedLanguage))
+                    {
+                        var r2 = cfg.ShowDialog(this);
+                        if (r2 != DialogResult.OK)
+                            continue;
+                    }
+
+                    if (TryGetConnectionStringFromSecret(out cs) && ProbarConexion(cs))
+                    {
+                        var lang = dlg.SelectedLanguage ?? "es";
+                        string tituloInfo = ConfigurationManager.AppSettings[$"TituloInfo.{lang}"] ?? "Información";
+                        string msgOk = ConfigurationManager.AppSettings[$"MsgConfigActualizada.{lang}"] ?? "Configuración actualizada correctamente. Se reintentará la conexión.";
+                        MessageBox.Show(msgOk, tituloInfo, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        private bool TryGetConnectionStringFromSecret(out string connectionString)
+        {
+            connectionString = null;
+            try
+            {
+                if (!File.Exists(secretPath))
+                    return false;
+
+                string encrypted = File.ReadAllText(secretPath, Encoding.UTF8)?.Trim();
+                if (string.IsNullOrWhiteSpace(encrypted))
+                    return false;
+
+                connectionString = EncriptacionBLL.GetInstance().DesencriptarReversible(encrypted);
+                return !string.IsNullOrWhiteSpace(connectionString);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool ProbarConexion(string connectionString)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void LoadLogo()
         {
             try
             {
                 string logoPath = ConfigurationManager.AppSettings["ReportLogoPath"];
-
                 if (string.IsNullOrWhiteSpace(logoPath))
                     return;
 
@@ -61,10 +142,7 @@ namespace WinApp
                     ptbLogo.Image = System.Drawing.Image.FromFile(logoPath);
                 }
             }
-            catch
-            {
-                // nada
-            }
+            catch { }
         }
 
         private void loadParametrizacion()
@@ -75,15 +153,35 @@ namespace WinApp
             }
             catch (Exception)
             {
-                string mensaje = ConfigurationManager.AppSettings["MensajeErrorConexion"];
-                string titulo = ConfigurationManager.AppSettings["TituloErrorConexion"];
+                string mensaje = ConfigurationManager.AppSettings["MensajeErrorConexion"]
+                                 ?? "Ocurrió un error inesperado al intentar conectar con el servicio. Por favor, comuníquese con el soporte técnico de la empresa para obtener asistencia.";
+                string titulo = ConfigurationManager.AppSettings["TituloErrorConexion"]
+                                ?? "Error de conexión";
 
-                MessageBox.Show(
-                    mensaje,
-                    titulo,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
+                var dr = MessageBox.Show(mensaje + "\n\n¿Desea reconfigurar la conexión ahora?", titulo, MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (dr == DialogResult.Yes)
+                {
+                    if (EnsureConnectionConfiguredAndHealthy())
+                    {
+                        try
+                        {
+                            param.LoadParametrizacion();
+                        }
+                        catch
+                        {
+                            MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Application.Exit();
+                        }
+                    }
+                    else
+                    {
+                        Application.Exit();
+                    }
+                }
+                else
+                {
+                    Application.Exit();
+                }
             }
         }
 
@@ -104,7 +202,6 @@ namespace WinApp
             {
                 string usuario = txtUsuario.Text?.Trim().ToLower();
                 string pass = txtContrasena.Text;
-
                 bool ok = await Task.Run(() => LoginBLL.GetInstance().TryLogin(usuario, pass));
 
                 SetBusy(false);
@@ -132,12 +229,10 @@ namespace WinApp
             catch (Exception)
             {
                 SetBusy(false);
-                MessageBox.Show(
-                    param.GetLocalizable("login_error_message"),
-                    param.GetLocalizable("login_error_title"),
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
+                MessageBox.Show(param.GetLocalizable("login_error_message"),
+                                param.GetLocalizable("login_error_title"),
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
             }
         }
 
@@ -149,7 +244,6 @@ namespace WinApp
             txtContrasena.Enabled = !busy;
             btnRecuperarContrasena.Enabled = !busy;
             cmbIdiomaInferior.Enabled = !busy;
-
             Cursor.Current = busy ? Cursors.WaitCursor : Cursors.Default;
             Application.DoEvents();
         }
@@ -164,39 +258,30 @@ namespace WinApp
 
         private void MostrarLoginError()
         {
-            MessageBox.Show(
-                param.GetLocalizable("login_invalid_message"),
-                param.GetLocalizable("login_invalid_title"),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning
-            );
-
+            MessageBox.Show(param.GetLocalizable("login_invalid_message"),
+                            param.GetLocalizable("login_invalid_title"),
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
             txtContrasena.Clear();
             txtContrasena.Focus();
         }
 
         private void MostrarBloqueadoError()
         {
-            MessageBox.Show(
-                param.GetLocalizable("login_blocked_message"),
-                param.GetLocalizable("login_blocked_title"),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning
-            );
-
+            MessageBox.Show(param.GetLocalizable("login_blocked_message"),
+                            param.GetLocalizable("login_blocked_title"),
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
             txtContrasena.Clear();
             txtContrasena.Focus();
         }
 
         private void MostrarDeshabilitadoError()
         {
-            MessageBox.Show(
-                param.GetLocalizable("login_disabled_message"),
-                param.GetLocalizable("login_disabled_title"),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning
-            );
-
+            MessageBox.Show(param.GetLocalizable("login_disabled_message"),
+                            param.GetLocalizable("login_disabled_title"),
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
             txtContrasena.Clear();
             txtContrasena.Focus();
         }
@@ -214,13 +299,10 @@ namespace WinApp
 
             string titleText = param.GetLocalizable("login_title");
             string nombreEmpresa = param.GetNombreEmpresa();
-
             this.Text = $"{titleText} {nombreEmpresa}";
 
-            SetHelpContext(
-                param.GetLocalizable("login_help_title"),
-                param.GetLocalizable("login_help_body")
-            );
+            SetHelpContext(param.GetLocalizable("login_help_title"),
+                           param.GetLocalizable("login_help_body"));
         }
 
         private void btnRecuperarContrasena_Click(object sender, EventArgs e)

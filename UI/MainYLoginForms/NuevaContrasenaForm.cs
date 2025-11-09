@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class NuevaContrasenaForm : BaseForm
     {
@@ -121,7 +120,7 @@ namespace UI
 
         private void UpdateTexts()
         {
-            txtContra.Tag = "VERIFY_PASS";
+            txtContra.Tag = TextBoxTag.PwdVerify;
             this.Text = param.GetLocalizable("reset_password_title");
             lblNueva.Text = param.GetLocalizable("reset_password_new_label");
             lblConfirmar.Text = param.GetLocalizable("reset_password_confirm_label");
@@ -129,6 +128,10 @@ namespace UI
             btnVerContra.Text = param.GetLocalizable("password_show_button");
             btnVerConfirmacion.Text = param.GetLocalizable("password_show_button");
             btnConfirmar.Text = param.GetLocalizable("reset_password_confirm_button");
+
+            string helpTitle = param.GetLocalizable("reset_password_help_title");
+            string helpBody = param.GetLocalizable("reset_password_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void ToggleBusy(bool busy)

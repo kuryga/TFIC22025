@@ -1,12 +1,12 @@
-﻿using System;
+﻿using BLL.Seguridad;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using BLL.Seguridad;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarFamiliasForm : BaseForm
     {
@@ -379,6 +379,10 @@ namespace UI
             btnCrear.Text = param.GetLocalizable("familia_create_button");
             btnGuardar.Text = param.GetLocalizable("save_button");
             btnModificar.Text = param.GetLocalizable("familia_modify_button");
+
+            string helpTitle = param.GetLocalizable("user_families_help_title");
+            string helpBody = param.GetLocalizable("user_families_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

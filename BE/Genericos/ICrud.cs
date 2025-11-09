@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BE
 {
@@ -11,6 +7,6 @@ namespace BE
         bool Create(T objAdd);
         List<T> GetAll();
         bool Update(T objUpd);
-        bool Delete(T objUdp);
+        bool Deshabilitar(int idObj, bool deshabilitar);
     }
 }

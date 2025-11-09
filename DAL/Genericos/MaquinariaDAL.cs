@@ -9,13 +9,18 @@ namespace DAL.Genericos
     {
         private static MaquinariaDAL instance;
         private MaquinariaDAL() { }
-        public static MaquinariaDAL GetInstance() { if (instance == null) instance = new MaquinariaDAL(); return instance; }
+        public static MaquinariaDAL GetInstance()
+        {
+            if (instance == null)
+                instance = new MaquinariaDAL();
+            return instance;
+        }
 
         private static readonly DalToolkit db = new DalToolkit();
 
         private const string table = "dbo.Maquinaria";
         private const string idCol = "idMaquinaria";
-        private const string publicCols = "idMaquinaria, nombre, costoPorHora";
+        private const string publicCols = "idMaquinaria, nombre, costoPorHora, deshabilitado";
 
         public List<BE.Maquinaria> GetAll()
         {
@@ -42,11 +47,12 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
                     var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
-                    p.Precision = 18; p.Scale = 2;
+                    p.Precision = 18;
+                    p.Scale = 2;
                     p.Value = obj.CostoPorHora;
                 },
                 table, idCol,
@@ -76,11 +82,12 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaquinaria;
 
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
                     var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
-                    p.Precision = 18; p.Scale = 2;
+                    p.Precision = 18;
+                    p.Scale = 2;
                     p.Value = obj.CostoPorHora;
                 },
                 table, idCol, obj.IdMaquinaria,
@@ -88,6 +95,31 @@ UPDATE " + table + @"
                 "Modificación de maquinaria Id=" + obj.IdMaquinaria,
                 true
             );
+        }
+
+        public void Deshabilitar(int idMaquinaria, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idMaquinaria;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idMaquinaria,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionMaquinaria
+                    : BE.Audit.AuditEvents.HabilitacionMaquinaria,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") + " de maquinaria Id=" + idMaquinaria,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idMaquinaria, false);
         }
     }
 }

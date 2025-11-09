@@ -1,6 +1,6 @@
-﻿using System;
+﻿using DAL.Seguridad;
+using System;
 using System.Collections.Generic;
-using DAL.Seguridad;
 using CodigoPatentes = BE.Seguridad.CodigoPatente;
 
 namespace BLL.Seguridad
@@ -42,7 +42,7 @@ namespace BLL.Seguridad
 
         public void SetFamiliasForUsuario(int idUsuario, IEnumerable<int> idsFamilia)
             => PermisosDAL.GetInstance().SetFamiliasForUsuario(idUsuario, idsFamilia);
-       
+
         public int CreateFamilia(BE.Familia familia, IEnumerable<int> idsPatente = null)
             => PermisosDAL.GetInstance().CreateFamilia(familia, idsPatente ?? Array.Empty<int>());
 

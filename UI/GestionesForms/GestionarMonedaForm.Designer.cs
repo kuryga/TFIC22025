@@ -1,13 +1,13 @@
 ﻿using System.Windows.Forms;
 
-namespace UI
+namespace WinApp
 {
     partial class GestionarMonedaForm
     {
         private DataGridView dgvMoneda;
         private TextBox txtId, txtNombre, txtValor, txtSimbolo;
         private Label lblId, lblNombre, lblValor, lblSimbolo;
-        private Button btnCrear, btnModificar, btnBorrar;
+        private Button btnCrear, btnModificar, btnDeshabilitar;
 
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
@@ -33,9 +33,10 @@ namespace UI
             this.lblValor = new System.Windows.Forms.Label();
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
-            this.btnBorrar = new System.Windows.Forms.Button();
+            this.btnDeshabilitar = new System.Windows.Forms.Button();
             this.lblSimbolo = new System.Windows.Forms.Label();
             this.txtSimbolo = new System.Windows.Forms.TextBox();
+            this.lblTitle = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMoneda)).BeginInit();
             this.SuspendLayout();
             // 
@@ -43,106 +44,115 @@ namespace UI
             // 
             this.dgvMoneda.AllowUserToAddRows = false;
             this.dgvMoneda.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMoneda.Location = new System.Drawing.Point(20, 20);
+            this.dgvMoneda.Location = new System.Drawing.Point(20, 45);
             this.dgvMoneda.MultiSelect = false;
             this.dgvMoneda.Name = "dgvMoneda";
             this.dgvMoneda.ReadOnly = true;
             this.dgvMoneda.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvMoneda.Size = new System.Drawing.Size(460, 150);
+            this.dgvMoneda.Size = new System.Drawing.Size(571, 150);
             this.dgvMoneda.TabIndex = 0;
             this.dgvMoneda.SelectionChanged += new System.EventHandler(this.dgvMoneda_SelectionChanged);
             // 
             // txtId
             // 
-            this.txtId.Location = new System.Drawing.Point(130, 180);
+            this.txtId.Location = new System.Drawing.Point(98, 205);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
-            this.txtId.Size = new System.Drawing.Size(150, 20);
+            this.txtId.Size = new System.Drawing.Size(182, 20);
             this.txtId.TabIndex = 2;
             // 
             // txtNombre
             // 
-            this.txtNombre.Location = new System.Drawing.Point(130, 210);
+            this.txtNombre.Location = new System.Drawing.Point(98, 235);
             this.txtNombre.Name = "txtNombre";
-            this.txtNombre.Size = new System.Drawing.Size(150, 20);
+            this.txtNombre.Size = new System.Drawing.Size(182, 20);
             this.txtNombre.TabIndex = 4;
             // 
             // txtValor
             // 
-            this.txtValor.Location = new System.Drawing.Point(130, 240);
+            this.txtValor.Location = new System.Drawing.Point(415, 205);
             this.txtValor.Name = "txtValor";
-            this.txtValor.Size = new System.Drawing.Size(150, 20);
+            this.txtValor.Size = new System.Drawing.Size(176, 20);
             this.txtValor.TabIndex = 6;
             // 
             // lblId
             // 
-            this.lblId.Location = new System.Drawing.Point(20, 185);
+            this.lblId.Location = new System.Drawing.Point(20, 210);
             this.lblId.Name = "lblId";
-            this.lblId.Size = new System.Drawing.Size(100, 23);
+            this.lblId.Size = new System.Drawing.Size(72, 23);
             this.lblId.TabIndex = 1;
             this.lblId.Text = "ID:";
             // 
             // lblNombre
             // 
-            this.lblNombre.Location = new System.Drawing.Point(20, 215);
+            this.lblNombre.Location = new System.Drawing.Point(20, 240);
             this.lblNombre.Name = "lblNombre";
-            this.lblNombre.Size = new System.Drawing.Size(100, 23);
+            this.lblNombre.Size = new System.Drawing.Size(72, 23);
             this.lblNombre.TabIndex = 3;
             this.lblNombre.Text = "Nombre:";
             // 
             // lblValor
             // 
-            this.lblValor.Location = new System.Drawing.Point(20, 245);
+            this.lblValor.Location = new System.Drawing.Point(306, 208);
             this.lblValor.Name = "lblValor";
-            this.lblValor.Size = new System.Drawing.Size(100, 23);
+            this.lblValor.Size = new System.Drawing.Size(90, 23);
             this.lblValor.TabIndex = 5;
             this.lblValor.Text = "Valor de cambio:";
             // 
             // btnCrear
             // 
-            this.btnCrear.Location = new System.Drawing.Point(365, 181);
+            this.btnCrear.Location = new System.Drawing.Point(23, 274);
             this.btnCrear.Name = "btnCrear";
-            this.btnCrear.Size = new System.Drawing.Size(75, 23);
+            this.btnCrear.Size = new System.Drawing.Size(110, 23);
             this.btnCrear.TabIndex = 7;
             this.btnCrear.Text = "Crear moneda";
             this.btnCrear.Click += new System.EventHandler(this.btnCrear_Click);
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(365, 211);
+            this.btnModificar.Location = new System.Drawing.Point(269, 274);
             this.btnModificar.Name = "btnModificar";
-            this.btnModificar.Size = new System.Drawing.Size(75, 23);
+            this.btnModificar.Size = new System.Drawing.Size(87, 23);
             this.btnModificar.TabIndex = 8;
             this.btnModificar.Text = "Modificar moneda";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
-            // btnBorrar
+            // btnDeshabilitar
             // 
-            this.btnBorrar.Location = new System.Drawing.Point(365, 241);
-            this.btnBorrar.Name = "btnBorrar";
-            this.btnBorrar.Size = new System.Drawing.Size(75, 23);
-            this.btnBorrar.TabIndex = 9;
-            this.btnBorrar.Text = "Borrar moneda";
-            this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
+            this.btnDeshabilitar.Location = new System.Drawing.Point(491, 274);
+            this.btnDeshabilitar.Name = "btnDeshabilitar";
+            this.btnDeshabilitar.Size = new System.Drawing.Size(100, 23);
+            this.btnDeshabilitar.TabIndex = 9;
+            this.btnDeshabilitar.Text = "Deshabilitar";
+            this.btnDeshabilitar.Click += new System.EventHandler(this.btnBorrar_Click);
             // 
             // lblSimbolo
             // 
-            this.lblSimbolo.Location = new System.Drawing.Point(20, 273);
+            this.lblSimbolo.Location = new System.Drawing.Point(306, 236);
             this.lblSimbolo.Name = "lblSimbolo";
-            this.lblSimbolo.Size = new System.Drawing.Size(100, 23);
+            this.lblSimbolo.Size = new System.Drawing.Size(90, 23);
             this.lblSimbolo.TabIndex = 10;
             this.lblSimbolo.Text = "Simbolo:";
             // 
             // txtSimbolo
             // 
-            this.txtSimbolo.Location = new System.Drawing.Point(130, 269);
+            this.txtSimbolo.Location = new System.Drawing.Point(415, 234);
             this.txtSimbolo.Name = "txtSimbolo";
-            this.txtSimbolo.Size = new System.Drawing.Size(150, 20);
+            this.txtSimbolo.Size = new System.Drawing.Size(176, 20);
             this.txtSimbolo.TabIndex = 11;
+            // 
+            // lblTitle
+            // 
+            this.lblTitle.Location = new System.Drawing.Point(17, 9);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(545, 23);
+            this.lblTitle.TabIndex = 12;
+            this.lblTitle.Text = "Descripción:";
             // 
             // GestionarMonedaForm
             // 
-            this.ClientSize = new System.Drawing.Size(503, 309);
+            this.ClientSize = new System.Drawing.Size(611, 310);
+            this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.lblSimbolo);
             this.Controls.Add(this.txtSimbolo);
             this.Controls.Add(this.dgvMoneda);
@@ -154,7 +164,7 @@ namespace UI
             this.Controls.Add(this.txtValor);
             this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnModificar);
-            this.Controls.Add(this.btnBorrar);
+            this.Controls.Add(this.btnDeshabilitar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GestionarMonedaForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -165,5 +175,6 @@ namespace UI
 
         }
 
+        private Label lblTitle;
     }
 }

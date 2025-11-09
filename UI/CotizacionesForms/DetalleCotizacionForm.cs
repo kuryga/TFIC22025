@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
-using System.Collections.Generic;
-
 using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class DetalleCotizacionForm : BaseForm
     {
@@ -20,6 +18,10 @@ namespace UI
         private void CargarDatos()
         {
             var ctz = CotizacionBLL.GetInstance().GetCotizacionCompleta(cotizacionId);
+            var param = BLL.Genericos.ParametrizacionBLL.GetInstance();
+            string helpTitle = param.GetLocalizable("cotizacion_detail_help_title");
+            string helpBody = param.GetLocalizable("cotizacion_detail_help_body");
+            SetHelpContext(helpTitle, helpBody);
 
             if (ctz == null)
             {
@@ -48,7 +50,6 @@ namespace UI
             cmbMoneda.Items.Add(monedaTxt);
             cmbMoneda.SelectedIndex = 0;
 
-            // ---------- Grillas ----------
             dgvMateriales.AutoGenerateColumns = true;
             dgvMateriales.DataSource = BuildMaterialesView(ctz.ListaMateriales);
 
@@ -58,13 +59,11 @@ namespace UI
             dgvServicios.AutoGenerateColumns = true;
             dgvServicios.DataSource = BuildServiciosView(ctz.ListaServicios);
 
-            // Formatos opcionales
             SetGridFormats();
         }
 
         private void SetGridFormats()
         {
-            // Materiales
             if (dgvMateriales.Columns.Contains("PrecioUnidad"))
                 dgvMateriales.Columns["PrecioUnidad"].DefaultCellStyle.Format = "N2";
             if (dgvMateriales.Columns.Contains("UsoPorM2"))
@@ -74,7 +73,6 @@ namespace UI
             if (dgvMateriales.Columns.Contains("Subtotal"))
                 dgvMateriales.Columns["Subtotal"].DefaultCellStyle.Format = "N2";
 
-            // Maquinaria
             if (dgvMaquinaria.Columns.Contains("CostoHora"))
                 dgvMaquinaria.Columns["CostoHora"].DefaultCellStyle.Format = "N2";
             if (dgvMaquinaria.Columns.Contains("HorasUso"))
@@ -82,12 +80,9 @@ namespace UI
             if (dgvMaquinaria.Columns.Contains("Subtotal"))
                 dgvMaquinaria.Columns["Subtotal"].DefaultCellStyle.Format = "N2";
 
-            // Servicios
             if (dgvServicios.Columns.Contains("Precio"))
                 dgvServicios.Columns["Precio"].DefaultCellStyle.Format = "N2";
         }
-
-        // ---------- Proyecciones planas para las grillas ----------
 
         private static List<object> BuildMaterialesView(List<BE.MaterialCotizacion> items)
         {

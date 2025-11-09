@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace UI
+namespace WinApp
 {
     public partial class NuevaCotizacionForm : BaseForm
     {
@@ -9,6 +9,11 @@ namespace UI
         {
             InitializeComponent();
             CargarDatosMock();
+
+            var param = BLL.Genericos.ParametrizacionBLL.GetInstance();
+            string helpTitle = param.GetLocalizable("cotizacion_new_help_title");
+            string helpBody = param.GetLocalizable("cotizacion_new_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatosMock()

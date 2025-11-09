@@ -1,7 +1,6 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
-namespace UI
+namespace WinApp
 {
     // notas mentales:
     // se aplica mediator, loginapp context actua como mediador y evita que los forms se conozcan

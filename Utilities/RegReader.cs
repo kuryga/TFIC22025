@@ -1,21 +1,15 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Utilities
 {
     public class RegReader
     {
-        public static string read( string reg )
+        public static string read(string reg)
         {
             RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\CustomSoft\Data");
 
             string response = "";
-            if ( key != null )
+            if (key != null)
             {
                 response = key.GetValue(reg).ToString();
                 key.Close();

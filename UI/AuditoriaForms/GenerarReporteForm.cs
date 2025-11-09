@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
-using BLL.Audit;
+using Utils.Reporting;
+using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI.AuditoriaForms
+namespace WinApp.AuditoriaForms
 {
-    public partial class GenerarReporteForm : Form
+    public partial class GenerarReporteForm : BaseForm
     {
         public DateTime? Desde { get; set; }
         public DateTime? Hasta { get; set; }
@@ -14,11 +18,16 @@ namespace UI.AuditoriaForms
         public string Criticidad { get; set; }
 
         private bool _sinFiltrosPrevios;
+        private readonly ParametrizacionBLL param = ParametrizacionBLL.GetInstance();
 
         public GenerarReporteForm()
         {
             InitializeComponent();
+            this.Text = param.GetLocalizable("report_generation_title") ?? "Generación de reportes";
             Load += GenerarReporteForm_Load;
+
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.ShowInTaskbar = false; 
         }
 
         public GenerarReporteForm(DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad)
@@ -32,111 +41,201 @@ namespace UI.AuditoriaForms
             _sinFiltrosPrevios = !desde.HasValue && !hasta.HasValue && string.IsNullOrWhiteSpace(criticidad);
         }
 
-        void GenerarReporteForm_Load(object sender, EventArgs e)
+        private void GenerarReporteForm_Load(object sender, EventArgs e)
         {
-            var cbo = Controls["cboDestino"] as ComboBox;
-            var chk = Controls["chkPaginaAct"] as CheckBox;
-
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            var docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            if (cbo != null)
-            {
-                cbo.DropDownStyle = ComboBoxStyle.DropDownList;
-                cbo.Items.Clear();
-                if (!string.IsNullOrWhiteSpace(desktop)) cbo.Items.Add(desktop);
-                if (!string.IsNullOrWhiteSpace(docs)) cbo.Items.Add(docs);
-                cbo.TextChanged += (s, ev) => UpdateButtonState();
-                cbo.SelectedIndexChanged += (s, ev) => UpdateButtonState(); // habilita también al seleccionar
-            }
-
-            if (chk != null)
-            {
-                chk.Checked = true;
-                chk.Visible = !_sinFiltrosPrevios;
-            }
-
-            btnCarpeta.Click += BtnExplorar_Click;
-            btnGenerar.Click += BtnGenerar_Click;
-            btnGenerar.Enabled = false;
-
-            UpdateButtonState();
+            UpdateTexts();
         }
 
-        void BtnExplorar_Click(object sender, EventArgs e)
+        private void UpdateTexts()
         {
-            using (var dlg = new FolderBrowserDialog())
-            {
-                dlg.Description = "Selecciona la carpeta de destino";
-                dlg.ShowNewFolderButton = true;
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    var cbo = Controls["cboDestino"] as ComboBox;
-                    if (cbo != null)
-                    {
-                        if (!cbo.Items.Contains(dlg.SelectedPath))
-                            cbo.Items.Add(dlg.SelectedPath);
-                        cbo.SelectedItem = dlg.SelectedPath;
-                        UpdateButtonState();
-                    }
-                }
-            }
+            chkPaginaAct.Text = param.GetLocalizable("current_page_only_label") ?? "Solo página actual";
+            btnGenerar.Text = param.GetLocalizable("report_generate_button") ?? "Imprimir";
+            SetHelpContext(
+                param.GetLocalizable("report_help_title"),
+                param.GetLocalizable("report_help_body")
+            );
         }
 
-        void BtnGenerar_Click(object sender, EventArgs e)
+        private void ImprimirPdfGenerico(string rutaPdf, string printerName)
         {
-            var cbo = Controls["cboDestino"] as ComboBox;
-            var chk = Controls["chkPaginaAct"] as CheckBox;
-
-            string destino = cbo != null ? cbo.Text?.Trim() : null;
-
-            if (string.IsNullOrWhiteSpace(destino))
-            {
-                MessageBox.Show(this, "Debe seleccionar o escribir una carpeta de destino antes de generar el reporte.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            bool exportarTodos = _sinFiltrosPrevios || !(chk?.Checked ?? true);
-
-            int? page = exportarTodos ? (int?)null : Math.Max(1, Page);
-            int? pageSize = exportarTodos ? (int?)null : Math.Max(1, PageSize);
-
             try
             {
-                string ruta = BitacoraBLL.GetInstance().ExportarReporte(
-                    Desde,
-                    Hasta,
-                    page,
-                    pageSize,
-                    Criticidad,
-                    destino,
-                    exportarTodos
-                );
+                var psi = new ProcessStartInfo
+                {
+                    FileName = rutaPdf,
+                    UseShellExecute = true,
+                    Verb = "printto",
+                    Arguments = $"\"{printerName}\""
+                };
 
-                if (!string.IsNullOrWhiteSpace(ruta) && File.Exists(ruta))
+                try
                 {
-                    MessageBox.Show(this, "Reporte generado correctamente:\n" + ruta, "Listo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    DialogResult = DialogResult.OK;
-                    Close();
+                    Process.Start(psi);
+                    return;
                 }
-                else
+                catch
                 {
-                    MessageBox.Show(this, "No se pudo verificar el archivo generado.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // fallback al print normal
+                }
+
+                var psiFallback = new ProcessStartInfo
+                {
+                    FileName = rutaPdf,
+                    UseShellExecute = true,
+                    Verb = "print"
+                };
+                Process.Start(psiFallback);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    this,
+                    (param.GetLocalizable("print_send_error_message") ?? "No fue posible enviar el PDF a impresión.")
+                        + Environment.NewLine + ex.Message,
+                    param.GetLocalizable("print_error_title") ?? "Error de impresión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void ProgramarBorradoTemporal(string ruta)
+        {
+            try
+            {
+                var timer = new Timer { Interval = 5000 };
+                int intentos = 0;
+                timer.Tick += (s, e) =>
+                {
+                    try
+                    {
+                        intentos++;
+                        if (File.Exists(ruta)) File.Delete(ruta);
+                        if (!File.Exists(ruta) || intentos >= 24)
+                        {
+                            timer.Stop();
+                            timer.Dispose();
+                        }
+                    }
+                    catch
+                    {
+                        if (intentos >= 24)
+                        {
+                            timer.Stop();
+                            timer.Dispose();
+                        }
+                    }
+                };
+                timer.Start();
+            }
+            catch
+            {
+                // No se requiere notificación
+            }
+        }
+
+        private byte[] TryLoadLogo()
+        {
+            try
+            {
+                string raw = ConfigurationManager.AppSettings["ReportLogoPath"];
+                var bases = new[]
+                {
+            AppDomain.CurrentDomain.BaseDirectory,
+            Application.StartupPath
+        };
+
+                var candidatos = new System.Collections.Generic.List<string>();
+
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    raw = raw.Trim('"');
+                    if (Path.IsPathRooted(raw))
+                    {
+                        candidatos.Add(raw);
+                    }
+                    else
+                    {
+                        foreach (var b in bases)
+                            candidatos.Add(Path.Combine(b, raw));
+                    }
+                }
+
+                foreach (var b in bases)
+                    candidatos.Add(Path.Combine(b, "Resources", "LogoUrbanSoft.png"));
+
+                foreach (var p in candidatos.Distinct())
+                {
+                    if (File.Exists(p))
+                        return File.ReadAllBytes(p);
+                }
+            }
+            catch
+            {
+                // nada
+            }
+
+            return null;
+        }
+
+        private void btnGenerar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                this.Enabled = false;
+
+                bool exportarTodos = _sinFiltrosPrevios || !(chkPaginaAct?.Checked ?? true);
+                int? page = exportarTodos ? (int?)null : Math.Max(1, Page);
+                int? pageSize = exportarTodos ? (int?)null : Math.Max(1, PageSize);
+                string empresa = param.GetNombreEmpresa();
+                byte[] logo = TryLoadLogo();
+
+                string appTemp = Path.Combine(Path.GetTempPath(), Application.ProductName);
+                string tempPdf = FilePDFExporter.GenerarPdfTemporal(Desde, Hasta, page, pageSize, Criticidad, exportarTodos, empresa, logo, appTemp);
+
+                this.Cursor = Cursors.Default;
+                this.Enabled = true;
+
+                if (string.IsNullOrWhiteSpace(tempPdf) || !File.Exists(tempPdf))
+                {
+                    MessageBox.Show(
+                        this,
+                        param.GetLocalizable("print_temp_fail_message") ?? "No se pudo generar el documento temporal para imprimir.",
+                        param.GetLocalizable("warning_title") ?? "Aviso",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
+                }
+
+                using (PrintDialog printDialog = new PrintDialog())
+                {
+                    printDialog.AllowSomePages = false;
+                    printDialog.ShowNetwork = true;
+
+                    if (printDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        string printerName = printDialog.PrinterSettings.PrinterName;
+                        ImprimirPdfGenerico(tempPdf, printerName);
+                        ProgramarBorradoTemporal(tempPdf);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "Error al generar el reporte:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+                this.Cursor = Cursors.Default;
+                this.Enabled = true;
 
-        void UpdateButtonState()
-        {
-            var cbo = Controls["cboDestino"] as ComboBox;
-            var btn = Controls["btnGenerar"] as Button;
-            if (btn == null || cbo == null) return;
-            bool tieneDestino = !string.IsNullOrWhiteSpace(cbo.Text);
-            btn.Enabled = tieneDestino;
+                MessageBox.Show(
+                    this,
+                    (param.GetLocalizable("print_generic_error_message") ?? "Ocurrió un error al intentar imprimir el documento.")
+                        + Environment.NewLine + ex.Message,
+                    param.GetLocalizable("print_error_title") ?? "Error de impresión",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
     }
 }

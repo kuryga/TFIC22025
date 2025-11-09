@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading;
-using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using BloqueadoException = BE.Seguridad.UsuarioBloqueadoException;
+using CredencialesException = BE.Seguridad.CredencialesInvalidasException;
 using DeshabilitadoException = BE.Seguridad.UsuarioDeshabilitadoException;
-using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
-using System.Collections.Generic;
+using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 
 namespace BLL.Seguridad
 {

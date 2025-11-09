@@ -15,15 +15,16 @@ namespace BLL.Genericos
             return instance;
         }
 
-
         public bool Create(BE.Material objAdd)
         {
-            //try { return UsuarioDAL.GetInstance().Create(objAdd); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (objAdd == null) throw new ArgumentNullException(nameof(objAdd));
+                MaterialDAL.GetInstance().Create(objAdd);
+                return objAdd.IdMaterial > 0;
+            }
+            catch (Exception) { throw; }
         }
-
 
         public List<BE.Material> GetAll()
         {
@@ -31,33 +32,27 @@ namespace BLL.Genericos
             catch (Exception) { throw; }
         }
 
-
-        public BE.Material GetByID(string idMat)
-        {
-            // try { return MaterialDAL.GetInstance().GetByCorreoElectronico(username); }
-            //catch (Exception) { throw; }
-            // TODO: sacar esto y modificar
-            return new BE.Material();
-        }
-
-
         public bool Update(BE.Material objUpd)
         {
             try
             {
+                if (objUpd == null) throw new ArgumentNullException(nameof(objUpd));
+                if (objUpd.IdMaterial <= 0) throw new ArgumentException("Id inválido");
                 MaterialDAL.GetInstance().Update(objUpd);
                 return true;
             }
             catch (Exception) { throw; }
         }
 
-
-        public bool Delete(BE.Material objUdp)
+        public bool Deshabilitar(int idMat, bool deshabilitar)
         {
-            //try { return UsuarioDAL.GetInstance().Delete(objUdp); }
-            //catch (Exception) { throw; }
-
-            return false;
+            try
+            {
+                if (idMat <= 0) throw new ArgumentException("Id inválido");
+                MaterialDAL.GetInstance().Deshabilitar(idMat, deshabilitar);
+                return true;
+            }
+            catch (Exception) { throw; }
         }
     }
 }

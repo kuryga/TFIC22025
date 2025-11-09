@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using UI.Infrastructure;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public class BaseForm : Form
     {
@@ -15,17 +17,19 @@ namespace UI
         public bool EnableArPhoneValidation { get; set; } = true;
 
         private readonly ErrorProvider _sharedErrorProvider;
+        private IContextualMenuExecutable _helpProtocol;
 
         public BaseForm()
         {
             _sharedErrorProvider = new ErrorProvider { BlinkStyle = ErrorBlinkStyle.NeverBlink };
+            this.KeyPreview = true;
+            _helpProtocol = new ContextualMenuExecutable(this);
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             ApplyPoliciesRecursive(this);
-
             this.ControlAdded -= BaseForm_ControlAdded;
             this.ControlAdded += BaseForm_ControlAdded;
         }
@@ -46,34 +50,39 @@ namespace UI
                     var tagUpper = string.IsNullOrWhiteSpace(tag) ? null : tag.Trim().ToUpperInvariant();
                     if (EnableSanitization)
                     {
-                        if (!(tb.Tag is string tagSan && tagSan.Equals("NoSanitize", StringComparison.OrdinalIgnoreCase)))
+                        if (!(tb.Tag is string tagSan && tagSan.Equals(TextBoxTag.NoSanitize, StringComparison.OrdinalIgnoreCase)))
                             InputSanitizer.ProtectTextBox(tb);
                     }
 
                     if (!string.IsNullOrEmpty(tagUpper))
                     {
-                        if (EnableArPhoneValidation && string.Equals(tagUpper, "AR_PHONE", StringComparison.Ordinal))
+                        if (EnableArPhoneValidation && string.Equals(tagUpper, TextBoxTag.PhoneNumber, StringComparison.Ordinal))
                             PhoneValidator.Attach(tb, _sharedErrorProvider);
 
-                        if (string.Equals(tagUpper, "NUM_12", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.Num12, StringComparison.Ordinal))
                             AttachNumeric12Validation(tb);
 
-                        if (string.Equals(tagUpper, "MAIL_URBANSOFT", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.MailUrban, StringComparison.Ordinal))
                             AttachUrbansoftEmailValidation(tb);
 
-                        if (string.Equals(tagUpper, "SAFE", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.SqlSafe, StringComparison.Ordinal))
                             AttachSafeSqlValidation(tb);
 
-                        if (string.Equals(tagUpper, "PASSWORD", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.Pwd, StringComparison.Ordinal))
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachSafeSqlValidation(tb);
                         }
 
-                        if (string.Equals(tagUpper, "VERIFY_PASS", StringComparison.Ordinal))
+                        if (string.Equals(tagUpper, TextBoxTag.PwdVerify, StringComparison.Ordinal))
                         {
                             tb.UseSystemPasswordChar = true;
                             AttachPasswordVerification(tb);
+                        }
+
+                        if (string.Equals(tagUpper, TextBoxTag.Price, StringComparison.Ordinal))
+                        {
+                            AttachPriceValidation(tb);
                         }
                     }
                 }
@@ -98,13 +107,48 @@ namespace UI
             }
         }
 
+        private static bool IsDigitsOnly(string s) => s.All(char.IsDigit);
+        private static string OnlyDigits(string s) => new string((s ?? string.Empty).Where(char.IsDigit).ToArray());
+
         private void AttachNumeric12Validation(TextBox tb)
         {
-            tb.Validating -= Numeric12_Validating;
-            tb.Validating += Numeric12_Validating;
+            if (tb.MaxLength <= 0 || tb.MaxLength > 12)
+                tb.MaxLength = 12;
+
+            tb.KeyPress -= Numeric12_KeyPress;
+            tb.KeyPress += Numeric12_KeyPress;
 
             tb.TextChanged -= Numeric12_TextChanged;
             tb.TextChanged += Numeric12_TextChanged;
+
+            tb.Validating -= Numeric12_Validating;
+            tb.Validating += Numeric12_Validating;
+        }
+
+        private void Numeric12_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (char.IsControl(e.KeyChar)) return;
+            if (!char.IsDigit(e.KeyChar))
+                e.Handled = true;
+        }
+
+        private void Numeric12_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            string original = tb.Text ?? string.Empty;
+            string digits = OnlyDigits(original);
+
+            if (original != digits)
+            {
+                int sel = tb.SelectionStart;
+                tb.Text = digits;
+                tb.SelectionStart = Math.Min(sel, tb.Text.Length);
+            }
+
+            if (digits.Length == 0 || IsDigitsOnly(digits))
+                _sharedErrorProvider.SetError(tb, string.Empty);
         }
 
         private void Numeric12_Validating(object sender, CancelEventArgs e)
@@ -113,25 +157,15 @@ namespace UI
             if (tb == null) return;
 
             var txt = tb.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
+            if (txt.Length == 0 || IsDigitsOnly(txt))
             {
                 _sharedErrorProvider.SetError(tb, string.Empty);
             }
             else
             {
-                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_doc_validation_message"));
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_numeric12_validation_message"));
                 e.Cancel = true;
             }
-        }
-
-        private void Numeric12_TextChanged(object sender, EventArgs e)
-        {
-            var tb = sender as TextBox;
-            if (tb == null) return;
-
-            var txt = tb.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
-                _sharedErrorProvider.SetError(tb, string.Empty);
         }
 
         private void AttachUrbansoftEmailValidation(TextBox tb)
@@ -241,6 +275,76 @@ namespace UI
             var txt = tb.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNewPassword(txt))
                 _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void AttachPriceValidation(TextBox tb)
+        {
+            tb.Validating -= Price_Validating;
+            tb.Validating += Price_Validating;
+
+            tb.TextChanged -= Price_TextChanged;
+            tb.TextChanged += Price_TextChanged;
+
+            tb.Leave -= Price_Leave;
+            tb.Leave += Price_Leave;
+        }
+
+        private void Price_Validating(object sender, CancelEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+
+            if (txt.Length == 0 || InputSanitizer.IsValidPrice(txt))
+            {
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+            else
+            {
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_price_validation_message"));
+                e.Cancel = true;
+            }
+        }
+
+        private void Price_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+            if (txt.Length == 0 || InputSanitizer.IsValidPrice(txt))
+                _sharedErrorProvider.SetError(tb, string.Empty);
+        }
+
+        private void Price_Leave(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            var txt = tb.Text == null ? string.Empty : tb.Text.Trim();
+            if (txt.Length == 0) return;
+
+            decimal _;
+            if (InputSanitizer.TryParsePrice(txt, out _))
+            {
+                tb.Text = InputSanitizer.FormatPrice2(txt, CultureInfo.CurrentCulture, false);
+                _sharedErrorProvider.SetError(tb, string.Empty);
+            }
+        }
+
+        protected void SetHelpContext(string title, string text)
+        {
+            if (_helpProtocol != null)
+                _helpProtocol.Configure(title, text);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (_helpProtocol != null && _helpProtocol.HandleKey(keyData))
+                return true;
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

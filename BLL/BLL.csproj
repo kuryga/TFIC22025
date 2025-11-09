@@ -49,6 +49,7 @@
     <Compile Include="Genericos\MaquinariaBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Seguridad\BackupBLL.cs" />
+    <Compile Include="Seguridad\EncriptacionBLL.cs" />
     <Compile Include="Seguridad\LoginBLL.cs" />
     <Compile Include="Seguridad\PermisosBLL.cs" />
     <Compile Include="Seguridad\UsuarioBLL.cs" />

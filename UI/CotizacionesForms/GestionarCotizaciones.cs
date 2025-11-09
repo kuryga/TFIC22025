@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 using CotizacionBLL = BLL.Genericos.CotizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class ConsultarCotizacionesForm : BaseForm
     {
@@ -11,6 +11,11 @@ namespace UI
         {
             InitializeComponent();
             CargarDatos();
+
+            var param = BLL.Genericos.ParametrizacionBLL.GetInstance();
+            string helpTitle = param.GetLocalizable("cotizacion_list_help_title");
+            string helpBody = param.GetLocalizable("cotizacion_list_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
 
         private void CargarDatos()

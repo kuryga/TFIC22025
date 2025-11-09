@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Material>;
 
@@ -16,7 +15,7 @@ namespace DAL.Genericos
 
         private const string table = "dbo.Material";
         private const string idCol = "idMaterial";
-        private const string publicCols = "idMaterial, nombre, unidadMedida, precioUnidad, usoPorM2";
+        private const string publicCols = "idMaterial, nombre, unidadMedida, precioUnidad, usoPorM2, deshabilitado";
 
         public List<BE.Material> GetAll()
         {
@@ -42,11 +41,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
-                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.UnidadMedida ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
                     pPrecio.Precision = 18; pPrecio.Scale = 2;
@@ -85,11 +84,11 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaterial;
 
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
-                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.UnidadMedida ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
                     pPrecio.Precision = 18; pPrecio.Scale = 2;
@@ -104,6 +103,31 @@ UPDATE " + table + @"
                 "Modificación de material Id=" + obj.IdMaterial,
                 true
             );
+        }
+
+        public void Deshabilitar(int idMaterial, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idMaterial;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idMaterial,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionMaterial
+                    : BE.Audit.AuditEvents.HabilitacionMaterial,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") + " de material Id=" + idMaterial,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idMaterial, false);
         }
     }
 }

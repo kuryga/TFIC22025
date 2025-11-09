@@ -29,8 +29,8 @@ namespace BLL.Genericos
 
         public int CrearCotizacion(BE.Cotizacion ctz)
         {
-          //  ValidarHeader(ctz);
-           // CotizacionDAL.GetInstance().Create(ctz);
+            //  ValidarHeader(ctz);
+            // CotizacionDAL.GetInstance().Create(ctz);
 
             return ctz.IdCotizacion;
         }

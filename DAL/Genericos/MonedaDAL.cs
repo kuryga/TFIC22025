@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 
 using DaoInterface = DAL.Seguridad.DV.IDAOInterface<BE.Moneda>;
 
@@ -10,13 +9,17 @@ namespace DAL.Genericos
     {
         private static MonedaDAL instance;
         private MonedaDAL() { }
-        public static MonedaDAL GetInstance() { if (instance == null) instance = new MonedaDAL(); return instance; }
+        public static MonedaDAL GetInstance()
+        {
+            if (instance == null) instance = new MonedaDAL();
+            return instance;
+        }
 
         private static readonly DalToolkit db = new DalToolkit();
 
         private const string table = "dbo.Moneda";
         private const string idCol = "idMoneda";
-        private const string publicCols = "idMoneda, NombreMoneda, Simbolo, ValorCambio";
+        private const string publicCols = "idMoneda, NombreMoneda, Simbolo, ValorCambio, deshabilitado";
 
         public List<BE.Moneda> GetAll()
         {
@@ -42,14 +45,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
-                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.NombreMoneda ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
-                        (object)obj.Simbolo ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.NVarChar, 10).Value =
+                        (object)(obj.Simbolo ?? string.Empty) ?? System.DBNull.Value;
 
                     var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
-                    pCambio.Precision = 18; pCambio.Scale = 4;
+                    pCambio.Precision = 18;
+                    pCambio.Scale = 4;
                     pCambio.Value = obj.ValorCambio;
                 },
                 table, idCol,
@@ -80,14 +84,15 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@IdMoneda", SqlDbType.Int).Value = obj.IdMoneda;
 
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
-                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.NombreMoneda ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
-                        (object)obj.Simbolo ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.NVarChar, 10).Value =
+                        (object)(obj.Simbolo ?? string.Empty) ?? System.DBNull.Value;
 
                     var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
-                    pCambio.Precision = 18; pCambio.Scale = 4;
+                    pCambio.Precision = 18;
+                    pCambio.Scale = 4;
                     pCambio.Value = obj.ValorCambio;
                 },
                 table, idCol, obj.IdMoneda,
@@ -95,6 +100,32 @@ UPDATE " + table + @"
                 "Modificación de moneda Id=" + obj.IdMoneda,
                 true
             );
+        }
+
+        public void Deshabilitar(int idMoneda, bool deshabilitar)
+        {
+            var sql = @"
+UPDATE " + table + @"
+   SET deshabilitado = @deshabilitado
+ WHERE " + idCol + @" = @id;";
+
+            db.ExecuteNonQueryAndLog(
+                sql,
+                cmd =>
+                {
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = idMoneda;
+                    cmd.Parameters.Add("@deshabilitado", SqlDbType.Bit).Value = deshabilitar;
+                },
+                table, idCol, idMoneda,
+                deshabilitar
+                    ? BE.Audit.AuditEvents.DeshabilitacionMoneda
+                    : BE.Audit.AuditEvents.HabilitacionMoneda,
+                (deshabilitar ? "Deshabilitación" : "Habilitación") +
+                " de moneda Id=" + idMoneda,
+                true
+            );
+
+            db.RefreshRowDvAndTableDvv(table, idCol, idMoneda, false);
         }
     }
 }

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using BLL.Seguridad.Mantenimiento;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using BLL.Seguridad.Mantenimiento;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class RestoreForm : BaseForm
     {
@@ -34,24 +34,11 @@ namespace UI
 
         private void RestoreForm_Load(object sender, EventArgs e)
         {
-            // Si el título se quiere forzar siempre desde traducciones
             this.Text = param.GetLocalizable("restore_title");
-        }
-
-        private void UpdateTexts()
-        {
-            if (this.Controls.ContainsKey("lblArchivos"))
-                this.Controls["lblArchivos"].Text = param.GetLocalizable("restore_files_label");
-
-            btnSeleccionar.Text = param.GetLocalizable("restore_browse_button");
-            btnRestaurar.Text = param.GetLocalizable("restore_execute_button");
-
-            chkVerify.Text = param.GetLocalizable("restore_verify_checkbox");
         }
 
         private void BtnSeleccionar_Click(object sender, EventArgs e)
         {
-            // Sincronizar por si el idioma cambió en runtime
             ofd.Filter = param.GetLocalizable("restore_ofd_filter");
             ofd.Title = param.GetLocalizable("restore_ofd_title");
 
@@ -205,6 +192,20 @@ namespace UI
                 .OrderBy(p => p.Part < 0 ? int.MaxValue : p.Part)
                 .Select(p => p.File)
                 .ToList();
+        }
+        private void UpdateTexts()
+        {
+            if (this.Controls.ContainsKey("lblArchivos"))
+                this.Controls["lblArchivos"].Text = param.GetLocalizable("restore_files_label");
+
+            btnSeleccionar.Text = param.GetLocalizable("restore_browse_button");
+            btnRestaurar.Text = param.GetLocalizable("restore_execute_button");
+
+            chkVerify.Text = param.GetLocalizable("restore_verify_checkbox");
+
+            string helpTitle = param.GetLocalizable("restore_help_title");
+            string helpBody = param.GetLocalizable("restore_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

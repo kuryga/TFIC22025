@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.IO;
-using System.Xml.Linq;
+﻿using System.Data.SqlClient;
 
 namespace Utilities
 {
@@ -16,7 +13,7 @@ namespace Utilities
 
         public static SqlConnection getConnection()
         {
-            if ( connection == null )
+            if (connection == null)
             {
                 connection = constructor();
             }

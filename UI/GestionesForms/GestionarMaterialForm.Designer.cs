@@ -1,13 +1,13 @@
 ﻿using System.Windows.Forms;
 
-namespace UI
+namespace WinApp
 {
     partial class GestionarMaterialForm
     {
         private DataGridView dgvMaterial;
         private TextBox txtId, txtNombre, txtUnidad, txtPrecio, txtUso;
         private Label lblId, lblNombre, lblUnidad, lblPrecio, lblUso;
-        private Button btnCrear, btnModificar, btnBorrar;
+        private Button btnCrear, btnModificar, btnDeshabilitar;
 
         private System.ComponentModel.IContainer components = null;
 
@@ -32,7 +32,8 @@ namespace UI
             this.lblUso = new System.Windows.Forms.Label();
             this.btnCrear = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
-            this.btnBorrar = new System.Windows.Forms.Button();
+            this.btnDeshabilitar = new System.Windows.Forms.Button();
+            this.lblTitle = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMaterial)).BeginInit();
             this.SuspendLayout();
             // 
@@ -40,7 +41,7 @@ namespace UI
             // 
             this.dgvMaterial.AllowUserToAddRows = false;
             this.dgvMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMaterial.Location = new System.Drawing.Point(20, 20);
+            this.dgvMaterial.Location = new System.Drawing.Point(20, 44);
             this.dgvMaterial.MultiSelect = false;
             this.dgvMaterial.Name = "dgvMaterial";
             this.dgvMaterial.ReadOnly = true;
@@ -51,7 +52,7 @@ namespace UI
             // 
             // txtId
             // 
-            this.txtId.Location = new System.Drawing.Point(126, 185);
+            this.txtId.Location = new System.Drawing.Point(126, 209);
             this.txtId.Name = "txtId";
             this.txtId.ReadOnly = true;
             this.txtId.Size = new System.Drawing.Size(150, 20);
@@ -59,14 +60,14 @@ namespace UI
             // 
             // txtNombre
             // 
-            this.txtNombre.Location = new System.Drawing.Point(126, 212);
+            this.txtNombre.Location = new System.Drawing.Point(126, 236);
             this.txtNombre.Name = "txtNombre";
             this.txtNombre.Size = new System.Drawing.Size(150, 20);
             this.txtNombre.TabIndex = 4;
             // 
             // txtUnidad
             // 
-            this.txtUnidad.Location = new System.Drawing.Point(126, 241);
+            this.txtUnidad.Location = new System.Drawing.Point(126, 265);
             this.txtUnidad.Name = "txtUnidad";
             this.txtUnidad.ReadOnly = true;
             this.txtUnidad.Size = new System.Drawing.Size(150, 20);
@@ -74,21 +75,21 @@ namespace UI
             // 
             // txtPrecio
             // 
-            this.txtPrecio.Location = new System.Drawing.Point(430, 182);
+            this.txtPrecio.Location = new System.Drawing.Point(430, 206);
             this.txtPrecio.Name = "txtPrecio";
             this.txtPrecio.Size = new System.Drawing.Size(150, 20);
             this.txtPrecio.TabIndex = 8;
             // 
             // txtUso
             // 
-            this.txtUso.Location = new System.Drawing.Point(430, 212);
+            this.txtUso.Location = new System.Drawing.Point(430, 236);
             this.txtUso.Name = "txtUso";
             this.txtUso.Size = new System.Drawing.Size(150, 20);
             this.txtUso.TabIndex = 10;
             // 
             // lblId
             // 
-            this.lblId.Location = new System.Drawing.Point(20, 185);
+            this.lblId.Location = new System.Drawing.Point(20, 209);
             this.lblId.Name = "lblId";
             this.lblId.Size = new System.Drawing.Size(100, 23);
             this.lblId.TabIndex = 1;
@@ -96,7 +97,7 @@ namespace UI
             // 
             // lblNombre
             // 
-            this.lblNombre.Location = new System.Drawing.Point(20, 215);
+            this.lblNombre.Location = new System.Drawing.Point(20, 239);
             this.lblNombre.Name = "lblNombre";
             this.lblNombre.Size = new System.Drawing.Size(100, 23);
             this.lblNombre.TabIndex = 3;
@@ -104,7 +105,7 @@ namespace UI
             // 
             // lblUnidad
             // 
-            this.lblUnidad.Location = new System.Drawing.Point(20, 245);
+            this.lblUnidad.Location = new System.Drawing.Point(20, 269);
             this.lblUnidad.Name = "lblUnidad";
             this.lblUnidad.Size = new System.Drawing.Size(100, 23);
             this.lblUnidad.TabIndex = 5;
@@ -112,7 +113,7 @@ namespace UI
             // 
             // lblPrecio
             // 
-            this.lblPrecio.Location = new System.Drawing.Point(320, 187);
+            this.lblPrecio.Location = new System.Drawing.Point(320, 211);
             this.lblPrecio.Name = "lblPrecio";
             this.lblPrecio.Size = new System.Drawing.Size(100, 23);
             this.lblPrecio.TabIndex = 7;
@@ -120,7 +121,7 @@ namespace UI
             // 
             // lblUso
             // 
-            this.lblUso.Location = new System.Drawing.Point(320, 217);
+            this.lblUso.Location = new System.Drawing.Point(320, 241);
             this.lblUso.Name = "lblUso";
             this.lblUso.Size = new System.Drawing.Size(100, 23);
             this.lblUso.TabIndex = 9;
@@ -128,34 +129,43 @@ namespace UI
             // 
             // btnCrear
             // 
-            this.btnCrear.Location = new System.Drawing.Point(20, 280);
+            this.btnCrear.Location = new System.Drawing.Point(20, 304);
             this.btnCrear.Name = "btnCrear";
-            this.btnCrear.Size = new System.Drawing.Size(75, 23);
+            this.btnCrear.Size = new System.Drawing.Size(100, 23);
             this.btnCrear.TabIndex = 11;
             this.btnCrear.Text = "Crear material";
             this.btnCrear.Click += new System.EventHandler(this.btnCrear_Click);
             // 
             // btnModificar
             // 
-            this.btnModificar.Location = new System.Drawing.Point(264, 280);
+            this.btnModificar.Location = new System.Drawing.Point(251, 304);
             this.btnModificar.Name = "btnModificar";
-            this.btnModificar.Size = new System.Drawing.Size(75, 23);
+            this.btnModificar.Size = new System.Drawing.Size(95, 23);
             this.btnModificar.TabIndex = 12;
             this.btnModificar.Text = "Modificar material";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
-            // btnBorrar
+            // btnDeshabilitar
             // 
-            this.btnBorrar.Location = new System.Drawing.Point(505, 280);
-            this.btnBorrar.Name = "btnBorrar";
-            this.btnBorrar.Size = new System.Drawing.Size(75, 23);
-            this.btnBorrar.TabIndex = 13;
-            this.btnBorrar.Text = "Borrar material";
-            this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
+            this.btnDeshabilitar.Location = new System.Drawing.Point(486, 304);
+            this.btnDeshabilitar.Name = "btnDeshabilitar";
+            this.btnDeshabilitar.Size = new System.Drawing.Size(94, 23);
+            this.btnDeshabilitar.TabIndex = 13;
+            this.btnDeshabilitar.Text = "Deshabilitar";
+            this.btnDeshabilitar.Click += new System.EventHandler(this.btnDeshabilitar_Click);
+            // 
+            // lblTitle
+            // 
+            this.lblTitle.Location = new System.Drawing.Point(20, 18);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Size = new System.Drawing.Size(560, 23);
+            this.lblTitle.TabIndex = 14;
+            this.lblTitle.Text = "Descripción:";
             // 
             // GestionarMaterialForm
             // 
-            this.ClientSize = new System.Drawing.Size(600, 321);
+            this.ClientSize = new System.Drawing.Size(597, 341);
+            this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.dgvMaterial);
             this.Controls.Add(this.lblId);
             this.Controls.Add(this.txtId);
@@ -169,7 +179,7 @@ namespace UI
             this.Controls.Add(this.txtUso);
             this.Controls.Add(this.btnCrear);
             this.Controls.Add(this.btnModificar);
-            this.Controls.Add(this.btnBorrar);
+            this.Controls.Add(this.btnDeshabilitar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GestionarMaterialForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -185,5 +195,6 @@ namespace UI
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private Label lblTitle;
     }
 }

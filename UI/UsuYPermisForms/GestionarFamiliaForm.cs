@@ -1,12 +1,12 @@
-﻿using System;
+﻿using BLL.Seguridad;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using BLL.Seguridad;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarFamiliaForm : BaseForm
     {
@@ -224,6 +224,10 @@ namespace UI
             lblDisponibles.Text = param.GetLocalizable("patentes_assigned_label");
 
             btnFinalizar.Text = param.GetLocalizable("save_button");
+
+            string helpTitle = param.GetLocalizable("family_management_help_title");
+            string helpBody = param.GetLocalizable("family_management_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

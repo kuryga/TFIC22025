@@ -1,16 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Text;
+using System.IO;
 using System.Linq;
+using System.Text;
+using DAL.Seguridad;
 using BitacoraDAL = DAL.Audit.BitacoraDAL;
 
 public sealed class DalToolkit
 {
-    public const string connectionString =
-        @"Server=.;Database=UrbanSoft;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True;";
+    public static readonly string connectionString = GetConnectionStringOrThrow();
+
+    private static string GetConnectionStringOrThrow()
+    {
+        try
+        {
+            string secretPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "UrbanSoft", "conn.secret");
+
+            if (!File.Exists(secretPath))
+                throw new FileNotFoundException(
+                    $"No se encontró el archivo de conexión cifrado. Ruta esperada: {secretPath}");
+
+            string encrypted = File.ReadAllText(secretPath, Encoding.UTF8).Trim();
+            if (string.IsNullOrWhiteSpace(encrypted))
+                throw new InvalidOperationException(
+                    $"El archivo de conexión cifrado está vacío o es inválido. Ruta: {secretPath}");
+
+            string decrypted = SecurityUtilities.DesencriptarReversible(encrypted);
+            if (string.IsNullOrWhiteSpace(decrypted))
+                throw new InvalidOperationException(
+                    "No fue posible desencriptar la cadena de conexión. Verifique el archivo de conexión.");
+
+            return decrypted;
+        }
+        catch (Exception ex)
+        {
+            throw new ConfigurationErrorsException(
+                "No fue posible obtener la cadena de conexión desde el archivo cifrado. " +
+                "Ejecute la utilidad de configuración para generarlo o actualizarlo.", ex);
+        }
+    }
 
     private const string dvvTable = "[dbo].[DigitoVerificadorVertical]";
     private const string dvvColTableName = "tabla";

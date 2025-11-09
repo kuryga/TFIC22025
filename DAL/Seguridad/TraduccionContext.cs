@@ -11,7 +11,7 @@ namespace DAL.Genericos
         public static void CargarTraducciones()
         {
 
-            int idioma = Seguridad.SessionContext.Current.parametrizacion.IdIdioma;     
+            int idioma = Seguridad.SessionContext.Current.parametrizacion.IdIdioma;
             _map = IdiomaDAL.GetInstance().LoadDiccionarioTraducciones(idioma);
         }
 

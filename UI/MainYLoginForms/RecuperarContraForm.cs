@@ -1,11 +1,9 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using BLL.Seguridad;
+using System;
 using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
-using BLL.Seguridad;
 
-namespace UI
+namespace WinApp
 {
     public partial class RecuperarContraForm : BaseForm
     {
@@ -20,15 +18,6 @@ namespace UI
             this.AcceptButton = (IButtonControl)this.btnEnviar;
 
             UpdateTexts();
-        }
-
-        private void UpdateTexts()
-        {
-            this.txtEmail.Tag = "MAIL_URBANSOFT";
-            this.Text = param.GetLocalizable("recover_title");
-            lblInstruccion.Text = param.GetLocalizable("recover_email_label");
-            btnEnviar.Text = param.GetLocalizable("recover_submit_button");
-            btnCodigo.Text = param.GetLocalizable("recover_have_code_button");
         }
 
         private void BtnEnviar_Click(object sender, EventArgs e)
@@ -115,6 +104,19 @@ namespace UI
             btnCodigo.Enabled = !busy;
 
             Application.DoEvents();
+        }
+
+        private void UpdateTexts()
+        {
+            this.txtEmail.Tag = TextBoxTag.MailUrban;
+            this.Text = param.GetLocalizable("recover_title");
+            lblInstruccion.Text = param.GetLocalizable("recover_email_label");
+            btnEnviar.Text = param.GetLocalizable("recover_submit_button");
+            btnCodigo.Text = param.GetLocalizable("recover_have_code_button");
+
+            string helpTitle = param.GetLocalizable("recover_help_title");
+            string helpBody = param.GetLocalizable("recover_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

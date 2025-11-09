@@ -1,7 +1,6 @@
-﻿using System;
+﻿using DAL.Audit;
+using System;
 using System.Collections.Generic;
-using DAL.Audit;
-
 using PagedResult = BE.Genericos.PagedResult<BE.Audit.Bitacora>;
 namespace BLL.Audit
 {

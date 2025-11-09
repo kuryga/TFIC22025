@@ -1,12 +1,12 @@
-﻿using System;
+﻿using BLL.Seguridad;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using BLL.Seguridad;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class GestionarPatentesForm : BaseForm
     {
@@ -244,6 +244,10 @@ namespace UI
             lblDisponibles.Text = param.GetLocalizable("patentes_assigned_label");
 
             brnGuardar.Text = param.GetLocalizable("save_button");
+
+            string helpTitle = param.GetLocalizable("user_patents_help_title");
+            string helpBody = param.GetLocalizable("user_patents_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Windows.Forms;
 using LoginBLL = BLL.Seguridad.LoginBLL;
-using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
-using PermisosBLL = BLL.Seguridad.PermisosBLL;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using PermisosBLL = BLL.Seguridad.PermisosBLL;
+using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class MainForm : BaseForm
     {
@@ -165,6 +165,10 @@ namespace UI
             lblBienvenida.Text = $"{welcomeText} {Username}";
 
             this.Text = $"{menuText} - {NombreEmpresa}";
+
+            string helpTitle = ParametrizacionBLL.GetInstance().GetLocalizable("main_help_title");
+            string helpBody = ParametrizacionBLL.GetInstance().GetLocalizable("main_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

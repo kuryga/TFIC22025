@@ -1,7 +1,7 @@
 ﻿// RestoreForm.Designer.cs
 using System.Windows.Forms;
 
-namespace UI
+namespace WinApp
 {
     partial class RestoreForm
     {

@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 using UsuarioBLL = BLL.Seguridad.UsuarioBLL;
 
-namespace UI
+namespace WinApp
 {
     public partial class IngresoCodigoRecupContraForm : BaseForm
     {
@@ -105,6 +105,10 @@ namespace UI
             this.Text = param.GetLocalizable("security_verification_title");
             lblTitulo.Text = param.GetLocalizable("security_code_label");
             btnVerificar.Text = param.GetLocalizable("security_verify_button");
+
+            string helpTitle = param.GetLocalizable("security_code_help_title");
+            string helpBody = param.GetLocalizable("security_code_help_body");
+            SetHelpContext(helpTitle, helpBody);
         }
     }
 }

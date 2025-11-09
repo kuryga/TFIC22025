@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BE.Audit
+﻿namespace BE.Audit
 {
     public static class AuditEvents
     {
@@ -14,7 +12,7 @@ namespace BE.Audit
         public const string ConsultaUsuariosPorPatente = "Usuarios.ConsultaPatentes";
         public const string ConsultaFamilias = "Familias.ConsultaDeListado";
         public const string ConsultaPatentes = "Patentes.ConsultaDeListado";
-       
+
         public const string ConsultaCotizaciones = "Cotizacion.ConsultaDeListado";
         public const string ConsultaCotizacionDetalle = "Cotizacion.ConsultaDetalle";
         public const string ExportacionCotizacion = "Cotizacion.Exportacion";
@@ -80,6 +78,17 @@ namespace BE.Audit
         public const string ModificarPatentesUsuario = "Patentes.ModificacionPorUsuario";
         public const string AsignarPatentesAFamilia = "Familia.AsignacionDePatente";
         public const string ModificacionFamilia = "Familia.Modificacion";
+        public const string HabilitacionTipoEdificacion = "TipoEdificacion.Habilitar";
+        public const string DeshabilitacionTipoEdificacion = "TipoEdificacion.Deshabilitar";
+        public const string HabilitacionServicioAdicional = "ServicioAdicional.Habilitar";
+        public const string DeshabilitacionServicioAdicional = "ServicioAdicional.Deshabilitar";
+        public const string DeshabilitacionMoneda = "Moneda.Deshabilitar";
+        public const string HabilitacionMoneda = "Moneda.Habilitar";
+        public const string DeshabilitacionMaterial = "Material.Deshabilitar";
+        public const string HabilitacionMaterial = "Material.Habilitar";
+        public const string DeshabilitacionMaquinaria = "Maquinaria.Deshabilitar";
+        public const string HabilitacionMaquinaria = "Maquinaria.Habilitar";
+
 
         // ==== C2 (acciones sensibles / seguridad operativa) ====
         public const string BajaManualUsuario = "Usuario.BajaManual";
@@ -176,6 +185,12 @@ namespace BE.Audit
                 case ModificarFamiliasUsuario:
                 case AsignarPatentesAFamilia:
                 case ModificacionFamilia:
+                case DeshabilitacionTipoEdificacion:
+                case HabilitacionTipoEdificacion:
+                case HabilitacionServicioAdicional:
+                case DeshabilitacionServicioAdicional:
+                case DeshabilitacionMaterial:
+                case HabilitacionMaterial:
                     return Criticidad.C3;
             }
 

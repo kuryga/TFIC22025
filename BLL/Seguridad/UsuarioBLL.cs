@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 using SessionContext = DAL.Seguridad.SessionContext;
+using UsuarioDAL = DAL.Seguridad.UsuarioDAL;
 
 namespace BLL.Seguridad
 {

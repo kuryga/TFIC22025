@@ -104,7 +104,7 @@ namespace WinApp
             // 
             this.lblUsuarios.Location = new System.Drawing.Point(20, 10);
             this.lblUsuarios.Name = "lblUsuarios";
-            this.lblUsuarios.Size = new System.Drawing.Size(100, 23);
+            this.lblUsuarios.Size = new System.Drawing.Size(673, 23);
             this.lblUsuarios.TabIndex = 0;
             this.lblUsuarios.Text = "Usuarios:";
             // 
@@ -112,7 +112,7 @@ namespace WinApp
             // 
             this.lblDisponibles.Location = new System.Drawing.Point(20, 143);
             this.lblDisponibles.Name = "lblDisponibles";
-            this.lblDisponibles.Size = new System.Drawing.Size(100, 23);
+            this.lblDisponibles.Size = new System.Drawing.Size(308, 23);
             this.lblDisponibles.TabIndex = 2;
             this.lblDisponibles.Text = "No asignadas:";
             // 
@@ -120,7 +120,7 @@ namespace WinApp
             // 
             this.lblAsignadas.Location = new System.Drawing.Point(387, 143);
             this.lblAsignadas.Name = "lblAsignadas";
-            this.lblAsignadas.Size = new System.Drawing.Size(100, 23);
+            this.lblAsignadas.Size = new System.Drawing.Size(306, 23);
             this.lblAsignadas.TabIndex = 4;
             this.lblAsignadas.Text = "Asignadas:";
             // 

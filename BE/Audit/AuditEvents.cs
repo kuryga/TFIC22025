@@ -8,6 +8,7 @@
 
         public const string ConsultaFamiliasPorUsuario = "Familias.ConsultaPorUsuario";
         public const string ConsultaPatentesPorUsuario = "Patentes.ConsultaPorUsuario";
+        public const string ConsultaPatentesIndividualesPorUsuario = "Patentes.ConsultaIndividualPorUsuario";
         public const string ConsultaPatentesPorFamilia = "Patentes.ConsultaPorFamilia";
         public const string ConsultaUsuariosPorPatente = "Usuarios.ConsultaPatentes";
         public const string ConsultaFamilias = "Familias.ConsultaDeListado";
@@ -144,6 +145,7 @@
                 case ConsultaPatentesPorFamilia:
                 case ConsultaFamilias:
                 case ConsultaUsuariosPorPatente:
+                case ConsultaPatentesIndividualesPorUsuario:
                     return Criticidad.C5;
             }
 

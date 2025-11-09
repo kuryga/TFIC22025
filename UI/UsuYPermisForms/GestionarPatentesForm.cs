@@ -20,6 +20,8 @@ namespace WinApp
             ConfigurarGrids();
             CargarUsuarios();
             UpdateTexts();
+
+            AplicarPermisosPatentes();
         }
 
         private void ConfigurarGrids()
@@ -150,7 +152,7 @@ namespace WinApp
             _patentesAsignadasOriginal.Clear();
 
             var todas = PermisosBLL.GetInstance().GetAllPatentes();
-            var asignadas = PermisosBLL.GetInstance().GetPatentesByUsuario(idUsuario) ?? new List<BE.Patente>();
+            var asignadas = PermisosBLL.GetInstance().GetPatentesIndividualesByUsuario(idUsuario) ?? new List<BE.Patente>();
 
             foreach (var p in asignadas)
                 _patentesAsignadasOriginal.Add(p.IdPatente);
@@ -237,13 +239,31 @@ namespace WinApp
             }
         }
 
-        private void UpdateTexts()
+        private void AplicarPermisosPatentes()
+        {
+            try
+            {
+                bool puedeGuardar = PermisosBLL.GetInstance().PuedeAsignarPatente();
+                btnGuardar.Enabled = puedeGuardar;
+                btnAgregar.Enabled = puedeGuardar;
+                btnEliminar.Enabled = puedeGuardar;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    param.GetLocalizable("familia_apply_permissions_error_message") + ex.Message,
+                    param.GetLocalizable("permissions_label"),
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+            private void UpdateTexts()
         {
             lblUsuarios.Text = param.GetLocalizable("users_label");
             lblDisponibles.Text = param.GetLocalizable("patentes_unassigned_label");
-            lblDisponibles.Text = param.GetLocalizable("patentes_assigned_label");
+            lblAsignadas.Text = param.GetLocalizable("patentes_assigned_label");
 
-            brnGuardar.Text = param.GetLocalizable("save_button");
+            btnGuardar.Text = param.GetLocalizable("save_button");
 
             string helpTitle = param.GetLocalizable("user_patents_help_title");
             string helpBody = param.GetLocalizable("user_patents_help_body");

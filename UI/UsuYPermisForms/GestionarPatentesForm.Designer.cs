@@ -22,7 +22,7 @@ namespace WinApp
             this.lblAsignadas = new System.Windows.Forms.Label();
             this.btnAgregar = new System.Windows.Forms.Button();
             this.btnEliminar = new System.Windows.Forms.Button();
-            this.brnGuardar = new System.Windows.Forms.Button();
+            this.btnGuardar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsuarios)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDisponibles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAsignadas)).BeginInit();
@@ -93,7 +93,7 @@ namespace WinApp
             // 
             this.lblUsuarios.Location = new System.Drawing.Point(20, 10);
             this.lblUsuarios.Name = "lblUsuarios";
-            this.lblUsuarios.Size = new System.Drawing.Size(100, 23);
+            this.lblUsuarios.Size = new System.Drawing.Size(675, 23);
             this.lblUsuarios.TabIndex = 0;
             this.lblUsuarios.Text = "Usuarios:";
             // 
@@ -101,17 +101,17 @@ namespace WinApp
             // 
             this.lblDisponibles.Location = new System.Drawing.Point(20, 173);
             this.lblDisponibles.Name = "lblDisponibles";
-            this.lblDisponibles.Size = new System.Drawing.Size(100, 23);
+            this.lblDisponibles.Size = new System.Drawing.Size(304, 23);
             this.lblDisponibles.TabIndex = 2;
-            this.lblDisponibles.Text = "No asignadas:";
+            this.lblDisponibles.Text = "no";
             // 
             // lblAsignadas
             // 
             this.lblAsignadas.Location = new System.Drawing.Point(383, 173);
             this.lblAsignadas.Name = "lblAsignadas";
-            this.lblAsignadas.Size = new System.Drawing.Size(100, 23);
+            this.lblAsignadas.Size = new System.Drawing.Size(312, 23);
             this.lblAsignadas.TabIndex = 4;
-            this.lblAsignadas.Text = "Asignadas:";
+            this.lblAsignadas.Text = "si";
             // 
             // btnAgregar
             // 
@@ -131,19 +131,19 @@ namespace WinApp
             this.btnEliminar.Text = "←";
             this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
-            // brnGuardar
+            // btnGuardar
             // 
-            this.brnGuardar.Location = new System.Drawing.Point(311, 355);
-            this.brnGuardar.Name = "brnGuardar";
-            this.brnGuardar.Size = new System.Drawing.Size(92, 30);
-            this.brnGuardar.TabIndex = 8;
-            this.brnGuardar.Text = "Guardar";
-            this.brnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
+            this.btnGuardar.Location = new System.Drawing.Point(311, 355);
+            this.btnGuardar.Name = "btnGuardar";
+            this.btnGuardar.Size = new System.Drawing.Size(92, 30);
+            this.btnGuardar.TabIndex = 8;
+            this.btnGuardar.Text = "Guardar";
+            this.btnGuardar.Click += new System.EventHandler(this.btnGuardar_Click);
             // 
             // GestionarPatentesForm
             // 
             this.ClientSize = new System.Drawing.Size(714, 392);
-            this.Controls.Add(this.brnGuardar);
+            this.Controls.Add(this.btnGuardar);
             this.Controls.Add(this.lblUsuarios);
             this.Controls.Add(this.dgvUsuarios);
             this.Controls.Add(this.lblDisponibles);
@@ -167,6 +167,6 @@ namespace WinApp
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private Button brnGuardar;
+        private Button btnGuardar;
     }
 }

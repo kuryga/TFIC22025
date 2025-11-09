@@ -24,6 +24,8 @@ namespace WinApp
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                          "UrbanSoft", "conn.secret");
 
+        private bool _showPass = false;
+
         public LoginForm()
         {
             InitializeComponent();
@@ -51,9 +53,22 @@ namespace WinApp
             this.AcceptButton = btnLogin;
 
             if (txtContrasena != null)
+            {
                 txtContrasena.UseSystemPasswordChar = true;
+                txtContrasena.TextChanged += TxtContrasena_TextChanged;
+            }
+
+            if (btnVer != null)
+                btnVer.Enabled = false; 
 
             txtUsuario?.Focus();
+        }
+        private void TxtContrasena_TextChanged(object sender, EventArgs e)
+        {
+            if (btnVer == null || txtContrasena == null)
+                return;
+
+            btnVer.Enabled = !string.IsNullOrWhiteSpace(txtContrasena.Text);
         }
 
         private bool EnsureConnectionConfiguredAndHealthy()
@@ -301,6 +316,8 @@ namespace WinApp
             string nombreEmpresa = param.GetNombreEmpresa();
             this.Text = $"{titleText} {nombreEmpresa}";
 
+            btnVer.Text = param.GetLocalizable(_showPass ? "password_hide_button" : "password_show_button");
+
             SetHelpContext(param.GetLocalizable("login_help_title"),
                            param.GetLocalizable("login_help_body"));
         }
@@ -312,6 +329,13 @@ namespace WinApp
                 frm.StartPosition = FormStartPosition.CenterParent;
                 frm.ShowDialog(this);
             }
+        }
+
+        private void btnVer_Click(object sender, EventArgs e)
+        {
+            _showPass = !_showPass;
+            if (txtContrasena != null)
+                txtContrasena.UseSystemPasswordChar = !_showPass;
         }
     }
 }

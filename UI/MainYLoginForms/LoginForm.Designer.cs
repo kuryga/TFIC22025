@@ -38,12 +38,13 @@ namespace WinApp
             this.cmbIdiomaInferior = new System.Windows.Forms.ComboBox();
             this.btnRecuperarContrasena = new System.Windows.Forms.Button();
             this.ptbLogo = new System.Windows.Forms.PictureBox();
+            this.btnVer = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ptbLogo)).BeginInit();
             this.SuspendLayout();
             // 
             // lblUsuario
             // 
-            this.lblUsuario.Location = new System.Drawing.Point(72, 120);
+            this.lblUsuario.Location = new System.Drawing.Point(128, 120);
             this.lblUsuario.Name = "lblUsuario";
             this.lblUsuario.Size = new System.Drawing.Size(155, 13);
             this.lblUsuario.TabIndex = 0;
@@ -52,7 +53,7 @@ namespace WinApp
             // 
             // lblContrasena
             // 
-            this.lblContrasena.Location = new System.Drawing.Point(72, 169);
+            this.lblContrasena.Location = new System.Drawing.Point(128, 169);
             this.lblContrasena.Name = "lblContrasena";
             this.lblContrasena.Size = new System.Drawing.Size(155, 13);
             this.lblContrasena.TabIndex = 2;
@@ -61,7 +62,7 @@ namespace WinApp
             // 
             // txtUsuario
             // 
-            this.txtUsuario.Location = new System.Drawing.Point(15, 136);
+            this.txtUsuario.Location = new System.Drawing.Point(71, 136);
             this.txtUsuario.Name = "txtUsuario";
             this.txtUsuario.Size = new System.Drawing.Size(272, 20);
             this.txtUsuario.TabIndex = 1;
@@ -69,7 +70,7 @@ namespace WinApp
             // 
             // txtContrasena
             // 
-            this.txtContrasena.Location = new System.Drawing.Point(15, 185);
+            this.txtContrasena.Location = new System.Drawing.Point(71, 185);
             this.txtContrasena.Name = "txtContrasena";
             this.txtContrasena.Size = new System.Drawing.Size(272, 20);
             this.txtContrasena.TabIndex = 3;
@@ -78,7 +79,7 @@ namespace WinApp
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(107, 225);
+            this.btnLogin.Location = new System.Drawing.Point(163, 225);
             this.btnLogin.Name = "btnLogin";
             this.btnLogin.Size = new System.Drawing.Size(86, 30);
             this.btnLogin.TabIndex = 6;
@@ -88,7 +89,7 @@ namespace WinApp
             // 
             // lblIdiomaInferior
             // 
-            this.lblIdiomaInferior.Location = new System.Drawing.Point(12, 263);
+            this.lblIdiomaInferior.Location = new System.Drawing.Point(9, 263);
             this.lblIdiomaInferior.Name = "lblIdiomaInferior";
             this.lblIdiomaInferior.Size = new System.Drawing.Size(100, 13);
             this.lblIdiomaInferior.TabIndex = 7;
@@ -102,7 +103,7 @@ namespace WinApp
             "Español",
             "Inglés",
             "Portugués"});
-            this.cmbIdiomaInferior.Location = new System.Drawing.Point(15, 279);
+            this.cmbIdiomaInferior.Location = new System.Drawing.Point(12, 279);
             this.cmbIdiomaInferior.Name = "cmbIdiomaInferior";
             this.cmbIdiomaInferior.Size = new System.Drawing.Size(86, 21);
             this.cmbIdiomaInferior.TabIndex = 8;
@@ -110,7 +111,7 @@ namespace WinApp
             // btnRecuperarContrasena
             // 
             this.btnRecuperarContrasena.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRecuperarContrasena.Location = new System.Drawing.Point(133, 272);
+            this.btnRecuperarContrasena.Location = new System.Drawing.Point(246, 273);
             this.btnRecuperarContrasena.Name = "btnRecuperarContrasena";
             this.btnRecuperarContrasena.Size = new System.Drawing.Size(154, 30);
             this.btnRecuperarContrasena.TabIndex = 9;
@@ -121,18 +122,29 @@ namespace WinApp
             // ptbLogo
             // 
             this.ptbLogo.BackColor = System.Drawing.SystemColors.Control;
-            this.ptbLogo.Location = new System.Drawing.Point(15, 0);
+            this.ptbLogo.Location = new System.Drawing.Point(71, 0);
             this.ptbLogo.Name = "ptbLogo";
             this.ptbLogo.Size = new System.Drawing.Size(272, 117);
             this.ptbLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ptbLogo.TabIndex = 10;
             this.ptbLogo.TabStop = false;
             // 
+            // btnVer
+            // 
+            this.btnVer.Location = new System.Drawing.Point(349, 185);
+            this.btnVer.Name = "btnVer";
+            this.btnVer.Size = new System.Drawing.Size(46, 20);
+            this.btnVer.TabIndex = 11;
+            this.btnVer.Text = "Ver";
+            this.btnVer.UseVisualStyleBackColor = true;
+            this.btnVer.Click += new System.EventHandler(this.btnVer_Click);
+            // 
             // LoginForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 312);
+            this.ClientSize = new System.Drawing.Size(412, 312);
+            this.Controls.Add(this.btnVer);
             this.Controls.Add(this.ptbLogo);
             this.Controls.Add(this.btnRecuperarContrasena);
             this.Controls.Add(this.lblUsuario);
@@ -154,5 +166,6 @@ namespace WinApp
         }
 
         private PictureBox ptbLogo;
+        private Button btnVer;
     }
 }

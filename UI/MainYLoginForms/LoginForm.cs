@@ -315,7 +315,7 @@ namespace WinApp
 
             string titleText = param.GetLocalizable("login_title");
             string nombreEmpresa = param.GetNombreEmpresa();
-            this.Text = $"{titleText} {nombreEmpresa}";
+            this.Text = $"{titleText} - {nombreEmpresa}";
 
             btnVer.Text = param.GetLocalizable(_showPass ? "password_hide_button" : "password_show_button");
 

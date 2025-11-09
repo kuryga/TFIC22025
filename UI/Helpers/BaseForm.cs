@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using System.Collections.Generic;                   // NUEVO
-using UI.Infrastructure;                            // NUEVO: protocolo de ayuda
+using System.Collections.Generic;
+using UI.Infrastructure;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
 
 namespace WinApp
@@ -22,7 +22,6 @@ namespace WinApp
         public BaseForm()
         {
             _sharedErrorProvider = new ErrorProvider { BlinkStyle = ErrorBlinkStyle.NeverBlink };
-
             this.KeyPreview = true;
             _helpProtocol = new ContextualMenuExecutable(this);
         }
@@ -31,7 +30,6 @@ namespace WinApp
         {
             base.OnLoad(e);
             ApplyPoliciesRecursive(this);
-
             this.ControlAdded -= BaseForm_ControlAdded;
             this.ControlAdded += BaseForm_ControlAdded;
         }
@@ -109,13 +107,48 @@ namespace WinApp
             }
         }
 
+        private static bool IsDigitsOnly(string s) => s.All(char.IsDigit);
+        private static string OnlyDigits(string s) => new string((s ?? string.Empty).Where(char.IsDigit).ToArray());
+
         private void AttachNumeric12Validation(TextBox tb)
         {
-            tb.Validating -= Numeric12_Validating;
-            tb.Validating += Numeric12_Validating;
+            if (tb.MaxLength <= 0 || tb.MaxLength > 12)
+                tb.MaxLength = 12;
+
+            tb.KeyPress -= Numeric12_KeyPress;
+            tb.KeyPress += Numeric12_KeyPress;
 
             tb.TextChanged -= Numeric12_TextChanged;
             tb.TextChanged += Numeric12_TextChanged;
+
+            tb.Validating -= Numeric12_Validating;
+            tb.Validating += Numeric12_Validating;
+        }
+
+        private void Numeric12_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (char.IsControl(e.KeyChar)) return;
+            if (!char.IsDigit(e.KeyChar))
+                e.Handled = true;
+        }
+
+        private void Numeric12_TextChanged(object sender, EventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+
+            string original = tb.Text ?? string.Empty;
+            string digits = OnlyDigits(original);
+
+            if (original != digits)
+            {
+                int sel = tb.SelectionStart;
+                tb.Text = digits;
+                tb.SelectionStart = Math.Min(sel, tb.Text.Length);
+            }
+
+            if (digits.Length == 0 || IsDigitsOnly(digits))
+                _sharedErrorProvider.SetError(tb, string.Empty);
         }
 
         private void Numeric12_Validating(object sender, CancelEventArgs e)
@@ -124,25 +157,15 @@ namespace WinApp
             if (tb == null) return;
 
             var txt = tb.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
+            if (txt.Length == 0 || IsDigitsOnly(txt))
             {
                 _sharedErrorProvider.SetError(tb, string.Empty);
             }
             else
             {
-                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_doc_validation_message"));
+                _sharedErrorProvider.SetError(tb, ParametrizacionBLL.GetInstance().GetLocalizable("user_numeric12_validation_message"));
                 e.Cancel = true;
             }
-        }
-
-        private void Numeric12_TextChanged(object sender, EventArgs e)
-        {
-            var tb = sender as TextBox;
-            if (tb == null) return;
-
-            var txt = tb.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrEmpty(txt) || InputSanitizer.IsValidNumeric(txt))
-                _sharedErrorProvider.SetError(tb, string.Empty);
         }
 
         private void AttachUrbansoftEmailValidation(TextBox tb)

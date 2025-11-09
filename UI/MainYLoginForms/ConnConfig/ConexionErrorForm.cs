@@ -54,15 +54,23 @@ namespace WinApp
         private void btnCancelar_Click(object sender, EventArgs e)
         {
             ReconfigureSelected = false;
-            this.DialogResult = DialogResult.Cancel;
-            Close();
+
+            string msg = T("MsgCerrarPorFaltaConexion", SelectedLanguage);
+            string title = T("TituloCerrarApp", SelectedLanguage);
+
+            MessageBox.Show(msg, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Application.Exit();
         }
 
         private sealed class LangItem
         {
             public string Code { get; }
             public string Display { get; }
-            public LangItem(string code, string display) { Code = code; Display = display; }
+            public LangItem(string code, string display)
+            {
+                Code = code;
+                Display = display;
+            }
             public override string ToString() => Display;
         }
     }

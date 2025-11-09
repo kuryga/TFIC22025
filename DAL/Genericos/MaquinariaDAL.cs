@@ -9,7 +9,12 @@ namespace DAL.Genericos
     {
         private static MaquinariaDAL instance;
         private MaquinariaDAL() { }
-        public static MaquinariaDAL GetInstance() { if (instance == null) instance = new MaquinariaDAL(); return instance; }
+        public static MaquinariaDAL GetInstance()
+        {
+            if (instance == null)
+                instance = new MaquinariaDAL();
+            return instance;
+        }
 
         private static readonly DalToolkit db = new DalToolkit();
 
@@ -42,11 +47,12 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
                     var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
-                    p.Precision = 18; p.Scale = 2;
+                    p.Precision = 18;
+                    p.Scale = 2;
                     p.Value = obj.CostoPorHora;
                 },
                 table, idCol,
@@ -76,11 +82,12 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaquinaria;
 
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
                     var p = cmd.Parameters.Add("@costoPorHora", SqlDbType.Decimal);
-                    p.Precision = 18; p.Scale = 2;
+                    p.Precision = 18;
+                    p.Scale = 2;
                     p.Value = obj.CostoPorHora;
                 },
                 table, idCol, obj.IdMaquinaria,

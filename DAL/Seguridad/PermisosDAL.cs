@@ -37,7 +37,6 @@ namespace DAL.Seguridad
             }
             catch
             {
-                // nada
                 return s;
             }
         }
@@ -438,7 +437,6 @@ END CATCH;";
 BEGIN TRY
     BEGIN TRAN;
 
-    -- Chequeo de duplicado contra nombre en CLARO normalizado o encriptado
     IF EXISTS (
         SELECT 1
         FROM dbo.Familia
@@ -465,9 +463,9 @@ END CATCH;";
                 sqlInsert,
                 c =>
                 {
-                    c.Parameters.Add("@nPlain", SqlDbType.VarChar, 100).Value = (object)nPlain ?? DBNull.Value;
+                    c.Parameters.Add("@nPlain", SqlDbType.NVarChar, 100).Value = (object)nPlain ?? DBNull.Value;
                     c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
-                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.NVarChar, 255).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                 },
                 "dbo.Familia", "idFamilia",
                 BE.Audit.AuditEvents.AltaFamilia,
@@ -533,7 +531,7 @@ DELETE FROM dbo.FamiliaPatente WHERE idFamilia = @f;";
                 {
                     c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
                     c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
-                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.NVarChar, 255).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                 };
             }
             else
@@ -551,7 +549,7 @@ INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
                 {
                     c.Parameters.Add("@f", SqlDbType.Int).Value = familia.IdFamilia;
                     c.Parameters.Add("@nEnc", SqlDbType.VarChar, 256).Value = (object)nEnc ?? DBNull.Value;
-                    c.Parameters.Add("@d", SqlDbType.VarChar, 4000).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
+                    c.Parameters.Add("@d", SqlDbType.NVarChar, 255).Value = (object)(familia.Descripcion ?? string.Empty) ?? DBNull.Value;
                     for (int i = 0; i < nuevasPatentes.Count; i++)
                         c.Parameters.Add($"@p{i}", SqlDbType.Int).Value = nuevasPatentes[i];
                 };
@@ -561,7 +559,6 @@ INSERT INTO dbo.FamiliaPatente (idFamilia, idPatente) VALUES {values};";
 BEGIN TRY
     BEGIN TRAN;
 
-    -- Chequeo de duplicado mixto. en claro normalizado o encriptado, excluyendo la actual
     IF EXISTS (
         SELECT 1
         FROM dbo.Familia
@@ -596,7 +593,6 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
     IF (XACT_STATE() <> 0) ROLLBACK TRAN;
-    DECLARE @msg NVARCHAR(4000) = ERROR_MESSAGE();
     THROW;
 END CATCH;";
 
@@ -605,9 +601,9 @@ END CATCH;";
                 c =>
                 {
                     binder(c);
-                    c.Parameters.Add("@nPlain", SqlDbType.VarChar, 100).Value = (object)nPlain ?? DBNull.Value;
+                    c.Parameters.Add("@nPlain", SqlDbType.NVarChar, 100).Value = (object)nPlain ?? DBNull.Value;
                 },
-                "dbo.FamiliaPatente", // antes "dbo.Familia"
+                "dbo.FamiliaPatente",
                 "idFamilia",
                 BE.Audit.AuditEvents.ModificacionFamilia,
                 "Modificación de familia Id=" + familia.IdFamilia,

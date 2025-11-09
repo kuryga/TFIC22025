@@ -49,7 +49,6 @@ namespace WinApp
                 var decSep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
                 var text = tb.Text ?? string.Empty;
 
-                // permitir solo dígitos y un separador decimal
                 if (char.IsDigit(e.KeyChar))
                 {
                     var sepIndex = text.IndexOf(decSep);
@@ -85,7 +84,6 @@ namespace WinApp
                         e.Handled = true;
                         return;
                     }
-
                     return;
                 }
 
@@ -94,16 +92,12 @@ namespace WinApp
                 return;
             }
 
-            var isSafe = string.Equals(tag, TextBoxTag.SqlSafe, StringComparison.OrdinalIgnoreCase);
-            var pattern = isSafe ? AllowedPatternWithSpaces : AllowedPattern;
-
-            if (e.KeyChar == '\r' || e.KeyChar == '\n')
+            if (string.Equals(tag, TextBoxTag.SqlSafe, StringComparison.OrdinalIgnoreCase))
             {
-                e.Handled = true;
-                System.Media.SystemSounds.Beep.Play();
                 return;
             }
 
+            var pattern = AllowedPattern;
             if (!Regex.IsMatch(e.KeyChar.ToString(), pattern))
             {
                 e.Handled = true;
@@ -184,37 +178,27 @@ namespace WinApp
 
         public static bool IsValidNewPassword(string input)
         {
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
-
-            if (input.Length < 8)
-                return false;
-
-            if (!input.Any(char.IsUpper))
-                return false;
-
-            if (!Regex.IsMatch(input, @"[!@#$^&?_+<>.:]"))
-                return false;
-
-            if (Regex.Matches(input, @"\d").Count < 2)
-                return false;
-
-            if (!IsSafeForSql(input))
-                return false;
-
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            if (input.Length < 8) return false;
+            if (!input.Any(char.IsUpper)) return false;
+            if (!Regex.IsMatch(input, @"[!@#$^&?_+<>.:]")) return false;
+            if (Regex.Matches(input, @"\d").Count < 2) return false;
+            if (!IsSafeForSql(input)) return false;
             return true;
         }
 
         public static bool IsSafeForSql(string input)
         {
-            if (string.IsNullOrEmpty(input))
-                return true;
+            if (input == null) return true;
 
-            if (input.Contains("\n") || input.Contains("\r"))
-                return false;
+            foreach (var ch in input)
+            {
+                if (ch == '\0') return false;
+                if (char.IsControl(ch) && ch != '\t')
+                    return false;
+            }
 
-            string forbiddenPattern = @"['"";\\/*]|--|\b(ALTER|DROP|DELETE|INSERT|UPDATE|EXEC|UNION|SELECT)\b";
-            return !Regex.IsMatch(input, forbiddenPattern, RegexOptions.IgnoreCase);
+            return true;
         }
 
         public static bool TryParsePrice(string input, out decimal price)
@@ -231,9 +215,8 @@ namespace WinApp
                 new CultureInfo("es-AR")
             };
 
-            for (int i = 0; i < cultures.Length; i++)
+            foreach (var c in cultures)
             {
-                var c = cultures[i];
                 if (decimal.TryParse(s, styles, c, out price))
                 {
                     price = Math.Round(price, 2, MidpointRounding.AwayFromZero);
@@ -252,7 +235,6 @@ namespace WinApp
         {
             decimal val;
             if (!TryParsePrice(input, out val)) return false;
-
             var abs = Math.Abs(val);
             var integerPart = (long)Math.Truncate(abs);
             return integerPart.ToString(CultureInfo.InvariantCulture).Length <= maxIntegerDigits;
@@ -262,12 +244,40 @@ namespace WinApp
         {
             decimal val;
             if (!TryParsePrice(input, out val)) return "0.00";
-
             if (culture == null) culture = CultureInfo.CurrentCulture;
-
             return includeCurrencySymbol
                 ? val.ToString("C2", culture)
                 : val.ToString("N2", culture);
         }
+
+        public enum SafeEncodeMode
+        {
+            None,
+            UnicodeEscapes,
+            Html,
+            Url
+        }
+
+        public static string Encode(string input, SafeEncodeMode mode)
+        {
+            if (input == null) return string.Empty;
+            switch (mode)
+            {
+                case SafeEncodeMode.UnicodeEscapes:
+                    return string.Concat(input.Select(c =>
+                        (c == '\'' || c == '"' || c == '\\' || char.IsControl(c))
+                            ? $"\\u{((int)c):X4}"
+                            : c.ToString()));
+                case SafeEncodeMode.Html:
+                    return System.Net.WebUtility.HtmlEncode(input);
+                case SafeEncodeMode.Url:
+                    return Uri.EscapeDataString(input);
+                default:
+                    return input;
+            }
+        }
+
+        public static string GetSafeText(TextBox tb, SafeEncodeMode mode) =>
+            tb == null ? string.Empty : Encode(tb.Text ?? string.Empty, mode);
     }
 }

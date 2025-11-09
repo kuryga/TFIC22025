@@ -46,8 +46,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
-                        (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.Descripcion ?? string.Empty) ?? System.DBNull.Value;
                 },
                 table, idCol,
                 BE.Audit.AuditEvents.CreacionTipoEdificacion,
@@ -74,8 +74,8 @@ UPDATE " + table + @"
                 cmd =>
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdTipoEdificacion;
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
-                        (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.Descripcion ?? string.Empty) ?? System.DBNull.Value;
                 },
                 table, idCol, obj.IdTipoEdificacion,
                 BE.Audit.AuditEvents.ModificacionTipoEdificacion,

@@ -45,11 +45,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
-                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.NombreMoneda ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
-                        (object)obj.Simbolo ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.NVarChar, 10).Value =
+                        (object)(obj.Simbolo ?? string.Empty) ?? System.DBNull.Value;
 
                     var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
                     pCambio.Precision = 18;
@@ -84,11 +84,11 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@IdMoneda", SqlDbType.Int).Value = obj.IdMoneda;
 
-                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.VarChar, 100).Value =
-                        (object)obj.NombreMoneda ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@NombreMoneda", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.NombreMoneda ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@Simbolo", SqlDbType.VarChar, 10).Value =
-                        (object)obj.Simbolo ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@Simbolo", SqlDbType.NVarChar, 10).Value =
+                        (object)(obj.Simbolo ?? string.Empty) ?? System.DBNull.Value;
 
                     var pCambio = cmd.Parameters.Add("@ValorCambio", SqlDbType.Decimal);
                     pCambio.Precision = 18;

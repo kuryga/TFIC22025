@@ -34,9 +34,7 @@ namespace DAL.Audit
         }
 
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize)
-        {
-            return GetBitacoraList(desde, hasta, page, pageSize, null);
-        }
+            => GetBitacoraList(desde, hasta, page, pageSize, null);
 
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad = null)
         {
@@ -64,9 +62,6 @@ ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
                 if (page <= 0) page = 1;
                 if (pageSize <= 0) pageSize = 30;
 
-                int start = ((page - 1) * pageSize) + 1;
-                int end = page * pageSize;
-
                 sql = @"
 SET ROWCOUNT 0;
 WITH CTE AS (
@@ -81,7 +76,8 @@ WITH CTE AS (
         ROW_NUMBER() OVER (ORDER BY b.fecha DESC, b." + PkBitacora + @" DESC) AS rn
     FROM " + TblBitacora + @" b
     WHERE (@desde IS NULL OR CAST(b.fecha AS date) >= @desde)
-      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta" + @")" + (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
+      AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)" +
+      (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
 )
 SELECT
     " + PkBitacora + @" AS idRegistro,
@@ -111,11 +107,11 @@ ORDER BY rn;";
                     cmd.Parameters.Add("@end", SqlDbType.Int).Value = page * pageSize;
 
                     if (!string.IsNullOrWhiteSpace(criticidad))
-                        cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                        cmd.Parameters.Add("@criticidad", SqlDbType.NVarChar, 32).Value = criticidad;
                 }
 
                 conn.Open();
-                using (var rdr = cmd.ExecuteReader())
+                using (var rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
                 {
                     int oId = rdr.GetOrdinal("idRegistro");
                     int oFecha = rdr.GetOrdinal("fecha");
@@ -147,7 +143,6 @@ ORDER BY rn;";
                         });
                     }
                 }
-                conn.Close();
             }
 
             if (!_isListingBitacora)
@@ -197,9 +192,9 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
             {
                 cmd.Parameters.Add("@fecha", SqlDbType.DateTime).Value = DateTime.Now;
-                cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
-                cmd.Parameters.Add("@accion", SqlDbType.VarChar, 128).Value = accion ?? string.Empty;
-                cmd.Parameters.Add("@mensaje", SqlDbType.VarChar, 4000).Value = encMensaje ?? string.Empty;
+                cmd.Parameters.Add("@criticidad", SqlDbType.NVarChar, 32).Value = criticidad;
+                cmd.Parameters.Add("@accion", SqlDbType.NVarChar, 128).Value = accion ?? string.Empty;
+                cmd.Parameters.Add("@mensaje", SqlDbType.NVarChar, 4000).Value = encMensaje ?? string.Empty;
 
                 var idValue = uid.HasValue ? (object)uid.Value : DBNull.Value;
                 var userValue = string.IsNullOrWhiteSpace(uname) ? (object)DBNull.Value : uname;
@@ -208,12 +203,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 pId.IsNullable = true;
                 pId.Value = idValue;
 
-                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.VarChar, 150).Value = userValue;
-                cmd.Parameters.Add("@DVH", SqlDbType.VarChar, 256).Value = string.Empty;
+                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.NVarChar, 150).Value = userValue;
+                cmd.Parameters.Add("@DVH", SqlDbType.NVarChar, 256).Value = string.Empty;
 
                 conn.Open();
                 newId = cmd.ExecuteScalar();
-                conn.Close();
             }
 
             int newIdInt = (newId != null && newId != DBNull.Value) ? Convert.ToInt32(newId) : 0;
@@ -237,7 +231,7 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
             using (var cmd = new SqlCommand(sql, conn) { CommandType = CommandType.Text })
             {
                 conn.Open();
-                using (var rdr = cmd.ExecuteReader())
+                using (var rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
                 {
                     int oCodigo = rdr.GetOrdinal("codigo");
                     while (rdr.Read())
@@ -250,7 +244,6 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                         }
                     }
                 }
-                conn.Close();
             }
             return list;
         }
@@ -273,7 +266,8 @@ SELECT
     b.UsuarioEjecutor
 FROM " + TblBitacora + @" b
 WHERE (@desde IS NULL OR CAST(b.fecha AS date) >= @desde)
-  AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta" + @")" + (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
+  AND (@hasta IS NULL OR CAST(b.fecha AS date) <= @hasta)" +
+  (string.IsNullOrWhiteSpace(criticidad) ? "" : " AND b.criticidad = @criticidad") + @"
 ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
 
                 items = new List<BE.Audit.Bitacora>();
@@ -288,10 +282,10 @@ ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
                         hasta.HasValue ? (object)hasta.Value.Date : DBNull.Value;
 
                     if (!string.IsNullOrWhiteSpace(criticidad))
-                        cmd.Parameters.Add("@criticidad", SqlDbType.VarChar, 32).Value = criticidad;
+                        cmd.Parameters.Add("@criticidad", SqlDbType.NVarChar, 32).Value = criticidad;
 
                     conn.Open();
-                    using (var rdr = cmd.ExecuteReader())
+                    using (var rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
                     {
                         int oId = rdr.GetOrdinal("idRegistro");
                         int oFecha = rdr.GetOrdinal("fecha");
@@ -323,7 +317,6 @@ ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
                             });
                         }
                     }
-                    conn.Close();
                 }
             }
             else

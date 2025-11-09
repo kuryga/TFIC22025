@@ -52,10 +52,7 @@ namespace DAL.Seguridad
                         list[i].CorreoElectronico =
                             segUtils.DesencriptarReversible(list[i].CorreoElectronico ?? string.Empty);
                     }
-                    catch
-                    {
-                        // nada
-                    }
+                    catch { }
                 }
             }
 
@@ -104,7 +101,6 @@ WHERE numeroDocumento = @doc;";
             if (countDoc > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
-
             string randomPassword = GenerarContrasenaAleatoria(20);
             string passwordHash = segUtils.EncriptarIrreversible(randomPassword);
 
@@ -121,15 +117,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)mailEnc ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash ?? System.DBNull.Value;
-                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;       // se crea bloqueado
-                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = 0;   // por defecto habilitado
+                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.NVarChar, 100).Value = (object)obj.NombreUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.NVarChar, 100).Value = (object)obj.ApellidoUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)mailEnc ?? DBNull.Value;
+                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.NVarChar, 50).Value = (object)obj.TelefonoContacto ?? DBNull.Value;
+                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.NVarChar, 150).Value = (object)obj.DireccionUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? DBNull.Value;
+                    cmd.Parameters.Add("@contrasenaHash", SqlDbType.Char, 32).Value = (object)passwordHash ?? DBNull.Value;
+                    cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = 1;
+                    cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = 0;
                 },
                 userTable, userIdCol,
                 BE.Audit.AuditEvents.CreacionUsuario,
@@ -137,8 +133,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 shouldCalculate: false
             );
 
-            if (newId != null && newId != System.DBNull.Value)
-                obj.IdUsuario = System.Convert.ToInt32(newId);
+            if (newId != null && newId != DBNull.Value)
+                obj.IdUsuario = Convert.ToInt32(newId);
 
             if (obj.IdUsuario > 0)
                 db.RefreshRowDvAndTableDvv(userTable, userIdCol, obj.IdUsuario, false);
@@ -169,7 +165,6 @@ WHERE correoElectronico = @mail AND " + userIdCol + " <> @id;";
                 "Verificación de email duplicado en Update: " + (obj.CorreoElectronico ?? string.Empty),
                 shouldCalculate: false
             ) ?? 0);
-
             if (countMail > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_email_exists"));
 
@@ -190,7 +185,6 @@ WHERE numeroDocumento = @doc AND " + userIdCol + " <> @id;";
                 "Verificación de documento duplicado en Update: " + documento,
                 shouldCalculate: false
             ) ?? 0);
-
             if (countDoc > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
@@ -211,11 +205,11 @@ WHERE " + userIdCol + @" = @idUsuario;";
                 cmd =>
                 {
                     cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = obj.IdUsuario;
-                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.VarChar, 100).Value = (object)obj.NombreUsuario ?? DBNull.Value;
-                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.VarChar, 100).Value = (object)obj.ApellidoUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@nombreUsuario", SqlDbType.NVarChar, 100).Value = (object)obj.NombreUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@apellidoUsuario", SqlDbType.NVarChar, 100).Value = (object)obj.ApellidoUsuario ?? DBNull.Value;
                     cmd.Parameters.Add("@correoElectronico", SqlDbType.VarChar, 150).Value = (object)encMail ?? DBNull.Value;
-                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.VarChar, 50).Value = (object)obj.TelefonoContacto ?? DBNull.Value;
-                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.VarChar, 150).Value = (object)obj.DireccionUsuario ?? DBNull.Value;
+                    cmd.Parameters.Add("@telefonoContacto", SqlDbType.NVarChar, 50).Value = (object)obj.TelefonoContacto ?? DBNull.Value;
+                    cmd.Parameters.Add("@direccionUsuario", SqlDbType.NVarChar, 150).Value = (object)obj.DireccionUsuario ?? DBNull.Value;
                     cmd.Parameters.Add("@numeroDocumento", SqlDbType.VarChar, 20).Value = (object)documento ?? DBNull.Value;
                     cmd.Parameters.Add("@Bloqueado", SqlDbType.Bit).Value = obj.Bloqueado;
                     cmd.Parameters.Add("@Deshabilitado", SqlDbType.Bit).Value = obj.Deshabilitado;
@@ -226,7 +220,6 @@ WHERE " + userIdCol + @" = @idUsuario;";
                 true
             );
         }
-
 
         public class UsuarioLoginRow
         {
@@ -272,10 +265,7 @@ WHERE correoElectronico = @mail;";
                     row.correoElectronico =
                         segUtils.DesencriptarReversible(row.correoElectronico ?? string.Empty);
                 }
-                catch
-                {
-                    // nada
-                }
+                catch { }
             }
 
             return row;
@@ -311,7 +301,7 @@ WHERE correoElectronico = @mail;";
             string desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             string safeMail = SanitizarParaNombreArchivo(userMail);
             string filePath = Path.Combine(desktop, $"Recupero_{safeMail}_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-            File.WriteAllText(filePath, codigoPlano, System.Text.Encoding.UTF8);
+            File.WriteAllText(filePath, codigoPlano, Encoding.UTF8);
 
             string tokenHash = segUtils.EncriptarIrreversible(codigoPlano);
             DateTime expiracion = DateTime.Now.AddMinutes(5);
@@ -336,6 +326,7 @@ UPDATE " + userTable + @"
                 true
             );
         }
+
         private sealed class UsuarioTokenRow
         {
             public int idUsuario { get; set; }
@@ -383,7 +374,6 @@ WHERE correoElectronico = @mail;";
 
             if (!valido)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("security_code_incorrect_message"));
-
 
             DateTime nuevaExpiracion = ahora.AddMinutes(5);
 
@@ -546,7 +536,7 @@ UPDATE " + userTable + @"
                 for (int i = 0; i < length; i++)
                 {
                     rng.GetBytes(buffer);
-                    int val = System.BitConverter.ToInt32(buffer, 0) & int.MaxValue;
+                    int val = BitConverter.ToInt32(buffer, 0) & int.MaxValue;
                     sb.Append(pool[val % pool.Length]);
                 }
             }

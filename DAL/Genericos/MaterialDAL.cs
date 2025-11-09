@@ -41,11 +41,11 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
-                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.UnidadMedida ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
                     pPrecio.Precision = 18; pPrecio.Scale = 2;
@@ -84,11 +84,11 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdMaterial;
 
-                    cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 100).Value =
-                        (object)obj.Nombre ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@nombre", SqlDbType.NVarChar, 100).Value =
+                        (object)(obj.Nombre ?? string.Empty) ?? System.DBNull.Value;
 
-                    cmd.Parameters.Add("@unidadMedida", SqlDbType.VarChar, 250).Value =
-                        (object)obj.UnidadMedida ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@unidadMedida", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.UnidadMedida ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precioUnidad", SqlDbType.Decimal);
                     pPrecio.Precision = 18; pPrecio.Scale = 2;

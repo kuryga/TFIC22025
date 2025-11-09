@@ -45,8 +45,8 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 sql,
                 cmd =>
                 {
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
-                        (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.Descripcion ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precio", SqlDbType.Decimal);
                     pPrecio.Precision = 18;
@@ -80,8 +80,8 @@ UPDATE " + table + @"
                 {
                     cmd.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdServicio;
 
-                    cmd.Parameters.Add("@descripcion", SqlDbType.VarChar, 250).Value =
-                        (object)obj.Descripcion ?? System.DBNull.Value;
+                    cmd.Parameters.Add("@descripcion", SqlDbType.NVarChar, 250).Value =
+                        (object)(obj.Descripcion ?? string.Empty) ?? System.DBNull.Value;
 
                     var pPrecio = cmd.Parameters.Add("@precio", SqlDbType.Decimal);
                     pPrecio.Precision = 18;

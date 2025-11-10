@@ -28,7 +28,7 @@ namespace DAL.Seguridad
             "idUsuario, nombreUsuario, apellidoUsuario, correoElectronico, " +
             "telefonoContacto, direccionUsuario, numeroDocumento, Bloqueado, Deshabilitado";
 
-        private const int AdminUserId = 999;
+        private const int AdminUserId = 0;
 
         public List<BE.Usuario> GetAll()
         {
@@ -188,61 +188,91 @@ WHERE numeroDocumento = @doc AND " + userIdCol + " <> @id;";
             if (countDoc > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
-            const string sqlGetEstadoActual = @"
-SELECT TOP 1 Bloqueado, Deshabilitado
-FROM dbo.Usuario
-WHERE " + userIdCol + @" = @id;";
+            bool toNoOperative = obj.Bloqueado || obj.Deshabilitado;
 
-            var estadoActual = db.QuerySingleOrDefaultAndLog<(bool Bloqueado, bool Deshabilitado)>(
-                sqlGetEstadoActual,
-                c => c.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdUsuario,
-                userTable, userIdCol,
-                BE.Audit.AuditEvents.ConsultaUsuarios,
-                "Lectura de estado actual para protección de patentes (Update)"
-            );
-
-            bool estabaOperativo = !(estadoActual.Bloqueado || estadoActual.Deshabilitado);
-            bool quedaraNoOperativo = (obj.Bloqueado || obj.Deshabilitado);
-
-            if (estabaOperativo && quedaraNoOperativo)
+            if (toNoOperative)
             {
-                var perms = PermisosDAL.GetInstance();
+                string sqlFlag = @"
+DECLARE @u INT = @idUsuario;
 
-                var patentesEfectivas = perms.GetPatentesByUsuario(obj.IdUsuario) ?? new List<BE.Patente>();
+SELECT CASE WHEN EXISTS (
+    SELECT 1
+    FROM dbo.Patente p
+    WHERE
+        -- El usuario actual posee la patente p (directa o por familias)
+        EXISTS (
+            SELECT 1
+            FROM dbo.UsuarioPatente up
+            WHERE up.idUsuario = @u AND up.idPatente = p.idPatente
+            UNION
+            SELECT 1
+            FROM dbo.UsuarioFamilia uf
+            JOIN dbo.FamiliaPatente fp ON fp.idFamilia = uf.idFamilia
+            WHERE uf.idUsuario = @u AND fp.idPatente = p.idPatente
+        )
+        AND
+        -- Ningún otro usuario la posee (ni directa ni por familias)
+        NOT EXISTS (
+            SELECT 1
+            FROM dbo.UsuarioPatente up2
+            WHERE up2.idPatente = p.idPatente AND up2.idUsuario <> @u
+            UNION
+            SELECT 1
+            FROM dbo.UsuarioFamilia uf2
+            JOIN dbo.FamiliaPatente fp2 ON fp2.idFamilia = uf2.idFamilia
+            WHERE fp2.idPatente = p.idPatente AND uf2.idUsuario <> @u
+        )
+) THEN 1 ELSE 0 END AS PatenteHuerfana;";
 
-                foreach (var pat in patentesEfectivas)
-                {
-                    var otrosUsuarios = new HashSet<int>(perms.GetUsuariosConPatente(pat.IdPatente) ?? new List<int>());
-                    otrosUsuarios.Remove(obj.IdUsuario);
-
-                    if (otrosUsuarios.Count == 0)
+                int flag = Convert.ToInt32(db.ExecuteScalarAndLog(
+                    sqlFlag,
+                    c =>
                     {
-                        Audit.BitacoraDAL.GetInstance().Log(
-                            BE.Audit.AuditEvents.EliminacionPatentesCriticaUsuario,
-                            $"Intento de dejar la patente Id={pat.IdPatente} ('{pat.NombrePatente ?? "PATENTE"}') sin usuarios asignados al deshabilitar/bloquear al usuario Id={obj.IdUsuario}."
-                        );
+                        c.Parameters.Add("@idUsuario", SqlDbType.Int).Value = obj.IdUsuario;
+                    },
+                    userTable, userIdCol,
+                    BE.Audit.AuditEvents.ConsultaPatentesPorUsuario,
+                    "Chequeo de patentes huérfanas previo a deshabilitar/bloquear. Usuario Id=" + obj.IdUsuario,
+                    shouldCalculate: false
+                ) ?? 0);
 
-                        throw new InvalidOperationException(
-                            $"No se puede bloquear/deshabilitar al usuario Id={obj.IdUsuario} porque la patente Id={pat.IdPatente} quedaría sin ningún usuario asignado."
-                        );
-                    }
+                if (flag == 1)
+                {
+                    Audit.BitacoraDAL.GetInstance().Log(
+                        BE.Audit.AuditEvents.UsuarioNoOperativoPatenteHuerfana,
+                        $"Bloquear/deshabilitar al usuario Id={obj.IdUsuario} dejaría patentes sin usuarios."
+                    );
+
+                    throw new InvalidOperationException(
+                        "No se puede bloquear o deshabilitar al usuario porque alguna patente quedaría sin usuarios asignados."
+                    );
                 }
             }
 
-            var sql = @"
-UPDATE " + userTable + @" SET
-    nombreUsuario     = @nombreUsuario,
-    apellidoUsuario   = @apellidoUsuario,
-    correoElectronico = @correoElectronico,
-    telefonoContacto  = @telefonoContacto,
-    direccionUsuario  = @direccionUsuario,
-    numeroDocumento   = @numeroDocumento,
-    Bloqueado         = @Bloqueado,
-    Deshabilitado     = @Deshabilitado
-WHERE " + userIdCol + @" = @idUsuario;";
+            var sqlUpdate = @"
+BEGIN TRY
+    BEGIN TRAN;
+
+    UPDATE " + userTable + @" SET
+        nombreUsuario     = @nombreUsuario,
+        apellidoUsuario   = @apellidoUsuario,
+        correoElectronico = @correoElectronico,
+        telefonoContacto  = @telefonoContacto,
+        direccionUsuario  = @direccionUsuario,
+        numeroDocumento   = @numeroDocumento,
+        Bloqueado         = @Bloqueado,
+        Deshabilitado     = @Deshabilitado
+    WHERE " + userIdCol + @" = @idUsuario;
+
+    COMMIT TRAN;
+END TRY
+BEGIN CATCH
+    IF (XACT_STATE() <> 0) ROLLBACK TRAN;
+    THROW;
+END CATCH;";
 
             db.ExecuteNonQueryAndLog(
-                sql,
+                sqlUpdate,
                 cmd =>
                 {
                     cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = obj.IdUsuario;

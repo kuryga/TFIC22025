@@ -256,30 +256,49 @@ namespace WinApp
             var u = dgvUsuarios.CurrentRow.DataBoundItem as BE.Usuario;
             if (u == null) return;
 
-            bool target = !u.Bloqueado;
-            string msg = target ? param.GetLocalizable("user_block_confirm_message")
-                                : param.GetLocalizable("user_unblock_confirm_message");
-            string title = param.GetLocalizable("confirm_title");
+            bool nuevoEstado = !u.Bloqueado;
+            string msg = nuevoEstado ? param.GetLocalizable("user_block_confirm_message")
+                                     : param.GetLocalizable("user_unblock_confirm_message");
 
-            if (!ShowConfirm(msg, title)) return;
+            if (!ShowConfirm(msg, param.GetLocalizable("confirm_title")))
+                return;
+
+            bool cambioRealizado = false;
 
             try
             {
-                u.Bloqueado = target;
-                UsuarioBLL.GetInstance().Update(u);
-                CargarDatos();
-                ReselectAndSync(u.IdUsuario);
-                MessageBox.Show(
-                    target ? param.GetLocalizable("user_block_success") : param.GetLocalizable("user_unblock_success"),
-                    param.GetLocalizable("ok_title"),
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Cursor = Cursors.WaitCursor;
+                btnBloquear.Enabled = false;
+                u.Bloqueado = nuevoEstado;
+
+                cambioRealizado = UsuarioBLL.GetInstance().Update(u);
+
+                if (cambioRealizado)
+                {
+                    CargarDatos();
+                    ReselectAndSync(u.IdUsuario);
+
+                    MessageBox.Show(
+                        nuevoEstado ? param.GetLocalizable("user_block_success")
+                                    : param.GetLocalizable("user_unblock_success"),
+                        param.GetLocalizable("ok_title"),
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
+                u.Bloqueado = !nuevoEstado;
+
                 MessageBox.Show(
-                    (target ? param.GetLocalizable("user_block_error_message") : param.GetLocalizable("user_unblock_error_message")) + ex.Message,
+                    (nuevoEstado ? param.GetLocalizable("user_block_error_message")
+                                 : param.GetLocalizable("user_unblock_error_message")) + " " + ex.Message,
                     param.GetLocalizable("user_modify_error_title"),
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnBloquear.Enabled = true;
+                this.Cursor = Cursors.Default;
             }
         }
 

@@ -95,6 +95,8 @@
         public const string BajaManualUsuario = "Usuario.BajaManual";
         public const string BloquearUsuario = "Usuario.Bloqueo";
         public const string DesbloquearUsuario = "Usuario.Desbloqueo";
+        public const string UsuarioNoOperativoPatenteHuerfana = "Usuario.NoOperativoPatenteHuerfana";
+        
         public const string EliminacionPatenteUsuario = "Usuario.EliminacionPatente";
         public const string EliminacionMaterial = "Material.Eliminacion";
         public const string IntentosFallidosAcceso = "Autenticacion.IntentosFallidos";
@@ -209,6 +211,7 @@
                 case AltaFamilia:
                 case RecuperoContrasenaSolicitud:
                 case ExportarReporteBitacora:
+                case UsuarioNoOperativoPatenteHuerfana:
                     return Criticidad.C2;
             }
 

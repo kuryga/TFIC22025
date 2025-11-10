@@ -7,13 +7,28 @@ namespace DAL.Seguridad
     public static class SecurityUtilities
     {
         private static byte[] _aesKey; // 32 bytes (AES-256)
-        private const string DefaultPassphrase = "TFIUAI2025AAGK";         // TODO: mover a configuración
-        private const string AesSaltText = "UrbanSoft-AES-Key-Salt";       // sal fija para derivar la clave
-        private const int AesDeriveIterations = 100000;
+        private const int AesDeriveIterationsDef = 100000;
 
         static SecurityUtilities()
         {
-            SetEncryptionKeyFromPassphrase_Default();
+            SecuritySecretStore.InitSecurityKeyOrThrow();
+        }
+
+        public static void SetEncryptionKeyFromPassphrase(string passphrase, string salt, int iterations = AesDeriveIterationsDef)
+        {
+            if (string.IsNullOrWhiteSpace(passphrase))
+                throw new ArgumentException("Passphrase vacía o inválida", nameof(passphrase));
+            if (string.IsNullOrWhiteSpace(salt))
+                throw new ArgumentException("Salt vacío o inválido", nameof(salt));
+            if (iterations <= 0) iterations = AesDeriveIterationsDef;
+
+            var saltBytes = Encoding.UTF8.GetBytes(salt);
+            using (var pbkdf2 = new Rfc2898DeriveBytes(passphrase, saltBytes, iterations))
+            {
+                var key = pbkdf2.GetBytes(32); // 256-bit
+                _aesKey = new byte[32];
+                Buffer.BlockCopy(key, 0, _aesKey, 0, 32);
+            }
         }
 
         public static string EncriptarReversible(string textoPlano)
@@ -30,14 +45,14 @@ namespace DAL.Seguridad
                 // IV determinístico derivado del texto plano
                 aes.IV = DeriveDeterministicIV(textoPlano);
 
-                byte[] plain = Encoding.UTF8.GetBytes(textoPlano);
+                var plain = Encoding.UTF8.GetBytes(textoPlano);
                 byte[] cipher;
                 using (var enc = aes.CreateEncryptor())
                 {
                     cipher = enc.TransformFinalBlock(plain, 0, plain.Length);
                 }
 
-                // Formato: IV || CIPHER (en Base64)
+                // Formato: IV || CIPHER en Base64
                 var output = new byte[aes.IV.Length + cipher.Length];
                 Buffer.BlockCopy(aes.IV, 0, output, 0, aes.IV.Length);
                 Buffer.BlockCopy(cipher, 0, output, aes.IV.Length, cipher.Length);
@@ -50,7 +65,7 @@ namespace DAL.Seguridad
             EnsureAesKey();
             if (string.IsNullOrEmpty(base64IvYCifrado)) return string.Empty;
 
-            byte[] combined = Convert.FromBase64String(base64IvYCifrado);
+            var combined = Convert.FromBase64String(base64IvYCifrado);
 
             using (var aes = Aes.Create())
             {
@@ -58,7 +73,7 @@ namespace DAL.Seguridad
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
 
-                int blockBytes = aes.BlockSize / 8; // 16 bytes para AES
+                int blockBytes = aes.BlockSize / 8; // 16 bytes
                 if (combined.Length < blockBytes + 1)
                     throw new ArgumentException("Entrada inválida (muy corta).", nameof(base64IvYCifrado));
 
@@ -99,18 +114,7 @@ namespace DAL.Seguridad
         private static void EnsureAesKey()
         {
             if (_aesKey != null) return;
-            SetEncryptionKeyFromPassphrase_Default();
-        }
-
-        private static void SetEncryptionKeyFromPassphrase_Default()
-        {
-            var salt = Encoding.UTF8.GetBytes(AesSaltText);
-            using (var pbkdf2 = new Rfc2898DeriveBytes(DefaultPassphrase, salt, AesDeriveIterations))
-            {
-                var key = pbkdf2.GetBytes(32); // 256-bit
-                _aesKey = new byte[32];
-                Buffer.BlockCopy(key, 0, _aesKey, 0, 32);
-            }
+            SecuritySecretStore.InitSecurityKeyOrThrow();
         }
 
         private static byte[] DeriveDeterministicIV(string textoPlano)

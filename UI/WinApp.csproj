@@ -66,6 +66,36 @@
     <Compile Include="AuditoriaForms\GenerarReporteForm.Designer.cs">
       <DependentUpon>GenerarReporteForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMaquinariaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMaquinariaForm.Designer.cs">
+      <DependentUpon>CrearMaquinariaForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMaterialForm.Designer.cs">
+      <DependentUpon>CrearMaterialForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMonedaForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearMonedaForm.Designer.cs">
+      <DependentUpon>CrearMonedaForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearServicioAdicionalForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearServicioAdicionalForm.Designer.cs">
+      <DependentUpon>CrearServicioAdicionalForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearTipoEdificacionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GestionesForms\GestionCrearForms\CrearTipoEdificacionForm.Designer.cs">
+      <DependentUpon>CrearTipoEdificacionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\SecretStore.cs" />
     <Compile Include="Helpers\ContextualMenuExecutable.cs" />
     <Compile Include="Helpers\FilePDFExporter.cs" />
@@ -350,5 +380,6 @@
   <ItemGroup>
     <None Include="Resources\loader_gif.gif" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

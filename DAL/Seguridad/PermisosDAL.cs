@@ -126,6 +126,32 @@ ORDER BY NombrePatente;";
             return list;
         }
 
+        public List<BE.Patente> GetPatentesIndividualesByUsuario(int idUsuario)
+        {
+            string sql = @"
+SELECT DISTINCT
+    p.idPatente     AS IdPatente,
+    p.nombrePatente AS NombrePatente,
+    p.descripcion   AS Descripcion
+FROM dbo.UsuarioPatente up
+JOIN dbo.Patente p ON p.idPatente = up.idPatente
+WHERE up.idUsuario = @idUsuario
+ORDER BY NombrePatente;";
+
+            var list = db.QueryListAndLog<BE.Patente>(
+                sql,
+                cmd => cmd.Parameters.Add("@idUsuario", SqlDbType.Int).Value = idUsuario,
+                "dbo.Patente", "idPatente",
+                BE.Audit.AuditEvents.ConsultaPatentesIndividualesPorUsuario,
+                "Patentes individuales del usuario Id=" + idUsuario
+            );
+
+            foreach (var p in list ?? Enumerable.Empty<BE.Patente>())
+                p.NombrePatente = DecName(p.NombrePatente);
+
+            return list;
+        }
+
         public List<BE.Patente> GetPatentesByFamilia(int idFamilia)
         {
             string sql = @"

@@ -3,6 +3,8 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 using Utils.Reporting;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
@@ -27,7 +29,7 @@ namespace WinApp.AuditoriaForms
             Load += GenerarReporteForm_Load;
 
             this.StartPosition = FormStartPosition.CenterParent;
-            this.ShowInTaskbar = false; 
+            this.ShowInTaskbar = false;
         }
 
         public GenerarReporteForm(DateTime? desde, DateTime? hasta, int page, int pageSize, string criticidad)
@@ -56,46 +58,110 @@ namespace WinApp.AuditoriaForms
             );
         }
 
-        private void ImprimirPdfGenerico(string rutaPdf, string printerName)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = rutaPdf,
-                    UseShellExecute = true,
-                    Verb = "printto",
-                    Arguments = $"\"{printerName}\""
-                };
+        [DllImport("winspool.drv", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern bool SetDefaultPrinter(string pszPrinter);
 
+        [DllImport("winspool.drv", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern bool GetDefaultPrinter(StringBuilder pszBuffer, ref int pcchBuffer);
+
+        private static string GetDefaultPrinterName()
+        {
+            int size = 0;
+            GetDefaultPrinter(null, ref size);
+            if (size <= 0) return null;
+
+            var sb = new StringBuilder(size);
+            return GetDefaultPrinter(sb, ref size) ? sb.ToString() : null;
+        }
+        private bool WaitForStablePdf(string path, int timeoutMs = 10000, int stableChecks = 2, int checkIntervalMs = 150)
+        {
+            var sw = Stopwatch.StartNew();
+            long lastLen = -1;
+            int stable = 0;
+
+            while (sw.ElapsedMilliseconds < timeoutMs)
+            {
                 try
                 {
-                    Process.Start(psi);
-                    return;
+                    if (!File.Exists(path))
+                    {
+                        System.Threading.Thread.Sleep(checkIntervalMs);
+                        continue;
+                    }
+
+                    using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        long len = fs.Length;
+
+                        if (len > 0 && len == lastLen)
+                        {
+                            stable++;
+                            if (stable >= stableChecks)
+                                return true;
+                        }
+                        else
+                        {
+                            stable = 0;
+                        }
+
+                        lastLen = len;
+                    }
                 }
                 catch
                 {
-                    // fallback al print normal
+                    // Archivo aún en uso
                 }
 
-                var psiFallback = new ProcessStartInfo
+                System.Threading.Thread.Sleep(checkIntervalMs);
+            }
+
+            return false;
+        }
+
+        private string ShadowCopyStablePdf(string sourcePath)
+        {
+            var dir = Path.GetDirectoryName(sourcePath) ?? Path.GetTempPath();
+            var name = Path.GetFileNameWithoutExtension(sourcePath);
+            var ext = Path.GetExtension(sourcePath);
+            var shadow = Path.Combine(dir, $"{name}.printcopy.{Guid.NewGuid():N}{ext}");
+
+            File.Copy(sourcePath, shadow, true);
+
+            using (var fs = new FileStream(shadow, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                if (fs.Length == 0) throw new IOException("La copia del PDF quedó con tamaño 0.");
+            }
+
+            return shadow;
+        }
+
+        private void ImprimirPdfConDefaultTemporal(string rutaPdf, string targetPrinter)
+        {
+            string originalDefault = GetDefaultPrinterName();
+
+            try
+            {
+                if (!string.IsNullOrEmpty(targetPrinter) && !SetDefaultPrinter(targetPrinter))
+                    throw new InvalidOperationException("No se pudo establecer la impresora seleccionada como predeterminada.");
+
+                var psi = new ProcessStartInfo
                 {
                     FileName = rutaPdf,
                     UseShellExecute = true,
                     Verb = "print"
                 };
-                Process.Start(psiFallback);
+
+                System.Threading.Thread.Sleep(200);
+
+                using (var proc = Process.Start(psi))
+                {
+                    System.Threading.Thread.Sleep(1200);
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(
-                    this,
-                    (param.GetLocalizable("print_send_error_message") ?? "No fue posible enviar el PDF a impresión.")
-                        + Environment.NewLine + ex.Message,
-                    param.GetLocalizable("print_error_title") ?? "Error de impresión",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
+                if (!string.IsNullOrEmpty(originalDefault))
+                    SetDefaultPrinter(originalDefault);
             }
         }
 
@@ -103,7 +169,7 @@ namespace WinApp.AuditoriaForms
         {
             try
             {
-                var timer = new Timer { Interval = 5000 };
+                var timer = new System.Windows.Forms.Timer { Interval = 5000 };
                 int intentos = 0;
                 timer.Tick += (s, e) =>
                 {
@@ -130,7 +196,7 @@ namespace WinApp.AuditoriaForms
             }
             catch
             {
-                // No se requiere notificación
+                // nada
             }
         }
 
@@ -141,9 +207,9 @@ namespace WinApp.AuditoriaForms
                 string raw = ConfigurationManager.AppSettings["ReportLogoPath"];
                 var bases = new[]
                 {
-            AppDomain.CurrentDomain.BaseDirectory,
-            Application.StartupPath
-        };
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    Application.StartupPath
+                };
 
                 var candidatos = new System.Collections.Generic.List<string>();
 
@@ -209,6 +275,20 @@ namespace WinApp.AuditoriaForms
                     return;
                 }
 
+                if (!WaitForStablePdf(tempPdf))
+                {
+                    MessageBox.Show(
+                        this,
+                        param.GetLocalizable("print_temp_not_ready_message") ?? "El documento aún se está generando. Intente nuevamente.",
+                        param.GetLocalizable("warning_title") ?? "Aviso",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+                    return;
+                }
+
+                string printPdf = ShadowCopyStablePdf(tempPdf);
+
                 using (PrintDialog printDialog = new PrintDialog())
                 {
                     printDialog.AllowSomePages = false;
@@ -217,7 +297,10 @@ namespace WinApp.AuditoriaForms
                     if (printDialog.ShowDialog(this) == DialogResult.OK)
                     {
                         string printerName = printDialog.PrinterSettings.PrinterName;
-                        ImprimirPdfGenerico(tempPdf, printerName);
+
+                        ImprimirPdfConDefaultTemporal(printPdf, printerName);
+
+                        ProgramarBorradoTemporal(printPdf);
                         ProgramarBorradoTemporal(tempPdf);
                     }
                 }

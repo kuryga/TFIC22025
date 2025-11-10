@@ -33,6 +33,19 @@ namespace DAL.Audit
             catch { return s; }
         }
 
+        private static string EncryptIfNeededOrNull(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return null;
+            try {
+                var _ = segUtils.DesencriptarReversible(s);
+                return s;
+            }
+            catch
+            {
+                return segUtils.EncriptarReversible(s);
+            }
+        }
+
         public List<BE.Audit.Bitacora> GetBitacoraList(DateTime? desde, DateTime? hasta, int page, int pageSize)
             => GetBitacoraList(desde, hasta, page, pageSize, null);
 
@@ -139,7 +152,7 @@ ORDER BY rn;";
                             Accion = rdr.IsDBNull(oAcc) ? null : rdr.GetString(oAcc),
                             Mensaje = rdr.IsDBNull(oMsg) ? null : TryDecryptOrNull(rdr.GetString(oMsg)),
                             IdEjecutor = rdr.IsDBNull(oIdExec) ? (int?)null : rdr.GetInt32(oIdExec),
-                            UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : rdr.GetString(oUsr),
+                            UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : TryDecryptOrNull(rdr.GetString(oUsr)),
                         });
                     }
                 }
@@ -180,6 +193,8 @@ ORDER BY rn;";
                            ? ctx.UsuarioEmail
                            : "Usuario deslogeado";
 
+            string encUsuario = EncryptIfNeededOrNull(uname);
+
             const string sql = @"
 INSERT INTO dbo.Bitacora
 ( fecha, criticidad, accion, mensaje, idEjecutor, UsuarioEjecutor, DVH )
@@ -197,13 +212,15 @@ SELECT CAST(SCOPE_IDENTITY() AS int);";
                 cmd.Parameters.Add("@mensaje", SqlDbType.NVarChar, 4000).Value = encMensaje ?? string.Empty;
 
                 var idValue = uid.HasValue ? (object)uid.Value : DBNull.Value;
-                var userValue = string.IsNullOrWhiteSpace(uname) ? (object)DBNull.Value : uname;
 
                 var pId = cmd.Parameters.Add("@idEjecutor", SqlDbType.Int);
                 pId.IsNullable = true;
                 pId.Value = idValue;
 
-                cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.NVarChar, 150).Value = userValue;
+                var pUser = cmd.Parameters.Add("@usuarioEjecutor", SqlDbType.NVarChar, 256);
+                pUser.IsNullable = true;
+                pUser.Value = string.IsNullOrWhiteSpace(encUsuario) ? (object)DBNull.Value : encUsuario;
+
                 cmd.Parameters.Add("@DVH", SqlDbType.NVarChar, 256).Value = string.Empty;
 
                 conn.Open();
@@ -313,7 +330,7 @@ ORDER BY b.fecha DESC, b." + PkBitacora + " DESC;";
                                 Accion = rdr.IsDBNull(oAcc) ? null : rdr.GetString(oAcc),
                                 Mensaje = rdr.IsDBNull(oMsg) ? null : TryDecryptOrNull(rdr.GetString(oMsg)),
                                 IdEjecutor = rdr.IsDBNull(oIdExec) ? (int?)null : rdr.GetInt32(oIdExec),
-                                UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : rdr.GetString(oUsr),
+                                UsuarioEjecutor = rdr.IsDBNull(oUsr) ? null : TryDecryptOrNull(rdr.GetString(oUsr)),
                             });
                         }
                     }

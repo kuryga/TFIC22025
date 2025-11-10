@@ -160,10 +160,14 @@ namespace WinApp
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                param.GetLocalizable("maquinaria_create_pending_message"),
-                param.GetLocalizable("info_title"),
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using (var frm = new CrearMaquinariaForm())
+            {
+                var result = frm.ShowDialog(this);
+                if (result == DialogResult.OK)
+                {
+                    CargarDatos();
+                }
+            }
         }
 
         private void btnModificar_Click(object sender, EventArgs e)

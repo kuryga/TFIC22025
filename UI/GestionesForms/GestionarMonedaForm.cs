@@ -199,7 +199,14 @@ namespace WinApp
 
         private void btnCrear_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Crear moneda pendiente de implementación");
+            using (var frm = new CrearMonedaForm())
+            {
+                var result = frm.ShowDialog(this);
+                if (result == DialogResult.OK)
+                {
+                    CargarDatos();
+                }
+            }
         }
 
         private void btnModificar_Click(object sender, EventArgs e)

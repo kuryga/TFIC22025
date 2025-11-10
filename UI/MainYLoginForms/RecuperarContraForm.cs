@@ -14,7 +14,6 @@ namespace WinApp
             InitializeComponent();
 
             btnEnviar.Click += BtnEnviar_Click;
-            btnCodigo.Click += BtnCodigo_Click;
             this.AcceptButton = (IButtonControl)this.btnEnviar;
 
             UpdateTexts();

@@ -27,6 +27,12 @@ namespace BLL.Seguridad
             return PermisosDAL.GetInstance().GetPatentesByUsuario(idUsuario);
         }
 
+        public List<BE.Patente> GetPatentesIndividualesByUsuario(int idUsuario)
+        {
+            if (idUsuario <= 0) throw new ArgumentOutOfRangeException(nameof(idUsuario));
+            return PermisosDAL.GetInstance().GetPatentesIndividualesByUsuario(idUsuario);
+        }
+
         public List<BE.Patente> GetPatentesByFamilia(int idFamilia)
         {
             if (idFamilia <= 0) throw new ArgumentOutOfRangeException(nameof(idFamilia));
@@ -80,5 +86,6 @@ namespace BLL.Seguridad
         public bool PuedeCrearFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_CREAR);
         public bool PuedeModificarFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIAS_MODIFICAR);
         public bool PuedeAsignarFamilia() => TieneAlguna(CodigoPatentes.PT_SEG_FAMILIA_ASIGNAR);
+        public bool PuedeAsignarPatente() => TieneAlguna(CodigoPatentes.PT_SEG_PATENTES_ASIGNAR);
     }
 }

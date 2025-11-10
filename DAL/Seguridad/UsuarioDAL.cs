@@ -188,6 +188,47 @@ WHERE numeroDocumento = @doc AND " + userIdCol + " <> @id;";
             if (countDoc > 0)
                 throw new InvalidOperationException(Genericos.TraduccionContext.Traducir("user_document_exists"));
 
+            const string sqlGetEstadoActual = @"
+SELECT TOP 1 Bloqueado, Deshabilitado
+FROM dbo.Usuario
+WHERE " + userIdCol + @" = @id;";
+
+            var estadoActual = db.QuerySingleOrDefaultAndLog<(bool Bloqueado, bool Deshabilitado)>(
+                sqlGetEstadoActual,
+                c => c.Parameters.Add("@id", SqlDbType.Int).Value = obj.IdUsuario,
+                userTable, userIdCol,
+                BE.Audit.AuditEvents.ConsultaUsuarios,
+                "Lectura de estado actual para protección de patentes (Update)"
+            );
+
+            bool estabaOperativo = !(estadoActual.Bloqueado || estadoActual.Deshabilitado);
+            bool quedaraNoOperativo = (obj.Bloqueado || obj.Deshabilitado);
+
+            if (estabaOperativo && quedaraNoOperativo)
+            {
+                var perms = PermisosDAL.GetInstance();
+
+                var patentesEfectivas = perms.GetPatentesByUsuario(obj.IdUsuario) ?? new List<BE.Patente>();
+
+                foreach (var pat in patentesEfectivas)
+                {
+                    var otrosUsuarios = new HashSet<int>(perms.GetUsuariosConPatente(pat.IdPatente) ?? new List<int>());
+                    otrosUsuarios.Remove(obj.IdUsuario);
+
+                    if (otrosUsuarios.Count == 0)
+                    {
+                        Audit.BitacoraDAL.GetInstance().Log(
+                            BE.Audit.AuditEvents.EliminacionPatentesCriticaUsuario,
+                            $"Intento de dejar la patente Id={pat.IdPatente} ('{pat.NombrePatente ?? "PATENTE"}') sin usuarios asignados al deshabilitar/bloquear al usuario Id={obj.IdUsuario}."
+                        );
+
+                        throw new InvalidOperationException(
+                            $"No se puede bloquear/deshabilitar al usuario Id={obj.IdUsuario} porque la patente Id={pat.IdPatente} quedaría sin ningún usuario asignado."
+                        );
+                    }
+                }
+            }
+
             var sql = @"
 UPDATE " + userTable + @" SET
     nombreUsuario     = @nombreUsuario,

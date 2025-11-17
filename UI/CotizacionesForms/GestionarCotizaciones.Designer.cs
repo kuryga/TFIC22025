@@ -5,7 +5,7 @@ namespace WinApp
     partial class ConsultarCotizacionesForm
     {
         private DataGridView dgvCotizaciones;
-        private Button btnExportar, btnVerDetalles, btnModificar, btnBorrar;
+        private Button btnExportar, btnVerDetalles, btnModificar;
 
         private void InitializeComponent()
         {
@@ -13,7 +13,6 @@ namespace WinApp
             this.btnExportar = new System.Windows.Forms.Button();
             this.btnVerDetalles = new System.Windows.Forms.Button();
             this.btnModificar = new System.Windows.Forms.Button();
-            this.btnBorrar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCotizaciones)).BeginInit();
             this.SuspendLayout();
             // 
@@ -39,7 +38,7 @@ namespace WinApp
             // 
             // btnVerDetalles
             // 
-            this.btnVerDetalles.Location = new System.Drawing.Point(20, 287);
+            this.btnVerDetalles.Location = new System.Drawing.Point(258, 240);
             this.btnVerDetalles.Name = "btnVerDetalles";
             this.btnVerDetalles.Size = new System.Drawing.Size(75, 23);
             this.btnVerDetalles.TabIndex = 2;
@@ -55,23 +54,13 @@ namespace WinApp
             this.btnModificar.Text = "Modificar";
             this.btnModificar.Click += new System.EventHandler(this.btnModificar_Click);
             // 
-            // btnBorrar
-            // 
-            this.btnBorrar.Location = new System.Drawing.Point(489, 287);
-            this.btnBorrar.Name = "btnBorrar";
-            this.btnBorrar.Size = new System.Drawing.Size(75, 23);
-            this.btnBorrar.TabIndex = 4;
-            this.btnBorrar.Text = "Borrar";
-            this.btnBorrar.Click += new System.EventHandler(this.btnBorrar_Click);
-            // 
             // ConsultarCotizacionesForm
             // 
-            this.ClientSize = new System.Drawing.Size(592, 327);
+            this.ClientSize = new System.Drawing.Size(592, 279);
             this.Controls.Add(this.dgvCotizaciones);
             this.Controls.Add(this.btnExportar);
             this.Controls.Add(this.btnVerDetalles);
             this.Controls.Add(this.btnModificar);
-            this.Controls.Add(this.btnBorrar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "ConsultarCotizacionesForm";
             this.Text = "Consultar Cotizaciones";

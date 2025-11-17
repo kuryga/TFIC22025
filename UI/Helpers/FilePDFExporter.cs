@@ -7,6 +7,7 @@ using iTextSharp.text.pdf;
 using Newtonsoft.Json;
 using BLL.Audit;
 using ParametrizacionBLL = BLL.Genericos.ParametrizacionBLL;
+using BE;
 
 namespace Utils.Reporting
 {
@@ -274,6 +275,214 @@ namespace Utils.Reporting
                 footer.AddCell(new PdfPCell(new Phrase(Pie ?? string.Empty, fPie)) { Border = Rectangle.TOP_BORDER, HorizontalAlignment = Element.ALIGN_LEFT });
                 footer.AddCell(new PdfPCell(new Phrase($"{PageLabel} {writer.PageNumber}", fPie)) { Border = Rectangle.TOP_BORDER, HorizontalAlignment = Element.ALIGN_RIGHT });
                 footer.WriteSelectedRows(0, -1, document.LeftMargin, document.BottomMargin - 5, cb);
+            }
+        }
+
+        public static string GenerarPdfCotizacion(Cotizacion ctz, string empresa, byte[] logoBytes = null, string tempRootDir = null)
+        {
+            if (ctz == null) throw new ArgumentNullException("ctz");
+
+            string baseDir = !string.IsNullOrWhiteSpace(tempRootDir)
+                ? tempRootDir
+                : Path.Combine(Path.GetTempPath(), AppDomain.CurrentDomain.FriendlyName);
+
+            Directory.CreateDirectory(baseDir);
+
+            string nombre = string.Format("Cotizacion_{0}_{1}.pdf",
+                ctz.IdCotizacion.ToString("000000"),
+                DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+            string rutaPdf = Path.Combine(baseDir, nombre);
+
+            GenerarPdfCotizacionInterno(ctz, rutaPdf, empresa, logoBytes);
+
+            return rutaPdf;
+        }
+
+        private static void GenerarPdfCotizacionInterno(Cotizacion ctz, string rutaSalida, string empresa, byte[] logoBytes)
+        {
+            var L = new Func<string, string, string>((code, fb) => ParametrizacionBLL.GetInstance().GetLocalizable(code) ?? fb);
+
+            var dir = Path.GetDirectoryName(rutaSalida);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+            using (var fs = new FileStream(rutaSalida, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (var doc = new Document(PageSize.A4, 36, 36, 100, 50))
+            {
+                var writer = PdfWriter.GetInstance(doc, fs);
+
+                Image logo = null;
+                if (logoBytes != null && logoBytes.Length > 0)
+                {
+                    logo = Image.GetInstance(logoBytes);
+                    logo.ScaleToFit(110f, 110f);
+                    logo.Alignment = Image.ALIGN_LEFT;
+                }
+
+                string reportTitle = L("cotizacion_report_title", "Detalle de Cotización");
+                string subtitle = $"{empresa} | {DateTime.Now:yyyy-MM-dd HH:mm}";
+                string footer = $"{empresa} • {DateTime.Now:yyyy-MM-dd HH:mm}";
+
+                var pageEvents = new HeaderFooterEvent
+                {
+                    Titulo = reportTitle,
+                    Subtitulo = subtitle,
+                    Logo = logo,
+                    Pie = footer,
+                    PageLabel = L("page_label", "Página")
+                };
+
+                writer.PageEvent = pageEvents;
+
+                doc.Open();
+
+                var fLbl = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9);
+                var fTxt = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+
+                var tablaHeader = new PdfPTable(4) { WidthPercentage = 100 };
+                tablaHeader.SetWidths(new float[] { 1.3f, 2.7f, 1.3f, 2.0f });
+
+                tablaHeader.AddCell(new PdfPCell(new Phrase(L("cotizacion_id_label", "N° Cotización"), fLbl)) { BackgroundColor = LightGray, Padding = 4 });
+                tablaHeader.AddCell(new PdfPCell(new Phrase(ctz.IdCotizacion.ToString(), fTxt)) { Padding = 4 });
+
+                tablaHeader.AddCell(new PdfPCell(new Phrase(L("cotizacion_date_label", "Fecha"), fLbl)) { BackgroundColor = LightGray, Padding = 4 });
+                tablaHeader.AddCell(new PdfPCell(new Phrase(ctz.FechaCreacion.ToString("yyyy-MM-dd"), fTxt)) { Padding = 4 });
+
+                tablaHeader.AddCell(new PdfPCell(new Phrase(L("cotizacion_type_label", "Tipo de edificación"), fLbl)) { BackgroundColor = LightGray, Padding = 4 });
+                tablaHeader.AddCell(new PdfPCell(new Phrase(ctz.TipoEdificacion?.Descripcion ?? "", fTxt)) { Padding = 4 });
+
+                tablaHeader.AddCell(new PdfPCell(new Phrase(L("cotizacion_currency_label", "Moneda"), fLbl)) { BackgroundColor = LightGray, Padding = 4 });
+                tablaHeader.AddCell(new PdfPCell(new Phrase(ctz.Moneda?.NombreMoneda ?? "", fTxt)) { Padding = 4 });
+
+                doc.Add(tablaHeader);
+                doc.Add(new Paragraph(" "));
+
+                var fSection = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11);
+                var fHead = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 9, BaseColor.WHITE);
+                var fRow = FontFactory.GetFont(FontFactory.HELVETICA, 9);
+
+                decimal totalMateriales = 0m;
+                decimal totalMaquinaria = 0m;
+                decimal totalServicios = 0m;
+
+                if (ctz.ListaMateriales != null && ctz.ListaMateriales.Count > 0)
+                {
+                    doc.Add(new Paragraph(L("cotizacion_materials_section", "Materiales"), fSection));
+                    doc.Add(new Paragraph(" "));
+
+                    var tableMat = new PdfPTable(5) { WidthPercentage = 100 };
+                    tableMat.SetWidths(new float[] { 2.4f, 1.0f, 1.2f, 1.2f, 1.2f });
+
+                    Th(tableMat, L("cotizacion_material_name_col", "Material"), fHead);
+                    Th(tableMat, L("cotizacion_material_unit_col", "Unidad"), fHead);
+                    Th(tableMat, L("cotizacion_material_price_col", "Precio unidad"), fHead);
+                    Th(tableMat, L("cotizacion_material_qty_col", "Cantidad"), fHead);
+                    Th(tableMat, L("cotizacion_material_subtotal_col", "Subtotal"), fHead);
+
+                    bool zebra = false;
+                    foreach (var it in ctz.ListaMateriales)
+                    {
+                        var bg = zebra ? RowAlt : BaseColor.WHITE;
+                        zebra = !zebra;
+
+                        string nombre = it.Material?.Nombre ?? "";
+                        string unidad = it.Material?.UnidadMedida ?? "";
+                        decimal precio = it.Material?.PrecioUnidad ?? 0m;
+                        decimal cant = it.Cantidad;
+                        decimal subtotal = precio * cant;
+                        totalMateriales += subtotal;
+
+                        tableMat.AddCell(Td(nombre, fRow, Element.ALIGN_LEFT, bg));
+                        tableMat.AddCell(Td(unidad, fRow, Element.ALIGN_CENTER, bg));
+                        tableMat.AddCell(Td(precio.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                        tableMat.AddCell(Td(cant.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                        tableMat.AddCell(Td(subtotal.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                    }
+
+                    doc.Add(tableMat);
+                    doc.Add(new Paragraph(" "));
+                }
+
+                if (ctz.ListaMaquinaria != null && ctz.ListaMaquinaria.Count > 0)
+                {
+                    doc.Add(new Paragraph(L("cotizacion_machinery_section", "Maquinaria"), fSection));
+                    doc.Add(new Paragraph(" "));
+
+                    var tableMaq = new PdfPTable(4) { WidthPercentage = 100 };
+                    tableMaq.SetWidths(new float[] { 2.4f, 1.2f, 1.2f, 1.2f });
+
+                    Th(tableMaq, L("cotizacion_machinery_name_col", "Maquinaria"), fHead);
+                    Th(tableMaq, L("cotizacion_machinery_cost_col", "Costo/hora"), fHead);
+                    Th(tableMaq, L("cotizacion_machinery_hours_col", "Horas uso"), fHead);
+                    Th(tableMaq, L("cotizacion_machinery_subtotal_col", "Subtotal"), fHead);
+
+                    bool zebra = false;
+                    foreach (var it in ctz.ListaMaquinaria)
+                    {
+                        var bg = zebra ? RowAlt : BaseColor.WHITE;
+                        zebra = !zebra;
+
+                        string nombre = it.Maquinaria?.Nombre ?? "";
+                        decimal costoHora = it.Maquinaria?.CostoPorHora ?? 0m;
+                        decimal horas = it.HorasUso;
+                        decimal subtotal = costoHora * horas;
+                        totalMaquinaria += subtotal;
+
+                        tableMaq.AddCell(Td(nombre, fRow, Element.ALIGN_LEFT, bg));
+                        tableMaq.AddCell(Td(costoHora.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                        tableMaq.AddCell(Td(horas.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                        tableMaq.AddCell(Td(subtotal.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                    }
+
+                    doc.Add(tableMaq);
+                    doc.Add(new Paragraph(" "));
+                }
+
+                if (ctz.ListaServicios != null && ctz.ListaServicios.Count > 0)
+                {
+                    doc.Add(new Paragraph(L("cotizacion_services_section", "Servicios adicionales"), fSection));
+                    doc.Add(new Paragraph(" "));
+
+                    var tableSrv = new PdfPTable(2) { WidthPercentage = 100 };
+                    tableSrv.SetWidths(new float[] { 3.4f, 1.2f });
+
+                    Th(tableSrv, L("cotizacion_service_desc_col", "Servicio"), fHead);
+                    Th(tableSrv, L("cotizacion_service_price_col", "Precio"), fHead);
+
+                    bool zebra = false;
+                    foreach (var it in ctz.ListaServicios)
+                    {
+                        var bg = zebra ? RowAlt : BaseColor.WHITE;
+                        zebra = !zebra;
+
+                        string desc = it.Servicio?.Descripcion ?? "";
+                        decimal precio = it.Servicio?.Precio ?? 0m;
+                        totalServicios += precio;
+
+                        tableSrv.AddCell(Td(desc, fRow, Element.ALIGN_LEFT, bg));
+                        tableSrv.AddCell(Td(precio.ToString("N2"), fRow, Element.ALIGN_RIGHT, bg));
+                    }
+
+                    doc.Add(tableSrv);
+                    doc.Add(new Paragraph(" "));
+                }
+
+                var fRes = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
+
+                decimal totalGeneral = totalMateriales + totalMaquinaria + totalServicios;
+
+                string totMatLbl = L("cotizacion_materials_total_label", "Total materiales");
+                string totMaqLbl = L("cotizacion_machinery_total_label", "Total maquinaria");
+                string totSrvLbl = L("cotizacion_services_total_label", "Total servicios");
+                string totGenLbl = L("cotizacion_grand_total_label", "TOTAL COTIZACIÓN");
+
+                doc.Add(new Paragraph($"{totMatLbl}: {totalMateriales:N2}", fRes));
+                doc.Add(new Paragraph($"{totMaqLbl}: {totalMaquinaria:N2}", fRes));
+                doc.Add(new Paragraph($"{totSrvLbl}: {totalServicios:N2}", fRes));
+                doc.Add(new Paragraph(" "));
+                doc.Add(new Paragraph($"{totGenLbl}: {totalGeneral:N2}", fRes));
+
+                doc.Close();
             }
         }
     }

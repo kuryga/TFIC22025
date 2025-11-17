@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using CotizacionDAL = DAL.Genericos.CotizacionDAL;
 
 namespace BLL.Genericos
@@ -8,7 +7,10 @@ namespace BLL.Genericos
     public class CotizacionBLL
     {
         private static CotizacionBLL _instance;
+        private readonly ParametrizacionBLL _param = ParametrizacionBLL.GetInstance();
+
         private CotizacionBLL() { }
+
         public static CotizacionBLL GetInstance()
         {
             if (_instance == null) _instance = new CotizacionBLL();
@@ -22,28 +24,41 @@ namespace BLL.Genericos
 
         public BE.Cotizacion GetCotizacionCompleta(int idCotizacion)
         {
-            if (idCotizacion <= 0) throw new ArgumentOutOfRangeException("idCotizacion");
+            if (idCotizacion <= 0)
+                throw new ArgumentOutOfRangeException(nameof(idCotizacion),
+                    _param.GetLocalizable("quotation_id_required_message"));
+
             return CotizacionDAL.GetInstance().GetCotizacionCompleta(idCotizacion);
         }
 
-
         public int CrearCotizacion(BE.Cotizacion ctz)
         {
-            //  ValidarHeader(ctz);
-            // CotizacionDAL.GetInstance().Create(ctz);
+            if (ctz == null)
+                throw new ArgumentNullException(nameof(ctz),
+                    _param.GetLocalizable("quotation_object_required_message"));
+
+            ValidarHeader(ctz);
+            ValidarLineas(ctz);
+
+            CotizacionDAL.GetInstance().Create(ctz);
 
             return ctz.IdCotizacion;
         }
 
         public void ActualizarCotizacion(BE.Cotizacion ctz)
         {
-            if (ctz == null) throw new ArgumentNullException("ctz");
-            if (ctz.IdCotizacion <= 0) throw new ArgumentOutOfRangeException("ctz.IdCotizacion");
+            if (ctz == null)
+                throw new ArgumentNullException(nameof(ctz),
+                    _param.GetLocalizable("quotation_object_required_message"));
+
+            if (ctz.IdCotizacion <= 0)
+                throw new ArgumentOutOfRangeException(nameof(ctz.IdCotizacion),
+                    _param.GetLocalizable("quotation_id_required_message"));
 
             ValidarHeader(ctz);
-            CotizacionDAL.GetInstance().Update(ctz);
+            ValidarLineas(ctz);
 
-            // GuardarLineas(ctz);
+            CotizacionDAL.GetInstance().Update(ctz);
         }
 
         public decimal CalcularTotal(BE.Cotizacion ctz)
@@ -87,15 +102,27 @@ namespace BLL.Genericos
             return total;
         }
 
+        public decimal CalcularTotalPorId(int idCotizacion)
+        {
+            if (idCotizacion <= 0)
+                throw new ArgumentOutOfRangeException(nameof(idCotizacion),
+                    _param.GetLocalizable("quotation_id_required_message"));
+
+            var ctz = GetCotizacionCompleta(idCotizacion);
+            return CalcularTotal(ctz);
+        }
+
         private void ValidarHeader(BE.Cotizacion ctz)
         {
-            if (ctz == null) throw new ArgumentNullException("ctz");
+            if (ctz == null)
+                throw new ArgumentNullException(nameof(ctz),
+                    _param.GetLocalizable("quotation_object_required_message"));
 
             if (ctz.TipoEdificacion == null || ctz.TipoEdificacion.IdTipoEdificacion <= 0)
-                throw new ArgumentException("Debe indicar un Tipo de Edificación válido.");
+                throw new ArgumentException(_param.GetLocalizable("quotation_type_required_message"));
 
             if (ctz.Moneda == null || ctz.Moneda.IdMoneda <= 0)
-                throw new ArgumentException("Debe indicar una Moneda válida.");
+                throw new ArgumentException(_param.GetLocalizable("quotation_currency_required_message"));
 
             if (ctz.FechaCreacion == default(DateTime))
                 ctz.FechaCreacion = DateTime.UtcNow;
@@ -103,18 +130,31 @@ namespace BLL.Genericos
 
         public void ValidarLineas(BE.Cotizacion ctz)
         {
-            if (ctz == null) throw new ArgumentNullException("ctz");
+            if (ctz == null)
+                throw new ArgumentNullException(nameof(ctz),
+                    _param.GetLocalizable("quotation_object_required_message"));
+
+            bool tieneAlgo =
+                (ctz.ListaMateriales != null && ctz.ListaMateriales.Count > 0) ||
+                (ctz.ListaMaquinaria != null && ctz.ListaMaquinaria.Count > 0) ||
+                (ctz.ListaServicios != null && ctz.ListaServicios.Count > 0);
+
+            if (!tieneAlgo)
+                throw new ArgumentException(_param.GetLocalizable("quotation_empty_items_message"));
 
             if (ctz.ListaMateriales != null)
             {
                 for (int i = 0; i < ctz.ListaMateriales.Count; i++)
                 {
                     var it = ctz.ListaMateriales[i];
-                    if (it == null) throw new ArgumentException("Ítem de material inválido.");
+                    if (it == null)
+                        throw new ArgumentException(_param.GetLocalizable("quotation_material_item_invalid"));
+
                     if (it.Material == null || it.Material.IdMaterial <= 0)
-                        throw new ArgumentException("Material inválido en ítems.");
+                        throw new ArgumentException(_param.GetLocalizable("quotation_material_invalid"));
+
                     if (it.Cantidad < 0m)
-                        throw new ArgumentException("Cantidad de material no puede ser negativa.");
+                        throw new ArgumentException(_param.GetLocalizable("quotation_material_qty_negative"));
                 }
             }
 
@@ -123,11 +163,14 @@ namespace BLL.Genericos
                 for (int i = 0; i < ctz.ListaMaquinaria.Count; i++)
                 {
                     var it = ctz.ListaMaquinaria[i];
-                    if (it == null) throw new ArgumentException("Ítem de maquinaria inválido.");
+                    if (it == null)
+                        throw new ArgumentException(_param.GetLocalizable("quotation_machinery_item_invalid"));
+
                     if (it.Maquinaria == null || it.Maquinaria.IdMaquinaria <= 0)
-                        throw new ArgumentException("Maquinaria inválida en ítems.");
+                        throw new ArgumentException(_param.GetLocalizable("quotation_machinery_invalid"));
+
                     if (it.HorasUso < 0m)
-                        throw new ArgumentException("Horas de uso no pueden ser negativas.");
+                        throw new ArgumentException(_param.GetLocalizable("quotation_machinery_hours_negative"));
                 }
             }
 
@@ -136,23 +179,13 @@ namespace BLL.Genericos
                 for (int i = 0; i < ctz.ListaServicios.Count; i++)
                 {
                     var it = ctz.ListaServicios[i];
-                    if (it == null) throw new ArgumentException("Ítem de servicio inválido.");
+                    if (it == null)
+                        throw new ArgumentException(_param.GetLocalizable("quotation_service_item_invalid"));
+
                     if (it.Servicio == null || it.Servicio.IdServicio <= 0)
-                        throw new ArgumentException("Servicio inválido en ítems.");
+                        throw new ArgumentException(_param.GetLocalizable("quotation_service_invalid"));
                 }
             }
         }
-
-        // TODO: hace falta DAL para MaterialCotizacion, MaquinariaCotizacion y ServicioCotizacion????? revisar cuando vaya por el crear
-        /*
-        private void GuardarLineas(BE.Cotizacion ctz)
-        {
-            if (ctz == null || ctz.IdCotizacion <= 0) return;
-
-            // var matDal = DAL.Genericos.MaterialCotizacionDAL.GetInstance();
-            // var maqDal = DAL.Genericos.MaquinariaCotizacionDAL.GetInstance();
-            // var srvDal = DAL.Genericos.ServicioCotizacionDAL.GetInstance();
-        }
-        */
     }
 }
